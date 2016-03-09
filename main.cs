@@ -166,6 +166,13 @@ namespace Chess
 
 		#endregion
 
+		Tetra.VAOItem vaoiPawn;
+		Tetra.VAOItem vaoiBishop;
+		Tetra.VAOItem vaoiHorse;
+		Tetra.VAOItem vaoiTower;
+		Tetra.VAOItem vaoiQueen;
+		Tetra.VAOItem vaoiKing;
+
 		void createScene()
 		{
 			Tetra.VAOItem vaoi = null;
@@ -238,70 +245,50 @@ namespace Chess
 
 			List<int> tmp = new List<int> ();
 
-			vaoi = mainVAO.Add (Tetra.OBJMeshLoader.Load ("Meshes/pawn.obj"));
-			vaoi.DiffuseTexture = new Texture("Textures/pawn_backed.png");
-			vaoi.modelMats = new Matrix4[16];
-			for (int i = 0; i < 8; i++)
-				addPiece (vaoi, i, ChessColor.White, PieceType.Pawn, i, 1);
-			for (int i = 0; i < 8; i++)
-				addPiece (vaoi, i+8, ChessColor.Black, PieceType.Pawn, i, 6);
-
-			tmp.Add(mainVAO.Meshes.IndexOf (vaoi));
+			vaoiPawn = mainVAO.Add (Tetra.OBJMeshLoader.Load ("Meshes/pawn.obj"));
+			vaoiPawn.DiffuseTexture = new Texture("Textures/pawn_backed.png");
+			vaoiPawn.modelMats = new Matrix4[16];
 
 
-			vaoi = mainVAO.Add (Tetra.OBJMeshLoader.Load ("Meshes/bishop.obj"));
-			vaoi.DiffuseTexture = new Texture("Textures/bishop_backed.png");
-			vaoi.modelMats = new Matrix4[4];
-			addPiece (vaoi, 0, ChessColor.White, PieceType.Bishop, 2, 0);
-			addPiece (vaoi, 1, ChessColor.White, PieceType.Bishop, 5, 0);
-			addPiece (vaoi, 2, ChessColor.Black, PieceType.Bishop, 2, 7);
-			addPiece (vaoi, 3, ChessColor.Black, PieceType.Bishop, 5, 7);
+			tmp.Add(mainVAO.Meshes.IndexOf (vaoiPawn));
 
-			tmp.Add(mainVAO.Meshes.IndexOf (vaoi));
+			vaoiBishop = mainVAO.Add (Tetra.OBJMeshLoader.Load ("Meshes/bishop.obj"));
+			vaoiBishop.DiffuseTexture = new Texture("Textures/bishop_backed.png");
+			vaoiBishop.modelMats = new Matrix4[4];
 
-			vaoi = mainVAO.Add (Tetra.OBJMeshLoader.Load ("Meshes/horse.obj"));
-			vaoi.DiffuseTexture = new Texture("Textures/horse_backed.png");
-			vaoi.modelMats = new Matrix4[4];
-			addPiece (vaoi, 0, ChessColor.White, PieceType.Horse, 1, 0);
-			addPiece (vaoi, 1, ChessColor.White, PieceType.Horse, 6, 0);
-			addPiece (vaoi, 2, ChessColor.Black, PieceType.Horse, 1, 7);
-			addPiece (vaoi, 3, ChessColor.Black, PieceType.Horse, 6, 7);
+			tmp.Add(mainVAO.Meshes.IndexOf (vaoiBishop));
 
-			tmp.Add(mainVAO.Meshes.IndexOf (vaoi));
+			vaoiHorse = mainVAO.Add (Tetra.OBJMeshLoader.Load ("Meshes/horse.obj"));
+			vaoiHorse.DiffuseTexture = new Texture("Textures/horse_backed.png");
+			vaoiHorse.modelMats = new Matrix4[4];
 
-			vaoi = mainVAO.Add (Tetra.OBJMeshLoader.Load ("Meshes/tower.obj"));
-			vaoi.DiffuseTexture = new Texture("Textures/tower_backed.png");
-			vaoi.modelMats = new Matrix4[4];
-			addPiece (vaoi, 0, ChessColor.White, PieceType.Tower, 0 ,0);
-			addPiece (vaoi, 1, ChessColor.White, PieceType.Tower, 7, 0);
-			addPiece (vaoi, 2, ChessColor.Black, PieceType.Tower, 0, 7);
-			addPiece (vaoi, 3, ChessColor.Black, PieceType.Tower, 7, 7);
 
-			tmp.Add(mainVAO.Meshes.IndexOf (vaoi));
+			tmp.Add(mainVAO.Meshes.IndexOf (vaoiHorse));
 
-			vaoi = mainVAO.Add (Tetra.OBJMeshLoader.Load ("Meshes/queen.obj"));
-			vaoi.DiffuseTexture = new Texture("Textures/queen_backed.png");
-			vaoi.modelMats = new Matrix4[2];
-			addPiece (vaoi, 0, ChessColor.White, PieceType.Queen, 3, 0);
-			addPiece (vaoi, 1, ChessColor.Black, PieceType.Queen, 4, 7);
+			vaoiTower = mainVAO.Add (Tetra.OBJMeshLoader.Load ("Meshes/tower.obj"));
+			vaoiTower.DiffuseTexture = new Texture("Textures/tower_backed.png");
+			vaoiTower.modelMats = new Matrix4[4];
 
-			tmp.Add(mainVAO.Meshes.IndexOf (vaoi));
+			tmp.Add(mainVAO.Meshes.IndexOf (vaoiTower));
 
-			vaoi = mainVAO.Add (Tetra.OBJMeshLoader.Load ("Meshes/king.obj"));
-			vaoi.DiffuseTexture = new Texture("Textures/king_backed.png");
-			vaoi.modelMats = new Matrix4[2];
-			addPiece (vaoi, 0, ChessColor.White, PieceType.King, 4, 0);
-			addPiece (vaoi, 1, ChessColor.Black, PieceType.King,3, 7);
+			vaoiQueen = mainVAO.Add (Tetra.OBJMeshLoader.Load ("Meshes/queen.obj"));
+			vaoiQueen.DiffuseTexture = new Texture("Textures/queen_backed.png");
+			vaoiQueen.modelMats = new Matrix4[2];
 
-			tmp.Add(mainVAO.Meshes.IndexOf (vaoi));
+			tmp.Add(mainVAO.Meshes.IndexOf (vaoiQueen));
+
+			vaoiKing = mainVAO.Add (Tetra.OBJMeshLoader.Load ("Meshes/king.obj"));
+			vaoiKing.DiffuseTexture = new Texture("Textures/king_backed.png");
+			vaoiKing.modelMats = new Matrix4[2];
+
+			tmp.Add(mainVAO.Meshes.IndexOf (vaoiKing));
 
 			mainVAO.ComputeTangents();
 			mainVAO.BuildBuffers ();
 
 			piecesVAOIndexes = tmp.ToArray ();
-		}
-		void addPiece(Tetra.VAOItem vaoi, int idx, ChessColor _color, PieceType _type, int col, int line){
-			Board [col, line] = new ChessPiece (vaoi, idx, _color, _type, col, line);
+
+			resetBoard ();
 		}
 		void draw()
 		{
@@ -418,6 +405,10 @@ namespace Chess
 			stockfish.WaitForInputIdle ();
 			stockfish.StandardInput.WriteLine ("go");
 		}
+		void onResetClick (object sender, MouseButtonEventArgs e){
+			resetBoard ();
+		}
+
 		#endregion
 
 		#region Stockfish
@@ -476,7 +467,7 @@ namespace Chess
 			}
 		}
 
-		ChessPiece[,] Board = new ChessPiece[8, 8];
+		ChessPiece[,] Board;
 		Point selection;
 		Point active = new Point(-1,-1);
 		List<Point> ValidMoves = null;
@@ -484,7 +475,7 @@ namespace Chess
 		int cptWhiteOut = 0;
 		int cptBlackOut = 0;
 
-		string stockfishMoves = "position startpos moves";
+		string stockfishMoves;
 
 
 		public Point Active {
@@ -729,7 +720,45 @@ namespace Chess
 			}
 		}
 
+		void addPiece(Tetra.VAOItem vaoi, int idx, ChessColor _color, PieceType _type, int col, int line){
+			Board [col, line] = new ChessPiece (vaoi, idx, _color, _type, col, line);
+		}
+		void resetBoard(){
+			CurrentPlayer = ChessColor.White;
+			cptWhiteOut = 0;
+			cptBlackOut = 0;
+			stockfishMoves = "position startpos moves";
+			Active = -1;
 
+			Board = new ChessPiece[8, 8];
+
+			for (int i = 0; i < 8; i++)
+				addPiece (vaoiPawn, i, ChessColor.White, PieceType.Pawn, i, 1);
+			for (int i = 0; i < 8; i++)
+				addPiece (vaoiPawn, i+8, ChessColor.Black, PieceType.Pawn, i, 6);
+
+			addPiece (vaoiBishop, 0, ChessColor.White, PieceType.Bishop, 2, 0);
+			addPiece (vaoiBishop, 1, ChessColor.White, PieceType.Bishop, 5, 0);
+			addPiece (vaoiBishop, 2, ChessColor.Black, PieceType.Bishop, 2, 7);
+			addPiece (vaoiBishop, 3, ChessColor.Black, PieceType.Bishop, 5, 7);
+
+			addPiece (vaoiHorse, 0, ChessColor.White, PieceType.Horse, 1, 0);
+			addPiece (vaoiHorse, 1, ChessColor.White, PieceType.Horse, 6, 0);
+			addPiece (vaoiHorse, 2, ChessColor.Black, PieceType.Horse, 1, 7);
+			addPiece (vaoiHorse, 3, ChessColor.Black, PieceType.Horse, 6, 7);
+
+			addPiece (vaoiTower, 0, ChessColor.White, PieceType.Tower, 0 ,0);
+			addPiece (vaoiTower, 1, ChessColor.White, PieceType.Tower, 7, 0);
+			addPiece (vaoiTower, 2, ChessColor.Black, PieceType.Tower, 0, 7);
+			addPiece (vaoiTower, 3, ChessColor.Black, PieceType.Tower, 7, 7);
+
+			addPiece (vaoiQueen, 0, ChessColor.White, PieceType.Queen, 3, 0);
+			addPiece (vaoiQueen, 1, ChessColor.Black, PieceType.Queen, 4, 7);
+
+			addPiece (vaoiKing, 0, ChessColor.White, PieceType.King, 4, 0);
+			addPiece (vaoiKing, 1, ChessColor.Black, PieceType.King,3, 7);
+
+		}
 
 		void closeGame(){
 			stockfish.WaitForInputIdle ();

@@ -8,6 +8,7 @@
 			<Label Text="{SelCell}"/>
 		</HorizontalStack>
 		<Button Background="vgradient|0:DimGray|1:Black" Caption="Hint" Width="0" Height="40" MouseClick="onHintClick"/>
+		<Button Background="vgradient|0:DimGray|1:Black" Caption="Restart" Width="0" Height="40" MouseClick="onResetClick"/>
 		<Button Background="vgradient|0:DimGray|1:Black" Caption="Quit" Width="0" Height="40" MouseClick="onQuitClick"/>
 	</VerticalStack>
 </Border>
