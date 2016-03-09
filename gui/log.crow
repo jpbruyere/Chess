@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<Border BorderWidth="1" CornerRadius="5" Background="0,6;0,6;0,6;0,5"
+		VerticalAlignment="Top"  Width="600" Height="-1">
+	<VerticalStack Height="-1" Margin="3" Focusable="true" MouseWheelChanged="onLogsWheel">
+		<Label Text="{log0}" Width="0" />
+		<Label Text="{log1}" Width="0" />
+		<Label Text="{log2}" Width="0" />
+		<Label Text="{log3}" Width="0" />
+	</VerticalStack>
+</Border>

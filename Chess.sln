@@ -1,0 +1,71 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chess", "Chess.csproj", "{5B0EDC22-E4C5-4778-995C-B49595EA2201}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Crow", "..\Crow\Crow.csproj", "{C2980F9B-4798-4C05-99E2-E174810F7C7B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OTKCrow", "..\Crow\OTKCrow\OTKCrow.csproj", "{350D4F49-9901-4998-9903-BCA7D48DA58C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GGL", "..\Ottd3D\lib\GGL\GGL.csproj", "{5490AD74-0BB3-438C-9DE4-EB7CFC68BCB5}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
+		Debug|Linux_x86 = Debug|Linux_x86
+		Release|Linux_x86 = Release|Linux_x86
+		Debug|Win_x86 = Debug|Win_x86
+		Release|Win_x86 = Release|Win_x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{350D4F49-9901-4998-9903-BCA7D48DA58C}.Debug|Linux_x86.ActiveCfg = Debug|Linux_x86
+		{350D4F49-9901-4998-9903-BCA7D48DA58C}.Debug|Linux_x86.Build.0 = Debug|Linux_x86
+		{350D4F49-9901-4998-9903-BCA7D48DA58C}.Debug|Win_x86.ActiveCfg = Debug|Linux_x86
+		{350D4F49-9901-4998-9903-BCA7D48DA58C}.Debug|Win_x86.Build.0 = Debug|Linux_x86
+		{350D4F49-9901-4998-9903-BCA7D48DA58C}.Debug|x86.ActiveCfg = Debug|Linux_x86
+		{350D4F49-9901-4998-9903-BCA7D48DA58C}.Debug|x86.Build.0 = Debug|Linux_x86
+		{350D4F49-9901-4998-9903-BCA7D48DA58C}.Release|Linux_x86.ActiveCfg = Release|Linux_x86
+		{350D4F49-9901-4998-9903-BCA7D48DA58C}.Release|Linux_x86.Build.0 = Release|Linux_x86
+		{350D4F49-9901-4998-9903-BCA7D48DA58C}.Release|Win_x86.ActiveCfg = Release|Linux_x86
+		{350D4F49-9901-4998-9903-BCA7D48DA58C}.Release|Win_x86.Build.0 = Release|Linux_x86
+		{350D4F49-9901-4998-9903-BCA7D48DA58C}.Release|x86.ActiveCfg = Release|Linux_x86
+		{350D4F49-9901-4998-9903-BCA7D48DA58C}.Release|x86.Build.0 = Release|Linux_x86
+		{5490AD74-0BB3-438C-9DE4-EB7CFC68BCB5}.Debug|Linux_x86.ActiveCfg = Debug|Any CPU
+		{5490AD74-0BB3-438C-9DE4-EB7CFC68BCB5}.Debug|Linux_x86.Build.0 = Debug|Any CPU
+		{5490AD74-0BB3-438C-9DE4-EB7CFC68BCB5}.Debug|Win_x86.ActiveCfg = Debug|Any CPU
+		{5490AD74-0BB3-438C-9DE4-EB7CFC68BCB5}.Debug|Win_x86.Build.0 = Debug|Any CPU
+		{5490AD74-0BB3-438C-9DE4-EB7CFC68BCB5}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{5490AD74-0BB3-438C-9DE4-EB7CFC68BCB5}.Debug|x86.Build.0 = Debug|Any CPU
+		{5490AD74-0BB3-438C-9DE4-EB7CFC68BCB5}.Release|Linux_x86.ActiveCfg = Release|Any CPU
+		{5490AD74-0BB3-438C-9DE4-EB7CFC68BCB5}.Release|Linux_x86.Build.0 = Release|Any CPU
+		{5490AD74-0BB3-438C-9DE4-EB7CFC68BCB5}.Release|Win_x86.ActiveCfg = Release|Any CPU
+		{5490AD74-0BB3-438C-9DE4-EB7CFC68BCB5}.Release|Win_x86.Build.0 = Release|Any CPU
+		{5490AD74-0BB3-438C-9DE4-EB7CFC68BCB5}.Release|x86.ActiveCfg = Release|Any CPU
+		{5490AD74-0BB3-438C-9DE4-EB7CFC68BCB5}.Release|x86.Build.0 = Release|Any CPU
+		{5B0EDC22-E4C5-4778-995C-B49595EA2201}.Debug|Linux_x86.ActiveCfg = Debug|x86
+		{5B0EDC22-E4C5-4778-995C-B49595EA2201}.Debug|Linux_x86.Build.0 = Debug|x86
+		{5B0EDC22-E4C5-4778-995C-B49595EA2201}.Debug|Win_x86.ActiveCfg = Debug|x86
+		{5B0EDC22-E4C5-4778-995C-B49595EA2201}.Debug|Win_x86.Build.0 = Debug|x86
+		{5B0EDC22-E4C5-4778-995C-B49595EA2201}.Debug|x86.ActiveCfg = Debug|x86
+		{5B0EDC22-E4C5-4778-995C-B49595EA2201}.Debug|x86.Build.0 = Debug|x86
+		{5B0EDC22-E4C5-4778-995C-B49595EA2201}.Release|Linux_x86.ActiveCfg = Release|x86
+		{5B0EDC22-E4C5-4778-995C-B49595EA2201}.Release|Linux_x86.Build.0 = Release|x86
+		{5B0EDC22-E4C5-4778-995C-B49595EA2201}.Release|Win_x86.ActiveCfg = Release|x86
+		{5B0EDC22-E4C5-4778-995C-B49595EA2201}.Release|Win_x86.Build.0 = Release|x86
+		{5B0EDC22-E4C5-4778-995C-B49595EA2201}.Release|x86.ActiveCfg = Release|x86
+		{5B0EDC22-E4C5-4778-995C-B49595EA2201}.Release|x86.Build.0 = Release|x86
+		{C2980F9B-4798-4C05-99E2-E174810F7C7B}.Debug|Linux_x86.ActiveCfg = Debug|Any CPU
+		{C2980F9B-4798-4C05-99E2-E174810F7C7B}.Debug|Linux_x86.Build.0 = Debug|Any CPU
+		{C2980F9B-4798-4C05-99E2-E174810F7C7B}.Debug|Win_x86.ActiveCfg = Debug|Any CPU
+		{C2980F9B-4798-4C05-99E2-E174810F7C7B}.Debug|Win_x86.Build.0 = Debug|Any CPU
+		{C2980F9B-4798-4C05-99E2-E174810F7C7B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{C2980F9B-4798-4C05-99E2-E174810F7C7B}.Debug|x86.Build.0 = Debug|Any CPU
+		{C2980F9B-4798-4C05-99E2-E174810F7C7B}.Release|Linux_x86.ActiveCfg = Release|Any CPU
+		{C2980F9B-4798-4C05-99E2-E174810F7C7B}.Release|Linux_x86.Build.0 = Release|Any CPU
+		{C2980F9B-4798-4C05-99E2-E174810F7C7B}.Release|Win_x86.ActiveCfg = Release|Any CPU
+		{C2980F9B-4798-4C05-99E2-E174810F7C7B}.Release|Win_x86.Build.0 = Release|Any CPU
+		{C2980F9B-4798-4C05-99E2-E174810F7C7B}.Release|x86.ActiveCfg = Release|Any CPU
+		{C2980F9B-4798-4C05-99E2-E174810F7C7B}.Release|x86.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

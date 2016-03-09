@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<Border Fit="true" HorizontalAlignment="Left"
+		BorderWidth="1" CornerRadius="5" Background="0,6;0,6;0,6;0,5">
+	<VerticalStack Height="-1" Width="80" Margin="3">
+		<Label Width="0" Text="{CurrentPlayer}"/>
+		<HorizontalStack Height="-1">
+			<Label Text="{ActCell}"/>
+			<Label Text="{SelCell}"/>
+		</HorizontalStack>
+		<Button Background="vgradient|0:DimGray|1:Black" Caption="Hint" Width="0" Height="40" MouseClick="onHintClick"/>
+		<Button Background="vgradient|0:DimGray|1:Black" Caption="Quit" Width="0" Height="40" MouseClick="onQuitClick"/>
+	</VerticalStack>
+</Border>
