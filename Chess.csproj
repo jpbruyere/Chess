@@ -130,5 +130,8 @@
     <EmbeddedResource Include="gui\fps.crow" />
     <EmbeddedResource Include="gui\log.crow" />
     <EmbeddedResource Include="gui\menu.crow" />
+    <EmbeddedResource Include="gui\tmpWindow.crow" />
+    <EmbeddedResource Include="gui\Splash.crow" />
+    <EmbeddedResource Include="splash.png" />
   </ItemGroup>
 </Project>

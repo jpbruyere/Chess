@@ -1,14 +1,18 @@
 ﻿<?xml version="1.0" encoding="UTF-8" ?>
-<Border Fit="true" HorizontalAlignment="Left"
-		BorderWidth="1" CornerRadius="5" Background="0,6;0,6;0,6;0,5">
-	<VerticalStack Height="-1" Width="80" Margin="3">
-		<Label Width="0" Text="{CurrentPlayer}"/>
-		<HorizontalStack Height="-1">
-			<Label Text="{ActCell}"/>
-			<Label Text="{SelCell}"/>
+<Border Height="40"  VerticalAlignment="Bottom"
+		BorderWidth="1" CornerRadius="5" Background="0,4;0,4;0,4;0,8">
+	<HorizontalStack Margin="3">
+		<Label Width="100" TextAlignment="Right" Text="Player: "/>
+		<Label Font="droid bold, 12" Text="{CurrentPlayer}"/>
+		<Label Width="100" TextAlignment="Right" Text="Move: "/>
+		<HorizontalStack Width="-1" >
+			<Label Font="droid bold, 12" Text="{ActCell}" Height="0"/>
+			<Label Font="droid bold, 12" Text="{SelCell}" Height="0"/>
 		</HorizontalStack>
-		<Button Background="vgradient|0:DimGray|1:Black" Caption="Hint" Width="0" Height="40" MouseClick="onHintClick"/>
-		<Button Background="vgradient|0:DimGray|1:Black" Caption="Restart" Width="0" Height="40" MouseClick="onResetClick"/>
-		<Button Background="vgradient|0:DimGray|1:Black" Caption="Quit" Width="0" Height="40" MouseClick="onQuitClick"/>
-	</VerticalStack>
+		<GraphicObject Width="0"/>
+		<Button Background="vgradient|0:DimGray|1:Black" Caption="Hint" Width="60" Height="0" MouseClick="onHintClick"/>
+		<Button Background="vgradient|0:DimGray|1:Black" Caption="Restart" Width="60" Height="0" MouseClick="onResetClick"/>
+		<GraphicObject Width="20"/>
+		<Button Background="vgradient|0:DimGray|1:Black" Caption="Quit" Width="60" Height="0" MouseClick="onQuitClick"/>
+	</HorizontalStack>
 </Border>

@@ -1,11 +1,12 @@
 ﻿<?xml version="1.0"?>
-<Border Fit="true" CornerRadius="5" BorderWidth="1" Margin="10" Background="0,5;0,5;0,5;0,5"
+<Window Width="120" Height="100"
+	Template="#Chess.gui.tmpWindow.crow"
 	HorizontalAlignment="Right" VerticalAlignment="Top">
 	<VerticalStack Fit="true" Spacing="10" Margin="10">
 		<HorizontalStack Fit="true">
 			<Label Text="Fps:" Width="40" TextAlignment="Right"/>
 			<Label Text="{fps}" Font="droid , 12" Width="50"
-				TextAlignment="Center" Background="Mantis"/>
+				TextAlignment="Center" Background="Teal"/>
 		</HorizontalStack>
 		<HorizontalStack Fit="true">
 			<Label Text="Min:" Width="40" TextAlignment="Right"/>
@@ -15,7 +16,7 @@
 		<HorizontalStack Fit="true">
 			<Label Text="Max:" Width="40" TextAlignment="Right"/>
 			<Label Text="{fpsMax}" Font="droid , 12" Width="50"
-				TextAlignment="Center" Background="MaroonCrayola"/>
+				TextAlignment="Center" Background="Teal"/>
 		</HorizontalStack>
 	</VerticalStack>				
-</Border>
+</Window>

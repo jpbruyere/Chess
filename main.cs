@@ -6,9 +6,11 @@ using System.Diagnostics;
 using GGL;
 using System.Runtime.InteropServices;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace Chess
 {
+	enum GameState { Init, MeshesLoading, VAOInit, ComputeTangents, BuildBuffers, Play}
 	enum ChessColor { White, Black};
 	enum PieceType { Pawn, Tower, Horse, Bishop, King, Queen };
 
@@ -147,9 +149,6 @@ namespace Chess
 
 			ErrorCode err = GL.GetError ();
 			Debug.Assert (err == ErrorCode.NoError, "OpenGL Error");
-
-			createScene ();
-
 		}
 		void updateShadersMatrices(){
 			shaderSharedData.projection = projection;
@@ -173,8 +172,33 @@ namespace Chess
 		Tetra.VAOItem vaoiQueen;
 		Tetra.VAOItem vaoiKing;
 
-		void createScene()
+		Tetra.Mesh meshPawn;
+		Tetra.Mesh meshBishop;
+		Tetra.Mesh meshHorse;
+		Tetra.Mesh meshTower;
+		Tetra.Mesh meshQueen;
+		Tetra.Mesh meshKing;
+
+		void loadMeshes()
 		{
+			currentState = GameState.MeshesLoading;
+
+			meshPawn = Tetra.OBJMeshLoader.Load ("Meshes/pawn.obj");
+			ProgressValue+=20;
+			meshBishop = Tetra.OBJMeshLoader.Load ("Meshes/bishop.obj");
+			ProgressValue+=20;
+			meshHorse = Tetra.OBJMeshLoader.Load ("Meshes/horse.obj");
+			ProgressValue+=20;
+			meshTower = Tetra.OBJMeshLoader.Load ("Meshes/tower.obj");
+			ProgressValue+=20;
+			meshQueen = Tetra.OBJMeshLoader.Load ("Meshes/queen.obj");
+			ProgressValue+=20;
+			meshKing = Tetra.OBJMeshLoader.Load ("Meshes/king.obj");
+			ProgressValue+=20;
+
+			currentState = GameState.VAOInit;
+		}
+		void createMainVAO(){
 			Tetra.VAOItem vaoi = null;
 
 			mainVAO = new Tetra.IndexedVAO ();
@@ -211,7 +235,6 @@ namespace Chess
 
 			boardVAOItem.UpdateInstancesData ();
 
-
 			x = 0f;
 			y = 0.03f;
 			width = 1.0f;
@@ -245,50 +268,47 @@ namespace Chess
 
 			List<int> tmp = new List<int> ();
 
-			vaoiPawn = mainVAO.Add (Tetra.OBJMeshLoader.Load ("Meshes/pawn.obj"));
+			vaoiPawn = mainVAO.Add (meshPawn);
 			vaoiPawn.DiffuseTexture = new Texture("Textures/pawn_backed.png");
 			vaoiPawn.modelMats = new Matrix4[16];
-
-
 			tmp.Add(mainVAO.Meshes.IndexOf (vaoiPawn));
+			ProgressValue++;
 
-			vaoiBishop = mainVAO.Add (Tetra.OBJMeshLoader.Load ("Meshes/bishop.obj"));
+			vaoiBishop = mainVAO.Add (meshBishop);
 			vaoiBishop.DiffuseTexture = new Texture("Textures/bishop_backed.png");
 			vaoiBishop.modelMats = new Matrix4[4];
-
 			tmp.Add(mainVAO.Meshes.IndexOf (vaoiBishop));
+			ProgressValue++;
 
-			vaoiHorse = mainVAO.Add (Tetra.OBJMeshLoader.Load ("Meshes/horse.obj"));
+			vaoiHorse = mainVAO.Add (meshHorse);
 			vaoiHorse.DiffuseTexture = new Texture("Textures/horse_backed.png");
 			vaoiHorse.modelMats = new Matrix4[4];
-
-
 			tmp.Add(mainVAO.Meshes.IndexOf (vaoiHorse));
+			ProgressValue++;
 
-			vaoiTower = mainVAO.Add (Tetra.OBJMeshLoader.Load ("Meshes/tower.obj"));
+			vaoiTower = mainVAO.Add (meshTower);
 			vaoiTower.DiffuseTexture = new Texture("Textures/tower_backed.png");
 			vaoiTower.modelMats = new Matrix4[4];
-
 			tmp.Add(mainVAO.Meshes.IndexOf (vaoiTower));
+			ProgressValue++;
 
-			vaoiQueen = mainVAO.Add (Tetra.OBJMeshLoader.Load ("Meshes/queen.obj"));
+			vaoiQueen = mainVAO.Add (meshQueen);
 			vaoiQueen.DiffuseTexture = new Texture("Textures/queen_backed.png");
 			vaoiQueen.modelMats = new Matrix4[2];
-
 			tmp.Add(mainVAO.Meshes.IndexOf (vaoiQueen));
+			ProgressValue++;
 
-			vaoiKing = mainVAO.Add (Tetra.OBJMeshLoader.Load ("Meshes/king.obj"));
+			vaoiKing = mainVAO.Add (meshKing);
 			vaoiKing.DiffuseTexture = new Texture("Textures/king_backed.png");
 			vaoiKing.modelMats = new Matrix4[2];
-
 			tmp.Add(mainVAO.Meshes.IndexOf (vaoiKing));
-
-			mainVAO.ComputeTangents();
-			mainVAO.BuildBuffers ();
+			ProgressValue++;
 
 			piecesVAOIndexes = tmp.ToArray ();
-
-			resetBoard ();
+		}
+		void computeTangents(){
+			mainVAO.ComputeTangents();
+			currentState = GameState.BuildBuffers;
 		}
 		void draw()
 		{
@@ -347,6 +367,28 @@ namespace Chess
 
 
 		#region Interface
+		GraphicObject uiSplash;
+		volatile int progressValue=0;
+		volatile int progressMax=200;
+		public int ProgressValue{
+			get { 
+				return progressValue; 
+			}
+			set {
+				progressValue = value;
+				NotifyValueChanged("ProgressValue", progressValue);
+			}
+		}
+		public int ProgressMax{
+			get { 
+				return progressMax; 
+			}
+			set {
+				progressMax = value;
+				NotifyValueChanged("ProgressMax", progressMax);
+			}
+		}
+
 		void initInterface(){
 			MouseMove += Mouse_Move;
 			MouseButtonDown += Mouse_ButtonDown;
@@ -363,6 +405,9 @@ namespace Chess
 			g = CrowInterface.LoadInterface ("#Chess.gui.menu.crow");
 			g.DataSource = this;
 			NotifyValueChanged ("CurrentColor", Color.Ivory);
+
+			CrowInterface.DeleteWidget (uiSplash);
+			uiSplash = null;
 		}
 
 		#region LOGS
@@ -398,6 +443,7 @@ namespace Chess
 			syncLogUi ();
 		}
 		#endregion
+
 		void onQuitClick (object sender, MouseButtonEventArgs e){
 			closeGame ();
 		}
@@ -457,6 +503,7 @@ namespace Chess
 
 		#endregion
 
+		volatile GameState currentState = GameState.Init;
 		ChessColor currentPlayer = ChessColor.White;
 
 		public ChessColor CurrentPlayer {
@@ -772,11 +819,16 @@ namespace Chess
 		{
 			base.OnLoad (e);
 
-			initInterface ();
+			uiSplash = CrowInterface.LoadInterface("#Chess.gui.Splash.crow");
+			uiSplash.DataSource = this;
 
 			initOpenGL ();
 
 			initStockfish ();
+
+			Thread t = new Thread (loadMeshes);
+			t.IsBackground = true;
+			t.Start ();
 		}			
 		public override void GLClear ()
 		{
@@ -785,6 +837,8 @@ namespace Chess
 		}
 		public override void OnRender (FrameEventArgs e)
 		{
+			if (currentState != GameState.Play)
+				return;
 			draw ();
 		}
 		protected override void OnResize (EventArgs e)
@@ -795,6 +849,32 @@ namespace Chess
 		protected override void OnUpdateFrame (FrameEventArgs e)
 		{
 			base.OnUpdateFrame (e);
+
+			switch (currentState) {
+			case GameState.Init:
+			case GameState.MeshesLoading:
+			case GameState.ComputeTangents:
+				ProgressValue++;
+				return;			
+			case GameState.VAOInit:
+
+				createMainVAO ();
+
+				currentState = GameState.ComputeTangents;
+
+				Thread t = new Thread (computeTangents);
+				t.IsBackground = true;
+				t.Start ();
+				return;			
+			case GameState.BuildBuffers:
+				mainVAO.BuildBuffers ();
+				resetBoard ();
+				initInterface ();
+				currentState = GameState.Play;
+				break;
+			case GameState.Play:
+				break;
+			}
 
 			Animation.ProcessAnimations ();
 		}
@@ -839,6 +919,7 @@ namespace Chess
 		void Mouse_ButtonDown (object sender, OpenTK.Input.MouseButtonEventArgs e)
 		{
 			this.CursorVisible = true;
+
 			if (e.Mouse.LeftButton != OpenTK.Input.ButtonState.Pressed)
 				return;
 			if (Active < 0) {
@@ -867,12 +948,7 @@ namespace Chess
 					return;
 				if (ValidMoves.Contains(Selection))
 					processMove(getChessCell(Active.X,Active.Y) + getChessCell(Selection.X,Selection.Y));
-//				Point diff = Active - Selection;
-//				float length = (float)Math.Sqrt (diff.X * diff.X + diff.Y * diff.Y);
-//				FloatAnimation fa = new FloatAnimation (p, "Z", 1f, 1f / length*0.4f);
-//				Animation.StartAnimation(fa,0,new AnimationEventHandler(delegate(Animation a) {
-//					Animation.StartAnimation(new FloatAnimation (p, "Z", 0f, (a as FloatAnimation).Step));
-//						}));
+
 			}
 
 
