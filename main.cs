@@ -35,6 +35,16 @@ namespace Chess
 		float x, y, z, xAngle;
 		public int InitX, InitY;
 
+		public Vector3 Position {
+			get { return new Vector3 (x, y, z); }
+			set {
+				x = value.X;
+				y = value.Y;
+				z = value.Z;
+				update ();
+			}
+		}
+
 		public float X {
 			get {return x;}
 			set {
@@ -87,8 +97,11 @@ namespace Chess
 		public void Reset(){
 			xAngle = 0f;
 			z = 0f;
-			Animation.StartAnimation(new FloatAnimation(this, "X", InitX + 0.5f, 0.2f));
-			Animation.StartAnimation(new FloatAnimation(this, "Y", InitY + 0.5f, 0.2f));
+			if (HasMoved)
+				Animation.StartAnimation(new PathAnimation(this, "Position",
+					new BezierPath(
+						Position,
+						new Vector3(InitX + 0.5f, InitY + 0.5f, 0f), Vector3.UnitZ)));
 
 			HasMoved = false;
 			Captured = false;
@@ -784,8 +797,11 @@ namespace Chess
 				cptBlackOut++;
 			}
 			p.Captured = true;
-			Animation.StartAnimation(new FloatAnimation(p, "X", x, 0.2f));
-			Animation.StartAnimation(new FloatAnimation(p, "Y", y, 0.2f));
+			p.HasMoved = true;
+			Animation.StartAnimation(new PathAnimation(p, "Position",
+				new BezierPath(
+					p.Position,
+					new Vector3(x, y, 0f), Vector3.UnitZ)));
 		}
 		void processMove(string move){
 			AddLog (CurrentPlayer.ToString () + " => " + move);
@@ -803,8 +819,11 @@ namespace Chess
 			Board [pEnd.X, pEnd.Y] = p;
 			p.HasMoved = true;
 
-			Animation.StartAnimation(new FloatAnimation(p, "X", (float)pEnd.X+0.5f, 0.2f));
-			Animation.StartAnimation(new FloatAnimation(p, "Y", (float)pEnd.Y+0.5f, 0.2f));
+			Animation.StartAnimation(new PathAnimation(p, "Position",
+				new BezierPath(
+					p.Position,
+					new Vector3(pEnd.X + 0.5f, pEnd.Y + 0.5f, 0f), Vector3.UnitZ)),
+				0, move_AnimationFinished);
 
 			Active = -1;
 
@@ -815,21 +834,26 @@ namespace Chess
 					//rocking
 					ChessPiece tower;
 					if (xDelta > 0) {
-						tower = Board [0, pStart.Y];
-						Board [0, pStart.Y] = null;
-						pEnd = new Point (pEnd.X + 1, pStart.Y);
+						pStart.X = 0;
+						pEnd.X = pEnd.X + 1;
 					} else {
-						tower = Board [7, pStart.Y];
-						Board [7, pStart.Y] = null;
-						pEnd = new Point (pEnd.X - 1, pStart.Y);
+						pStart.X = 7;
+						pEnd.X = pEnd.X - 1;
 					}
+					tower = Board [pStart.X, pStart.Y];
+					Board [pStart.X, pStart.Y] = null;
 					Board [pEnd.X, pEnd.Y] = tower;
 					tower.HasMoved = true;
-					Animation.StartAnimation(new FloatAnimation(tower, "X", (float)pEnd.X+0.5f, 0.2f));
-					Animation.StartAnimation(new FloatAnimation(tower, "Y", (float)pEnd.Y+0.5f, 0.2f));
+					Animation.StartAnimation(new PathAnimation(tower, "Position",
+						new BezierPath(
+							tower.Position,
+							new Vector3(pEnd.X + 0.5f, pEnd.Y + 0.5f, 0f), Vector3.UnitZ * 2f)));
 				}
 			}
 
+		}
+
+		void switchPlayer(){
 			if (CurrentPlayer == ChessColor.White)
 				CurrentPlayer = ChessColor.Black;
 			else
@@ -842,6 +866,11 @@ namespace Chess
 				stockfish.WaitForInputIdle ();
 				stockfish.StandardInput.WriteLine ("go");
 			}
+		}
+
+		void move_AnimationFinished (Animation a)
+		{
+			switchPlayer ();			
 		}
 
 		void addPiece(Tetra.VAOItem vaoi, int idx, ChessColor _color, PieceType _type, int col, int line){
