@@ -18,10 +18,21 @@ namespace Chess
 		public Tetra.VAOItem Mesh;
 		public int InstanceIndex;
 		public ChessColor Color;
-		public PieceType Type;
-		public bool HasMoved;
+		PieceType originalType;
 
-		float x, y, z, xAngle;
+		public PieceType Type {
+			get {
+				return originalType;
+			}
+			set {
+				originalType = value;
+			}
+		}
+
+		public bool HasMoved;
+		public bool Captured;
+
+		float initX, initY, x, y, z, xAngle;
 
 		public float X {
 			get {return x;}
@@ -52,7 +63,7 @@ namespace Chess
 			}
 		}
 		void update(){
-			Mesh.modelMats [InstanceIndex] = 
+			Mesh.modelMats [InstanceIndex] =
 				Matrix4.CreateRotationX(xAngle) *
 				Matrix4.CreateTranslation(new Vector3(x, y, z));
 			Mesh.UpdateInstancesData ();
@@ -62,11 +73,23 @@ namespace Chess
 			InstanceIndex = idx;
 			Color = _color;
 			Type = _type;
-			x = xPos + 0.5f;
-			y = yPos + 0.5f;
+			initX = x = xPos + 0.5f;
+			initY = y = yPos + 0.5f;
 			z = 0f;
 			xAngle = 0f;
 			HasMoved = false;
+			Captured = false;
+			update ();
+		}
+		public void Reset(){
+			xAngle = 0f;
+			z = 0f;
+
+			Animation.StartAnimation(new FloatAnimation(this, "X", initX, 0.2f));
+			Animation.StartAnimation(new FloatAnimation(this, "Y", initY, 0.2f));
+
+			HasMoved = false;
+			Captured = false;
 			update ();
 		}
 	}
@@ -88,12 +111,12 @@ namespace Chess
 		public static Matrix4 invMVP;
 		public static int[] viewport = new int[4];
 
-		public float EyeDist { 
-			get { return eyeDist; } 
-			set { 
-				eyeDist = value; 
+		public float EyeDist {
+			get { return eyeDist; }
+			set {
+				eyeDist = value;
 				UpdateViewMatrix ();
-			} 
+			}
 		}
 		public Vector3 vEyeTarget = new Vector3(4f, 4f, 0f);
 		public Vector3 vEye;
@@ -122,7 +145,7 @@ namespace Chess
 		Tetra.IndexedVAO mainVAO;
 		Tetra.VAOItem boardVAOItem;
 		Tetra.VAOItem cellVAOItem;
-		int[] piecesVAOIndexes;	
+		int[] piecesVAOIndexes;
 
 		void initOpenGL()
 		{
@@ -228,8 +251,8 @@ namespace Chess
 					Vector3.UnitZ,
 					Vector3.UnitZ
 				},
-				new ushort[] { 0, 1, 2, 2,1,3 }));			
-			boardVAOItem.DiffuseTexture = new Texture("Textures/chessBoard.jpg");
+				new ushort[] { 0, 1, 2, 2, 1, 3 }));
+			boardVAOItem.DiffuseTexture = new Texture ("Textures/chessBoard.jpg");
 			boardVAOItem.modelMats = new Matrix4[1];
 			boardVAOItem.modelMats [0] = Matrix4.Identity;
 
@@ -259,52 +282,60 @@ namespace Chess
 					Vector3.UnitZ,
 					Vector3.UnitZ
 				},
-				new ushort[] { 0, 1, 2, 2, 1, 3}));			
-			cellVAOItem.DiffuseTexture = new Texture("Textures/marble.jpg");
+				new ushort[] { 0, 1, 2, 2, 1, 3 }));
+			cellVAOItem.DiffuseTexture = new Texture ("Textures/marble.jpg");
 			cellVAOItem.modelMats = new Matrix4[1];
-			cellVAOItem.modelMats [0] = Matrix4.CreateTranslation(new Vector3(4.5f,4.5f,0f));
+			cellVAOItem.modelMats [0] = Matrix4.CreateTranslation (new Vector3 (4.5f, 4.5f, 0f));
 
 			cellVAOItem.UpdateInstancesData ();
 
 			List<int> tmp = new List<int> ();
 
 			vaoiPawn = mainVAO.Add (meshPawn);
-			vaoiPawn.DiffuseTexture = new Texture("Textures/pawn_backed.png");
+			vaoiPawn.DiffuseTexture = new Texture ("Textures/pawn_backed.png");
 			vaoiPawn.modelMats = new Matrix4[16];
-			tmp.Add(mainVAO.Meshes.IndexOf (vaoiPawn));
+			tmp.Add (mainVAO.Meshes.IndexOf (vaoiPawn));
 			ProgressValue++;
 
 			vaoiBishop = mainVAO.Add (meshBishop);
-			vaoiBishop.DiffuseTexture = new Texture("Textures/bishop_backed.png");
+			vaoiBishop.DiffuseTexture = new Texture ("Textures/bishop_backed.png");
 			vaoiBishop.modelMats = new Matrix4[4];
-			tmp.Add(mainVAO.Meshes.IndexOf (vaoiBishop));
+			tmp.Add (mainVAO.Meshes.IndexOf (vaoiBishop));
 			ProgressValue++;
 
 			vaoiHorse = mainVAO.Add (meshHorse);
-			vaoiHorse.DiffuseTexture = new Texture("Textures/horse_backed.png");
+			vaoiHorse.DiffuseTexture = new Texture ("Textures/horse_backed.png");
 			vaoiHorse.modelMats = new Matrix4[4];
-			tmp.Add(mainVAO.Meshes.IndexOf (vaoiHorse));
+			tmp.Add (mainVAO.Meshes.IndexOf (vaoiHorse));
 			ProgressValue++;
 
 			vaoiTower = mainVAO.Add (meshTower);
-			vaoiTower.DiffuseTexture = new Texture("Textures/tower_backed.png");
+			vaoiTower.DiffuseTexture = new Texture ("Textures/tower_backed.png");
 			vaoiTower.modelMats = new Matrix4[4];
-			tmp.Add(mainVAO.Meshes.IndexOf (vaoiTower));
+			tmp.Add (mainVAO.Meshes.IndexOf (vaoiTower));
 			ProgressValue++;
 
 			vaoiQueen = mainVAO.Add (meshQueen);
-			vaoiQueen.DiffuseTexture = new Texture("Textures/queen_backed.png");
+			vaoiQueen.DiffuseTexture = new Texture ("Textures/queen_backed.png");
 			vaoiQueen.modelMats = new Matrix4[2];
-			tmp.Add(mainVAO.Meshes.IndexOf (vaoiQueen));
+			tmp.Add (mainVAO.Meshes.IndexOf (vaoiQueen));
 			ProgressValue++;
 
 			vaoiKing = mainVAO.Add (meshKing);
-			vaoiKing.DiffuseTexture = new Texture("Textures/king_backed.png");
+			vaoiKing.DiffuseTexture = new Texture ("Textures/king_backed.png");
 			vaoiKing.modelMats = new Matrix4[2];
-			tmp.Add(mainVAO.Meshes.IndexOf (vaoiKing));
+			tmp.Add (mainVAO.Meshes.IndexOf (vaoiKing));
 			ProgressValue++;
 
 			piecesVAOIndexes = tmp.ToArray ();
+
+
+			meshPawn = null;
+			meshBishop = null;
+			meshHorse = null;
+			meshTower = null;
+			meshQueen = null;
+			meshKing = null;
 		}
 		void computeTangents(){
 			mainVAO.ComputeTangents();
@@ -324,7 +355,7 @@ namespace Chess
 
 			if (ValidMoves != null){
 				foreach (Point vm in ValidMoves)
-					drawSquarre(vm, new Vector4(0.0f,0.5f,0.7f,0.7f));				
+					drawSquarre(vm, new Vector4(0.0f,0.5f,0.7f,0.7f));
 			}
 
 			drawSquarre(Selection, new Vector4(0.3f,1.0f,0.3f,0.5f));
@@ -348,11 +379,11 @@ namespace Chess
 			}
 
 
-			mainVAO.Unbind ();			
+			mainVAO.Unbind ();
 		}
 		void drawSquarre(Point pos, Vector4 color){
 			changeShadingColor(color);
-			cellVAOItem.modelMats [0] = Matrix4.CreateTranslation 
+			cellVAOItem.modelMats [0] = Matrix4.CreateTranslation
 				((float)pos.X+0.5f, (float)pos.Y+0.5f, 0);
 			cellVAOItem.UpdateInstancesData ();
 			mainVAO.Render (PrimitiveType.Triangles, cellVAOItem);
@@ -371,8 +402,8 @@ namespace Chess
 		volatile int progressValue=0;
 		volatile int progressMax=200;
 		public int ProgressValue{
-			get { 
-				return progressValue; 
+			get {
+				return progressValue;
 			}
 			set {
 				progressValue = value;
@@ -380,8 +411,8 @@ namespace Chess
 			}
 		}
 		public int ProgressMax{
-			get { 
-				return progressMax; 
+			get {
+				return progressMax;
 			}
 			set {
 				progressMax = value;
@@ -499,7 +530,7 @@ namespace Chess
 
 			if (tmp [0] == "bestmove")
 				processMove (tmp [1]);
-		}			
+		}
 
 		#endregion
 
@@ -515,6 +546,8 @@ namespace Chess
 		}
 
 		ChessPiece[,] Board;
+		List<ChessPiece> Whites;
+		List<ChessPiece> Blacks;
 		Point selection;
 		Point active = new Point(-1,-1);
 		List<Point> ValidMoves = null;
@@ -543,7 +576,7 @@ namespace Chess
 			get {
 				return selection;
 			}
-			set {				
+			set {
 				selection = value;
 				if (selection.X < 0)
 					selection.X = 0;
@@ -574,7 +607,7 @@ namespace Chess
 					return;
 			} else if (onlyForTaking)
 				return;
-			
+
 			addValidMove (x, y);
 		}
 		void checkIncrementalMove(int xDelta, int yDelta){
@@ -707,6 +740,7 @@ namespace Chess
 				y = 1f + cptBlackOut;
 				cptBlackOut++;
 			}
+			p.Captured = true;
 			Animation.StartAnimation(new FloatAnimation(p, "X", x, 0.2f));
 			Animation.StartAnimation(new FloatAnimation(p, "Y", y, 0.2f));
 		}
@@ -768,9 +802,14 @@ namespace Chess
 		}
 
 		void addPiece(Tetra.VAOItem vaoi, int idx, ChessColor _color, PieceType _type, int col, int line){
-			Board [col, line] = new ChessPiece (vaoi, idx, _color, _type, col, line);
+			ChessPiece p = new ChessPiece (vaoi, idx, _color, _type, col, line);
+			Board [col, line] = p;
+			if (_color == ChessColor.White)
+				Whites.Add (p);
+			else
+				Blacks.Add (p);
 		}
-		void resetBoard(){
+		void initBoard(){
 			CurrentPlayer = ChessColor.White;
 			cptWhiteOut = 0;
 			cptBlackOut = 0;
@@ -778,6 +817,8 @@ namespace Chess
 			Active = -1;
 
 			Board = new ChessPiece[8, 8];
+			Whites = new List<ChessPiece> ();
+			Blacks = new List<ChessPiece> ();
 
 			for (int i = 0; i < 8; i++)
 				addPiece (vaoiPawn, i, ChessColor.White, PieceType.Pawn, i, 1);
@@ -804,13 +845,24 @@ namespace Chess
 
 			addPiece (vaoiKing, 0, ChessColor.White, PieceType.King, 4, 0);
 			addPiece (vaoiKing, 1, ChessColor.Black, PieceType.King, 4, 7);
+		}
+		void resetBoard(){
+			CurrentPlayer = ChessColor.White;
+			cptWhiteOut = 0;
+			cptBlackOut = 0;
+			stockfishMoves = "position startpos moves";
+			Active = -1;
 
+			foreach (ChessPiece p in Whites)
+				p.Reset ();
+			foreach (ChessPiece p in Blacks)
+				p.Reset ();
 		}
 
 		void closeGame(){
 			stockfish.WaitForInputIdle ();
 			stockfish.StandardInput.WriteLine ("quit");
-			stockfish.WaitForExit ();			
+			stockfish.WaitForExit ();
 			this.Quit (null,null);
 		}
 
@@ -829,7 +881,7 @@ namespace Chess
 			Thread t = new Thread (loadMeshes);
 			t.IsBackground = true;
 			t.Start ();
-		}			
+		}
 		public override void GLClear ()
 		{
 			GL.ClearColor(0.2f, 0.2f, 0.4f, 1.0f);
@@ -855,7 +907,7 @@ namespace Chess
 			case GameState.MeshesLoading:
 			case GameState.ComputeTangents:
 				ProgressValue++;
-				return;			
+				return;
 			case GameState.VAOInit:
 
 				createMainVAO ();
@@ -865,10 +917,10 @@ namespace Chess
 				Thread t = new Thread (computeTangents);
 				t.IsBackground = true;
 				t.Start ();
-				return;			
+				return;
 			case GameState.BuildBuffers:
 				mainVAO.BuildBuffers ();
-				resetBoard ();
+				initBoard ();
 				initInterface ();
 				currentState = GameState.Play;
 				break;
@@ -928,7 +980,7 @@ namespace Chess
 					return;
 				if (p.Color != CurrentPlayer)
 					return;
-				Active = Selection;	
+				Active = Selection;
 			} else if (Selection == Active) {
 				Active = -1;
 				return;
@@ -954,15 +1006,15 @@ namespace Chess
 
 		}
 		void Mouse_ButtonUp (object sender, OpenTK.Input.MouseButtonEventArgs e)
-		{	
+		{
 		}
 
 		void Mouse_Move(object sender, OpenTK.Input.MouseMoveEventArgs e)
-		{			
+		{
 			if (e.XDelta != 0 || e.YDelta != 0)
 			{
 				if (e.Mouse.MiddleButton == OpenTK.Input.ButtonState.Pressed) {
-					Vector3 tmp = Vector3.Transform (vLook, 
+					Vector3 tmp = Vector3.Transform (vLook,
 						Matrix4.CreateRotationX (-e.YDelta * RotationSpeed)*
 						Matrix4.CreateRotationZ (-e.XDelta * RotationSpeed));
 					tmp.Normalize();
