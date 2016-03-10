@@ -114,14 +114,15 @@ namespace Chess
 		public struct UBOSharedData
 		{
 			public Vector4 Color;
-			public Matrix4 projection;
 			public Matrix4 view;
+			public Matrix4 projection;
 			public Matrix4 normal;
 			public Vector4 LightPosition;
 		}
 
 		#region  scene matrix and vectors
 		public static Matrix4 modelview;
+		public static Matrix4 reflectedModelview;
 		public static Matrix4 projection;
 		public static Matrix4 invMVP;
 		public static int[] viewport = new int[4];
@@ -165,6 +166,8 @@ namespace Chess
 		void initOpenGL()
 		{
 			GL.ClearColor(0.0f, 0.0f, 0.2f, 1.0f);
+			GL.Enable (EnableCap.CullFace);
+			GL.CullFace (CullFaceMode.Back);
 			GL.Enable(EnableCap.DepthTest);
 			GL.DepthFunc(DepthFunction.Less);
 			GL.PrimitiveRestartIndex (int.MaxValue);
@@ -185,6 +188,9 @@ namespace Chess
 
 			GL.ActiveTexture (TextureUnit.Texture0);
 
+			int b;
+			GL.GetInteger(GetPName.StencilBits, out b);
+
 			ErrorCode err = GL.GetError ();
 			Debug.Assert (err == ErrorCode.NoError, "OpenGL Error");
 		}
@@ -200,7 +206,19 @@ namespace Chess
 				ref shaderSharedData, BufferUsageHint.DynamicCopy);
 			GL.BindBuffer (BufferTarget.UniformBuffer, 0);
 		}
+		void changeShadingColor(Vector4 color){
+			GL.BindBuffer (BufferTarget.UniformBuffer, uboShaderSharedData);
+			GL.BufferSubData(BufferTarget.UniformBuffer, IntPtr.Zero, Vector4.SizeInBytes,
+				ref color);
+			GL.BindBuffer (BufferTarget.UniformBuffer, 0);
 
+		}
+		void changeModelView(Matrix4 newModelView){
+			GL.BindBuffer (BufferTarget.UniformBuffer, uboShaderSharedData);
+			GL.BufferSubData(BufferTarget.UniformBuffer, (IntPtr)Vector4.SizeInBytes, Vector4.SizeInBytes * 4,
+				ref newModelView);
+			GL.BindBuffer (BufferTarget.UniformBuffer, 0);
+		}
 		#endregion
 
 		Tetra.VAOItem vaoiPawn;
@@ -362,8 +380,33 @@ namespace Chess
 
 			mainVAO.Bind ();
 
+			GL.Enable(EnableCap.StencilTest);
+
+
+			//cut stencil
+			GL.StencilFunc(StencilFunction.Always, 1, 0xff);
+			GL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Replace);
+			GL.StencilMask (0xff);
+			GL.DepthMask (false);
+
+			//drawSquarre(Selection, new Vector4(0.3f,1.0f,0.3f,0.5f));
 			changeShadingColor(new Vector4(1.0f,1.0f,1.0f,1.0f));
 			mainVAO.Render (PrimitiveType.Triangles, boardVAOItem);
+
+			//draw reflected items
+			GL.CullFace(CullFaceMode.Front);
+
+			GL.StencilFunc(StencilFunction.Equal, 1, 0xff);
+			GL.StencilMask (0x00);
+			GL.DepthMask (true);
+
+			changeModelView (reflectedModelview);
+			drawPieces (0.6f);
+
+			//draw scene
+			GL.CullFace(CullFaceMode.Back);
+			GL.Disable(EnableCap.StencilTest);
+			changeModelView (modelview);
 
 			#region sel squarres
 			GL.Disable (EnableCap.DepthTest);
@@ -381,22 +424,26 @@ namespace Chess
 			GL.Enable (EnableCap.DepthTest);
 			#endregion
 
+			drawPieces ();
+
+			mainVAO.Unbind ();
+
+			renderArrow ();
+
+			GL.StencilMask (0xff);
+		}
+		void drawPieces(float alpha = 1.0f){
 			foreach (int i in piecesVAOIndexes) {
 				Tetra.VAOItem p = mainVAO.Meshes [i];
 				int halfCount = p.modelMats.Length / 2;
 
 				//White
-				changeShadingColor(new Vector4(1.0f,1.0f,1.0f,1.0f));
+				changeShadingColor(new Vector4(1.0f,1.0f,1.0f,alpha));
 				mainVAO.Render (PrimitiveType.Triangles, p, 0, halfCount);
 
-				changeShadingColor(new Vector4(0.6f,0.6f,0.6f,1.0f));
+				changeShadingColor(new Vector4(0.6f,0.6f,0.6f,alpha));
 				mainVAO.Render (PrimitiveType.Triangles, p, halfCount, halfCount);
 			}
-
-
-			mainVAO.Unbind ();
-
-			renderArrow ();
 		}
 		void drawSquarre(Point pos, Vector4 color){
 			changeShadingColor(color);
@@ -404,13 +451,6 @@ namespace Chess
 				((float)pos.X+0.5f, (float)pos.Y+0.5f, 0);
 			cellVAOItem.UpdateInstancesData ();
 			mainVAO.Render (PrimitiveType.Triangles, cellVAOItem);
-		}
-		void changeShadingColor(Vector4 color){
-			GL.BindBuffer (BufferTarget.UniformBuffer, uboShaderSharedData);
-			GL.BufferSubData(BufferTarget.UniformBuffer, IntPtr.Zero, Vector4.SizeInBytes,
-				ref color);
-			GL.BindBuffer (BufferTarget.UniformBuffer, 0);
-
 		}
 
 		#region Arrows
@@ -961,7 +1001,7 @@ namespace Chess
 		public override void GLClear ()
 		{
 			GL.ClearColor(0.2f, 0.2f, 0.4f, 1.0f);
-			GL.Clear (ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+			GL.Clear (ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit | ClearBufferMask.StencilBufferBit);
 		}
 		public override void OnRender (FrameEventArgs e)
 		{
@@ -1027,7 +1067,9 @@ namespace Chess
 			modelview = Matrix4.LookAt(vEye, vEyeTarget, Vector3.UnitZ);
 			GL.GetInteger(GetPName.Viewport, viewport);
 			invMVP = Matrix4.Invert(modelview) * Matrix4.Invert(projection);
-
+			reflectedModelview =
+				Matrix4.CreateScale (1.0f, 1.0f, -1.0f) * modelview;
+			//Matrix4.CreateTranslation (0.0f, 0.0f, 1.0f) *
 			updateShadersMatrices ();
 		}
 		#endregion
@@ -1166,8 +1208,10 @@ namespace Chess
 
 		#region CTOR and Main
 		public MainWin ()
-			: base(1024, 800,"test")
-		{}
+			: base(1024, 800, 32, 24, 1, 1, "test")
+		{
+			VSync = VSyncMode.Off;
+		}
 
 		[STAThread]
 		static void Main ()

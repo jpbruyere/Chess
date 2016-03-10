@@ -18,8 +18,8 @@ namespace Chess
 
 			layout (std140, index = 0) uniform block_data{
 				vec4 Color;
-				mat4 Projection;
 				mat4 ModelView;
+				mat4 Projection;
 				mat4 Normal;
 				vec4 lightPos;
 			};
@@ -36,8 +36,8 @@ namespace Chess
 
 			layout (std140, index = 0) uniform block_data{
 				vec4 Color;
-				mat4 Projection;
 				mat4 ModelView;
+				mat4 Projection;
 				mat4 Normal;
 				vec4 lightPos;
 			};
