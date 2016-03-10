@@ -753,10 +753,10 @@ namespace Chess
 			addPiece (vaoiTower, 3, ChessColor.Black, PieceType.Tower, 7, 7);
 
 			addPiece (vaoiQueen, 0, ChessColor.White, PieceType.Queen, 3, 0);
-			addPiece (vaoiQueen, 1, ChessColor.Black, PieceType.Queen, 4, 7);
+			addPiece (vaoiQueen, 1, ChessColor.Black, PieceType.Queen, 3, 7);
 
 			addPiece (vaoiKing, 0, ChessColor.White, PieceType.King, 4, 0);
-			addPiece (vaoiKing, 1, ChessColor.Black, PieceType.King,3, 7);
+			addPiece (vaoiKing, 1, ChessColor.Black, PieceType.King, 4, 7);
 
 		}
 
