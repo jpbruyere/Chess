@@ -2,7 +2,8 @@
 using OpenTK.Graphics.OpenGL;
 using System.Diagnostics;
 using OpenTK;
-using GameLib;
+using Tetra;
+
 
 namespace Chess
 {

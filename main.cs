@@ -32,7 +32,8 @@ namespace Chess
 		public bool HasMoved;
 		public bool Captured;
 
-		float initX, initY, x, y, z, xAngle;
+		float x, y, z, xAngle;
+		public int InitX, InitY;
 
 		public float X {
 			get {return x;}
@@ -73,8 +74,10 @@ namespace Chess
 			InstanceIndex = idx;
 			Color = _color;
 			Type = _type;
-			initX = x = xPos + 0.5f;
-			initY = y = yPos + 0.5f;
+			InitX= xPos;
+			InitY= yPos;
+			x = xPos + 0.5f;
+			y = yPos + 0.5f;
 			z = 0f;
 			xAngle = 0f;
 			HasMoved = false;
@@ -84,9 +87,8 @@ namespace Chess
 		public void Reset(){
 			xAngle = 0f;
 			z = 0f;
-
-			Animation.StartAnimation(new FloatAnimation(this, "X", initX, 0.2f));
-			Animation.StartAnimation(new FloatAnimation(this, "Y", initY, 0.2f));
+			Animation.StartAnimation(new FloatAnimation(this, "X", InitX + 0.5f, 0.2f));
+			Animation.StartAnimation(new FloatAnimation(this, "Y", InitY + 0.5f, 0.2f));
 
 			HasMoved = false;
 			Captured = false;
@@ -140,7 +142,7 @@ namespace Chess
 		int uboShaderSharedData;
 
 		public static Mat4InstancedShader piecesShader;
-		public static ChessShader mainShader;
+		public static SimpleColoredShader coloredShader;
 
 		Tetra.IndexedVAO mainVAO;
 		Tetra.VAOItem boardVAOItem;
@@ -158,7 +160,7 @@ namespace Chess
 			GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
 
 			piecesShader = new Mat4InstancedShader();
-			mainShader = new ChessShader ();
+			coloredShader = new SimpleColoredShader ();
 
 			shaderSharedData.Color = new Vector4(1,1,1,1);
 			uboShaderSharedData = GL.GenBuffer ();
@@ -380,6 +382,8 @@ namespace Chess
 
 
 			mainVAO.Unbind ();
+
+			renderArrow ();
 		}
 		void drawSquarre(Point pos, Vector4 color){
 			changeShadingColor(color);
@@ -396,6 +400,40 @@ namespace Chess
 
 		}
 
+		#region Arrows
+		vaoMesh arrows;
+		void clearArrows(){
+			if (arrows!=null)
+				arrows.Dispose ();
+			arrows = null;
+		}
+		public void createArrows(string move){
+			if (string.IsNullOrEmpty (move))
+				return;
+			
+			if (arrows!=null)
+				arrows.Dispose ();
+			arrows = null;
+
+			Point pStart = getChessCell(move.Substring(0,2));
+			Point pEnd = getChessCell(move.Substring(2,2));
+			arrows = new Arrow3d (
+				new Vector3 ((float)pStart.X + 0.5f, (float)pStart.Y + 0.5f, 0), 
+				new Vector3 ((float)pEnd.X + 0.5f, (float)pEnd.Y + 0.5f, 0), 
+					Vector3.UnitZ);
+		}
+		void renderArrow(){
+			if (arrows == null)
+				return;
+			coloredShader.Enable ();
+			changeShadingColor (new Vector4 (1f, 0f, 0f, 0.7f));
+
+			GL.Disable (EnableCap.CullFace);
+			arrows.Render (PrimitiveType.TriangleStrip);
+			GL.Enable (EnableCap.CullFace);
+
+		}
+		#endregion
 
 		#region Interface
 		GraphicObject uiSplash;
@@ -520,8 +558,11 @@ namespace Chess
 			string[] tmp = e.Data.Split (' ');
 
 			if (CurrentPlayer == ChessColor.White) {
-				if (tmp [0] == "bestmove")
-					AddLog ("Hint => " + tmp[1]);
+				if (tmp [0] == "bestmove") {
+					AddLog ("Hint => " + tmp [1]);
+					nextHint = tmp [1];
+					updateArrows = true;
+				}
 				return;
 			}
 
@@ -557,6 +598,8 @@ namespace Chess
 
 		string stockfishMoves;
 
+		volatile bool updateArrows = false;
+		string nextHint;
 
 		public Point Active {
 			get {
@@ -852,11 +895,15 @@ namespace Chess
 			cptBlackOut = 0;
 			stockfishMoves = "position startpos moves";
 			Active = -1;
-
-			foreach (ChessPiece p in Whites)
+			Board = new ChessPiece[8, 8];
+			foreach (ChessPiece p in Whites) {
 				p.Reset ();
-			foreach (ChessPiece p in Blacks)
+				Board [p.InitX, p.InitY] = p;
+			}
+			foreach (ChessPiece p in Blacks) {
 				p.Reset ();
+				Board [p.InitX, p.InitY] = p;
+			}
 		}
 
 		void closeGame(){
@@ -925,6 +972,10 @@ namespace Chess
 				currentState = GameState.Play;
 				break;
 			case GameState.Play:
+				if (updateArrows) {
+					updateArrows = false;
+					createArrows (nextHint);
+				}
 				break;
 			}
 
@@ -974,6 +1025,9 @@ namespace Chess
 
 			if (e.Mouse.LeftButton != OpenTK.Input.ButtonState.Pressed)
 				return;
+
+			clearArrows ();
+
 			if (Active < 0) {
 				ChessPiece p = Board [Selection.X, Selection.Y];
 				if (p == null)
@@ -1029,7 +1083,6 @@ namespace Chess
 					vEyeTarget = Vector3.Transform (vEyeTarget, m);
 					UpdateViewMatrix();
 				}
-				Debug.WriteLine (e.Position.ToString());
 				Vector3 mv = unprojectMouse (new Vector2 (e.X, e.Y));
 				Vector3 vRay = Vector3.Normalize(mv - vEye);
 				float a = vEye.Z / vRay.Z;

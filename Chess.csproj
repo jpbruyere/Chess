@@ -35,6 +35,7 @@
     <Compile Include="Mat4InstancedShader.cs" />
     <Compile Include="main.cs" />
     <Compile Include="ChessShader.cs" />
+    <Compile Include="SimpleColoredShader.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="cairo-sharp, Version=1.10.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756">
