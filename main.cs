@@ -142,15 +142,15 @@ namespace Chess
 		public Vector3 vEyeTarget = new Vector3(4f, 4f, 0f);
 		public Vector3 vEye;
 		public Vector3 vLook = Vector3.Normalize(new Vector3(0.0f, -0.7f, 0.7f));  // Camera vLook Vector
-		public float zFar = 6000.0f;
-		public float zNear = 1.0f;
+		public float zFar = 30.0f;
+		public float zNear = 0.1f;
 		public float fovY = (float)Math.PI / 4;
 
 		float eyeDist = 12f;
 		float eyeDistTarget = 12f;
 		float MoveSpeed = 0.02f;
 		float RotationSpeed = 0.005f;
-		float ZoomSpeed = 1f;
+		float ZoomSpeed = 2f;
 
 		//public Vector4 vLight = new Vector4 (0.5f, 0.5f, -1f, 0f);
 		public Vector4 vLight = Vector4.Normalize(new Vector4 (0.4f, 0.4f, -0.5f, 0f));
@@ -379,6 +379,7 @@ namespace Chess
 			mainVAO.ComputeTangents();
 			currentState = GameState.BuildBuffers;
 		}
+
 		void draw()
 		{
 			piecesShader.Enable ();
@@ -406,7 +407,7 @@ namespace Chess
 			GL.DepthMask (true);
 
 			changeModelView (reflectedModelview);
-			drawPieces (0.6f);
+			drawPieces (0.3f);
 
 			//draw scene
 			GL.CullFace(CullFaceMode.Back);
@@ -1304,13 +1305,13 @@ namespace Chess
 				speed *= 20.0f;
 
 			eyeDistTarget -= e.Delta * speed;
-			if (eyeDistTarget < zNear+10)
-				eyeDistTarget = zNear+10;
-			else if (eyeDistTarget > zFar-100)
-				eyeDistTarget = zFar-100;
+			if (eyeDistTarget < zNear+1)
+				eyeDistTarget = zNear+1;
+			else if (eyeDistTarget > zFar-6)
+				eyeDistTarget = zFar-6;
 
-			EyeDist = eyeDistTarget;
-			//Animation.StartAnimation(new Animation<float> (this, "EyeDist", eyeDistTarget, (eyeDistTarget - eyeDist) * 0.2f));
+			//EyeDist = eyeDistTarget;
+			Animation.StartAnimation(new Animation<float> (this, "EyeDist", eyeDistTarget, (eyeDistTarget - eyeDist) * 0.1f));
 		}
 		#endregion
 
