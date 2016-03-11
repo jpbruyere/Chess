@@ -12,10 +12,23 @@ using Tetra;
 
 namespace Chess
 {
-	enum GameState { Init, MeshesLoading, VAOInit, ComputeTangents, BuildBuffers, Play}
+	enum GameState { Init, MeshesLoading, VAOInit, ComputeTangents, BuildBuffers, Play};
+	enum PlayerType { Human, AI };
 	enum ChessColor { White, Black};
 	enum PieceType { Pawn, Tower, Horse, Bishop, King, Queen };
 
+	class ChessPlayer{
+		public string Name;
+		public ChessColor Color;
+		public PlayerType Type;
+		public Point[] ValidMoves;
+		public string [] CheckMoves;
+
+		public override string ToString ()
+		{
+			return Color.ToString();
+		}
+	}
 	class ChessPiece{
 		public VAOItem<VAOChessData> Mesh;
 		public int InstanceIndex;
@@ -118,7 +131,7 @@ namespace Chess
 			HasMoved = false;
 			Captured = false;
 			update ();
-		}
+		}	
 	}
 	class MainWin : OpenTKGameWindow
 	{
@@ -425,8 +438,8 @@ namespace Chess
 			#region sel squarres
 			GL.Disable (EnableCap.DepthTest);
 
-			if (ValidMoves != null){
-				foreach (Point vm in ValidMoves)
+			if (CurrentPlayer.ValidMoves != null){
+				foreach (Point vm in CurrentPlayer.ValidMoves)
 					drawSquarre(vm, new Vector4(0.0f,0.5f,0.7f,0.7f));
 			}
 
@@ -595,6 +608,18 @@ namespace Chess
 
 		#region Stockfish
 		Process stockfish;
+		List<String> stockfishMoves = new List<string> ();
+		List<String> StockfishMoves {
+			get { return stockfishMoves; }
+			set { stockfishMoves = value; }
+		}
+		string stockfishPositionCommand {
+			get {
+				string tmp = "position startpos moves ";
+				return 
+					StockfishMoves.Count == 0 ? tmp : tmp + StockfishMoves.Aggregate ((i, j) => i + " " + j); }
+		}
+
 		void initStockfish()
 		{
 			stockfish = new Process ();
@@ -629,7 +654,7 @@ namespace Chess
 
 			string[] tmp = e.Data.Split (' ');
 
-			if (CurrentPlayer == ChessColor.White) {
+			if (CurrentPlayer.Type == PlayerType.Human) {
 				if (tmp [0] == "bestmove") {
 					AddLog ("Hint => " + tmp [1]);
 					nextHint = tmp [1];
@@ -638,8 +663,6 @@ namespace Chess
 				return;
 			}
 
-			//syncStockfish ();
-
 			if (tmp [0] == "bestmove")
 				processMove (tmp [1]);
 		}
@@ -647,49 +670,40 @@ namespace Chess
 		#endregion
 
 		#region game logic
+		ChessPlayer[] Players;
 		volatile GameState currentState = GameState.Init;
-		ChessColor currentPlayer = ChessColor.White;
-
-		public ChessColor CurrentPlayer {
-			get { return currentPlayer;}
-			set {
-				currentPlayer = value;
-				NotifyValueChanged ("CurrentPlayer", currentPlayer);
-			}
-		}
+		int currentPlayerIndex = 0;
 
 		ChessPiece[,] Board;
 		List<ChessPiece> Whites;
 		List<ChessPiece> Blacks;
 		Point selection;
 		Point active = new Point(-1,-1);
+
+		int testedPlayer = 0;
 		List<Point> ValidMoves = null;
+		List<string> CheckMoves = null;
 
 		int cptWhiteOut = 0;
 		int cptBlackOut = 0;
 
-		List<String> stockfishMoves = new List<string> ();
-
-		public List<String> StockfishMoves {
-			get {
-				return stockfishMoves;
-			}
-			set {
-				stockfishMoves = value;
-			}
-		}
-
-		string stockfishPositionCommand {
-			get {
-				string tmp = "position startpos moves ";
-				return 
-					StockfishMoves.Count == 0 ? tmp : tmp + StockfishMoves.Aggregate ((i, j) => i + " " + j); }
-		}
-
 		volatile bool updateArrows = false;
 		string nextHint;
 
-		public Point Active {
+		int CurrentPlayerIndex {
+			get { return currentPlayerIndex; }
+			set {
+				currentPlayerIndex = value;
+				NotifyValueChanged ("CurrentPlayer", CurrentPlayer);
+			}
+		}
+		public ChessPlayer CurrentPlayer {
+			get { return Players[CurrentPlayerIndex];}
+			set {
+				CurrentPlayerIndex = Array.IndexOf(Players, value);
+			}
+		}
+		Point Active {
 			get {
 				return active;
 			}
@@ -700,11 +714,21 @@ namespace Chess
 				else
 					NotifyValueChanged ("ActCell", getChessCell(active.X,active.Y) + " => ");
 
+				if (Active < 0) {
+					CurrentPlayer.ValidMoves = null;
+					return;
+				}
+
+				ValidMoves = new List<Point> ();
+				CheckMoves = new List<string> ();
+
 				computeValidMove (Active);
+
+				CurrentPlayer.ValidMoves = ValidMoves.ToArray ();
+				CurrentPlayer.CheckMoves = CheckMoves.ToArray ();
 			}
 		}
-
-		public Point Selection {
+		Point Selection {
 			get {
 				return selection;
 			}
@@ -722,29 +746,94 @@ namespace Chess
 			}
 		}
 
+		void initBoard(){
+			CurrentPlayerIndex = 0;
+			cptWhiteOut = 0;
+			cptBlackOut = 0;
+			StockfishMoves.Clear ();
+			Active = -1;
+
+			Board = new ChessPiece[8, 8];
+			Whites = new List<ChessPiece> ();
+			Blacks = new List<ChessPiece> ();
+
+			for (int i = 0; i < 8; i++)
+				addPiece (vaoiPawn, i, ChessColor.White, PieceType.Pawn, i, 1);
+			for (int i = 0; i < 8; i++)
+				addPiece (vaoiPawn, i+8, ChessColor.Black, PieceType.Pawn, i, 6);
+
+			addPiece (vaoiBishop, 0, ChessColor.White, PieceType.Bishop, 2, 0);
+			addPiece (vaoiBishop, 1, ChessColor.White, PieceType.Bishop, 5, 0);
+			addPiece (vaoiBishop, 2, ChessColor.Black, PieceType.Bishop, 2, 7);
+			addPiece (vaoiBishop, 3, ChessColor.Black, PieceType.Bishop, 5, 7);
+
+			addPiece (vaoiHorse, 0, ChessColor.White, PieceType.Horse, 1, 0);
+			addPiece (vaoiHorse, 1, ChessColor.White, PieceType.Horse, 6, 0);
+			addPiece (vaoiHorse, 2, ChessColor.Black, PieceType.Horse, 1, 7);
+			addPiece (vaoiHorse, 3, ChessColor.Black, PieceType.Horse, 6, 7);
+
+			addPiece (vaoiTower, 0, ChessColor.White, PieceType.Tower, 0 ,0);
+			addPiece (vaoiTower, 1, ChessColor.White, PieceType.Tower, 7, 0);
+			addPiece (vaoiTower, 2, ChessColor.Black, PieceType.Tower, 0, 7);
+			addPiece (vaoiTower, 3, ChessColor.Black, PieceType.Tower, 7, 7);
+
+			addPiece (vaoiQueen, 0, ChessColor.White, PieceType.Queen, 3, 0);
+			addPiece (vaoiQueen, 1, ChessColor.Black, PieceType.Queen, 3, 7);
+
+			addPiece (vaoiKing, 0, ChessColor.White, PieceType.King, 4, 0);
+			addPiece (vaoiKing, 1, ChessColor.Black, PieceType.King, 4, 7);
+		}
+		void resetBoard(bool animate = true){
+			CurrentPlayerIndex = 0;
+			cptWhiteOut = 0;
+			cptBlackOut = 0;
+			StockfishMoves.Clear ();
+			Active = -1;
+			Board = new ChessPiece[8, 8];
+			foreach (ChessPiece p in Whites) {
+				p.Reset (animate);
+				Board [p.InitX, p.InitY] = p;
+			}
+			foreach (ChessPiece p in Blacks) {
+				p.Reset (animate);
+				Board [p.InitX, p.InitY] = p;
+			}
+		}
+		void addPiece(VAOItem<VAOChessData> vaoi, int idx, ChessColor _color, PieceType _type, int col, int line){
+			ChessPiece p = new ChessPiece (vaoi, idx, _color, _type, col, line);
+			Board [col, line] = p;
+			if (_color == ChessColor.White)
+				Whites.Add (p);
+			else
+				Blacks.Add (p);
+		}
+
 		void addValidMove(int x, int y){
 			Point p = new Point (x, y);
 			if (ValidMoves.Contains (p))
 				return;
 			ValidMoves.Add (p);
 		}
-		void checkSingleMove(int xDelta, int yDelta, bool onlyForTaking = false){
-			int x = Active.X + xDelta;
-			int y = Active.Y + yDelta;
+		void checkSingleMove(Point pos, int xDelta, int yDelta, bool onlyForTaking = false){
+			int x = pos.X + xDelta;
+			int y = pos.Y + yDelta;
 
 			if (x < 0 || x > 7 || y < 0 || y > 7)
 				return;
 			if (Board [x, y] != null) {
-				if (Board [x, y].Color == CurrentPlayer)
+				if (Board [x, y].Color == Board [pos.X, pos.Y].Color)
 					return;
 			} else if (onlyForTaking)
 				return;
 
 			addValidMove (x, y);
+
+			if (Board [x, y].Type == PieceType.King)
+				CheckMoves.Add (getChessCell(pos.X,pos.Y) + getChessCell(x,y));
 		}
-		void checkIncrementalMove(int xDelta, int yDelta){
-			int x = Active.X + xDelta;
-			int y = Active.Y + yDelta;
+		void checkIncrementalMove(Point pos, int xDelta, int yDelta){
+			int x = pos.X + xDelta;
+			int y = pos.Y + yDelta;
 
 			while (x >= 0 && x < 8 && y >= 0 && y < 8) {
 				if (Board [x, y] == null) {
@@ -754,22 +843,27 @@ namespace Chess
 					continue;
 				}
 
-				if (Board [x, y].Color != CurrentPlayer)
-					addValidMove (x, y);
+				if (Board [x, y].Color == Board [pos.X, pos.Y].Color)
+					break;
+
+				addValidMove (x, y);
+
+				if (Board [x, y].Type == PieceType.King)
+					CheckMoves.Add (getChessCell(pos.X,pos.Y) + getChessCell(x,y));
 				break;
 			}
 		}
-		void computeValidMove(Point position){
-			computeValidMove (position.X, position.Y);
-		}
-		void computeValidMove(int x, int y){
-			if (Active < 0) {
-				ValidMoves = null;
-				return;
-			}
+		void computeValidMove(Point pos){
+			int x = pos.X;
+			int y = pos.Y;
 
 			ValidMoves = new List<Point> ();
+			CheckMoves = new List<String> ();
+
 			ChessPiece p = Board [x, y];
+
+			if (p == null)
+				return;
 
 			switch (p.Type) {
 			case PieceType.Pawn:
@@ -778,30 +872,30 @@ namespace Chess
 					if (!p.HasMoved && Board [x, y + 2] == null)
 						addValidMove (x, y + 2);
 				}
-				checkSingleMove (-1, 1, true);
-				checkSingleMove (1, 1, true);
+				checkSingleMove (pos, -1, 1, true);
+				checkSingleMove (pos, 1, 1, true);
 				break;
 			case PieceType.Tower:
-				checkIncrementalMove (0, 1);
-				checkIncrementalMove (0, -1);
-				checkIncrementalMove (1, 0);
-				checkIncrementalMove (-1, 0);
+				checkIncrementalMove (pos, 0, 1);
+				checkIncrementalMove (pos, 0, -1);
+				checkIncrementalMove (pos, 1, 0);
+				checkIncrementalMove (pos, -1, 0);
 				break;
 			case PieceType.Horse:
-				checkSingleMove (2, 1);
-				checkSingleMove (2, -1);
-				checkSingleMove (-2, 1);
-				checkSingleMove (-2, -1);
-				checkSingleMove (1, 2);
-				checkSingleMove (-1, 2);
-				checkSingleMove (1, -2);
-				checkSingleMove (-1, -2);
+				checkSingleMove (pos, 2, 1);
+				checkSingleMove (pos, 2, -1);
+				checkSingleMove (pos, -2, 1);
+				checkSingleMove (pos, -2, -1);
+				checkSingleMove (pos, 1, 2);
+				checkSingleMove (pos, -1, 2);
+				checkSingleMove (pos, 1, -2);
+				checkSingleMove (pos, -1, -2);
 				break;
 			case PieceType.Bishop:
-				checkIncrementalMove (1, 1);
-				checkIncrementalMove (-1, -1);
-				checkIncrementalMove (1, -1);
-				checkIncrementalMove (-1, 1);
+				checkIncrementalMove (pos, 1, 1);
+				checkIncrementalMove (pos, -1, -1);
+				checkIncrementalMove (pos, 1, -1);
+				checkIncrementalMove (pos, -1, 1);
 				break;
 			case PieceType.King:
 				if (!p.HasMoved) {
@@ -829,31 +923,30 @@ namespace Chess
 					}
 				}
 
-				checkSingleMove (-1, -1);
-				checkSingleMove (-1,  0);
-				checkSingleMove (-1,  1);
-				checkSingleMove ( 0, -1);
-				checkSingleMove ( 0,  1);
-				checkSingleMove ( 1, -1);
-				checkSingleMove ( 1,  0);
-				checkSingleMove ( 1,  1);
+				checkSingleMove (pos, -1, -1);
+				checkSingleMove (pos, -1,  0);
+				checkSingleMove (pos, -1,  1);
+				checkSingleMove (pos,  0, -1);
+				checkSingleMove (pos,  0,  1);
+				checkSingleMove (pos,  1, -1);
+				checkSingleMove (pos,  1,  0);
+				checkSingleMove (pos,  1,  1);
 
 				break;
 			case PieceType.Queen:
-				checkIncrementalMove (0, 1);
-				checkIncrementalMove (0, -1);
-				checkIncrementalMove (1, 0);
-				checkIncrementalMove (-1, 0);
-				checkIncrementalMove (1, 1);
-				checkIncrementalMove (-1, -1);
-				checkIncrementalMove (1, -1);
-				checkIncrementalMove (-1, 1);
+				checkIncrementalMove (pos, 0, 1);
+				checkIncrementalMove (pos, 0, -1);
+				checkIncrementalMove (pos, 1, 0);
+				checkIncrementalMove (pos, -1, 0);
+				checkIncrementalMove (pos, 1, 1);
+				checkIncrementalMove (pos, -1, -1);
+				checkIncrementalMove (pos, 1, -1);
+				checkIncrementalMove (pos, -1, 1);
 				break;
 			}
 			if (ValidMoves.Count == 0)
 				ValidMoves = null;
 		}
-
 		string getChessCell(int col, int line){
 			char c = (char)(col + 97);
 			return c.ToString () + (line + 1).ToString ();
@@ -1003,14 +1096,14 @@ namespace Chess
 		}
 
 		void switchPlayer(){
-			if (CurrentPlayer == ChessColor.White)
-				CurrentPlayer = ChessColor.Black;
+			if (CurrentPlayerIndex == 0)
+				CurrentPlayerIndex = 1;
 			else
-				CurrentPlayer = ChessColor.White;
+				CurrentPlayerIndex = 0;
 
 			syncStockfish ();
 
-			if (CurrentPlayer == ChessColor.Black) {
+			if (CurrentPlayer.Type == PlayerType.AI) {
 				stockfish.WaitForInputIdle ();
 				stockfish.StandardInput.WriteLine ("go");
 			}
@@ -1019,68 +1112,6 @@ namespace Chess
 		void move_AnimationFinished (Animation a)
 		{
 			switchPlayer ();			
-		}
-
-		void addPiece(VAOItem<VAOChessData> vaoi, int idx, ChessColor _color, PieceType _type, int col, int line){
-			ChessPiece p = new ChessPiece (vaoi, idx, _color, _type, col, line);
-			Board [col, line] = p;
-			if (_color == ChessColor.White)
-				Whites.Add (p);
-			else
-				Blacks.Add (p);
-		}
-		void initBoard(){
-			CurrentPlayer = ChessColor.White;
-			cptWhiteOut = 0;
-			cptBlackOut = 0;
-			StockfishMoves.Clear ();
-			Active = -1;
-
-			Board = new ChessPiece[8, 8];
-			Whites = new List<ChessPiece> ();
-			Blacks = new List<ChessPiece> ();
-
-			for (int i = 0; i < 8; i++)
-				addPiece (vaoiPawn, i, ChessColor.White, PieceType.Pawn, i, 1);
-			for (int i = 0; i < 8; i++)
-				addPiece (vaoiPawn, i+8, ChessColor.Black, PieceType.Pawn, i, 6);
-
-			addPiece (vaoiBishop, 0, ChessColor.White, PieceType.Bishop, 2, 0);
-			addPiece (vaoiBishop, 1, ChessColor.White, PieceType.Bishop, 5, 0);
-			addPiece (vaoiBishop, 2, ChessColor.Black, PieceType.Bishop, 2, 7);
-			addPiece (vaoiBishop, 3, ChessColor.Black, PieceType.Bishop, 5, 7);
-
-			addPiece (vaoiHorse, 0, ChessColor.White, PieceType.Horse, 1, 0);
-			addPiece (vaoiHorse, 1, ChessColor.White, PieceType.Horse, 6, 0);
-			addPiece (vaoiHorse, 2, ChessColor.Black, PieceType.Horse, 1, 7);
-			addPiece (vaoiHorse, 3, ChessColor.Black, PieceType.Horse, 6, 7);
-
-			addPiece (vaoiTower, 0, ChessColor.White, PieceType.Tower, 0 ,0);
-			addPiece (vaoiTower, 1, ChessColor.White, PieceType.Tower, 7, 0);
-			addPiece (vaoiTower, 2, ChessColor.Black, PieceType.Tower, 0, 7);
-			addPiece (vaoiTower, 3, ChessColor.Black, PieceType.Tower, 7, 7);
-
-			addPiece (vaoiQueen, 0, ChessColor.White, PieceType.Queen, 3, 0);
-			addPiece (vaoiQueen, 1, ChessColor.Black, PieceType.Queen, 3, 7);
-
-			addPiece (vaoiKing, 0, ChessColor.White, PieceType.King, 4, 0);
-			addPiece (vaoiKing, 1, ChessColor.Black, PieceType.King, 4, 7);
-		}
-		void resetBoard(bool animate = true){
-			CurrentPlayer = ChessColor.White;
-			cptWhiteOut = 0;
-			cptBlackOut = 0;
-			StockfishMoves.Clear ();
-			Active = -1;
-			Board = new ChessPiece[8, 8];
-			foreach (ChessPiece p in Whites) {
-				p.Reset (animate);
-				Board [p.InitX, p.InitY] = p;
-			}
-			foreach (ChessPiece p in Blacks) {
-				p.Reset (animate);
-				Board [p.InitX, p.InitY] = p;
-			}
 		}
 
 		void closeGame(){
@@ -1094,6 +1125,11 @@ namespace Chess
 		#region OTK window overrides
 		protected override void OnLoad (EventArgs e)
 		{
+			Players = new ChessPlayer[2] {
+				new ChessPlayer () { Color = ChessColor.White, Type = PlayerType.Human },
+				new ChessPlayer () { Color = ChessColor.Black, Type = PlayerType.AI }
+			};
+
 			base.OnLoad (e);
 
 			uiSplash = CrowInterface.LoadInterface("#Chess.gui.Splash.crow");
@@ -1212,7 +1248,7 @@ namespace Chess
 				ChessPiece p = Board [Selection.X, Selection.Y];
 				if (p == null)
 					return;
-				if (p.Color != CurrentPlayer)
+				if (p.Color != CurrentPlayer.Color)
 					return;
 				Active = Selection;
 			} else if (Selection == Active) {
@@ -1221,7 +1257,7 @@ namespace Chess
 			} else {
 				ChessPiece p = Board [Selection.X, Selection.Y];
 				if (p != null) {
-					if (p.Color == CurrentPlayer) {
+					if (p.Color == CurrentPlayer.Color) {
 						//check here if rocking
 						Active = Selection;
 						return;
