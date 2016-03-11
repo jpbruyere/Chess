@@ -444,10 +444,10 @@ namespace Chess
 				int halfCount = p.modelMats.Length / 2;
 
 				//White
-				changeShadingColor(new Vector4(1.0f,1.0f,1.0f,alpha));
+				changeShadingColor(new Vector4(0.80f,0.80f,0.70f,alpha));
 				mainVAO.Render (PrimitiveType.Triangles, p, 0, halfCount);
 
-				changeShadingColor(new Vector4(0.6f,0.6f,0.6f,alpha));
+				changeShadingColor(new Vector4(0.2f,0.2f,0.2f,alpha));
 				mainVAO.Render (PrimitiveType.Triangles, p, halfCount, halfCount);
 			}
 		}
@@ -700,7 +700,8 @@ namespace Chess
 					NotifyValueChanged ("ActCell", "" );
 				else
 					NotifyValueChanged ("ActCell", getChessCell(active.X,active.Y) + " => ");
-				computeValidMove ();
+
+				computeValidMove (Active);
 			}
 		}
 
@@ -759,14 +760,14 @@ namespace Chess
 				break;
 			}
 		}
-		void computeValidMove(){
+		void computeValidMove(Point position){
+			computeValidMove (position.X, position.Y);
+		}
+		void computeValidMove(int x, int y){
 			if (Active < 0) {
 				ValidMoves = null;
 				return;
 			}
-
-			int x = Active.X;
-			int y = Active.Y;
 
 			ValidMoves = new List<Point> ();
 			ChessPiece p = Board [x, y];

@@ -66,21 +66,36 @@ namespace Chess
 			
 			out vec4 out_frag_color;
 
+			const vec3 diffuse = vec3(1.2, 1.2, 1.2);
+			const vec3 ambient = vec3(0.01, 0.01, 0.01);
+			const vec3 specular = vec3(1.0, 1.0, 1.0);
+			const float shininess = 80.0;
+			const float screenGamma = 1.0;
+
 			void main(void)
 			{
+
 				vec4 diffTex = texture( tex, texCoord) * Color;
 				if (diffTex.a == 0.0)
 					discard;
 
-				vec3 l;
+				vec3 vLight;
+				vec3 vEye = normalize(-vEyeSpacePos.xyz);
+
 				if (lightPos.w == 0.0)
-					l = normalize(-lightPos.xyz);
+					vLight = normalize(-lightPos.xyz);
 				else
-					l = normalize(lightPos.xyz - vEyeSpacePos.xyz);				
+					vLight = normalize(lightPos.xyz - vEyeSpacePos.xyz);
 
-				float Idiff = clamp(max(dot(n,l), 0.0),0.5,1.0);
+				//blinn phong
+				vec3 halfDir = normalize(vLight + vEye);
+				float specAngle = max(dot(halfDir, n), 0.0);
+				vec3 Ispec = specular * pow(specAngle, shininess);
+				vec3 Idiff = diffuse * max(dot(n,vLight), 0.0);
 
-				out_frag_color = vec4(diffTex.rgb*Idiff, diffTex.a);
+				vec3 colorLinear = diffTex.rgb + diffTex.rgb * (ambient + Idiff) + Ispec;
+
+				out_frag_color = vec4(pow(colorLinear, vec3(1.0/screenGamma)), diffTex.a);
 			}";
 			Compile ();
 		}
