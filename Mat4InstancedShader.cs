@@ -19,6 +19,7 @@ namespace Chess
 			layout (location = 1) in vec2 in_tex;
 			layout (location = 2) in vec3 in_normal;
 			layout (location = 4) in mat4 in_model;
+			layout (location = 8) in vec4 in_color;
 
 			layout (std140, index = 0) uniform block_data{
 				vec4 Color;
@@ -31,6 +32,7 @@ namespace Chess
 			out vec2 texCoord;			
 			out vec3 n;			
 			out vec4 vEyeSpacePos;
+			out vec4 color;
 			
 
 			void main(void)
@@ -41,6 +43,7 @@ namespace Chess
 				vec3 pos = in_position.xyz;
 
 				vEyeSpacePos = ModelView * in_model * vec4(pos, 1);
+				color = in_color;
 				
 				gl_Position = Projection * ModelView * in_model * vec4(pos, 1);
 			}";
@@ -62,7 +65,8 @@ namespace Chess
 
 			in vec2 texCoord;			
 			in vec4 vEyeSpacePos;
-			in vec3 n;			
+			in vec3 n;
+			in vec4 color;
 			
 			out vec4 out_frag_color;
 
@@ -75,7 +79,7 @@ namespace Chess
 			void main(void)
 			{
 
-				vec4 diffTex = texture( tex, texCoord) * Color;
+				vec4 diffTex = texture( tex, texCoord) * Color * color;
 				if (diffTex.a == 0.0)
 					discard;
 

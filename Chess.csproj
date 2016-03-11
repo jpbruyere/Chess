@@ -36,6 +36,7 @@
     <Compile Include="main.cs" />
     <Compile Include="ChessShader.cs" />
     <Compile Include="SimpleColoredShader.cs" />
+    <Compile Include="VAOChessData.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="cairo-sharp, Version=1.10.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756">
@@ -132,5 +133,6 @@
     <EmbeddedResource Include="gui\tmpWindow.crow" />
     <EmbeddedResource Include="gui\Splash.crow" />
     <EmbeddedResource Include="splash.png" />
+    <EmbeddedResource Include="gui\promote.crow" />
   </ItemGroup>
 </Project>
