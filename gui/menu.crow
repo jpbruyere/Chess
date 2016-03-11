@@ -11,6 +11,7 @@
 		</HorizontalStack>
 		<GraphicObject Width="0"/>
 		<Button Background="vgradient|0:DimGray|1:Black" Caption="Hint" Width="60" Height="0" MouseClick="onHintClick"/>
+		<Button Background="vgradient|0:DimGray|1:Black" Caption="Undo" Width="60" Height="0" MouseClick="onUndoClick"/>
 		<Button Background="vgradient|0:DimGray|1:Black" Caption="Restart" Width="60" Height="0" MouseClick="onResetClick"/>
 		<GraphicObject Width="20"/>
 		<Button Background="vgradient|0:DimGray|1:Black" Caption="Quit" Width="60" Height="0" MouseClick="onQuitClick"/>

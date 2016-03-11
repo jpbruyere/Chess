@@ -7,6 +7,7 @@ using GGL;
 using System.Runtime.InteropServices;
 using System.Collections.Generic;
 using System.Threading;
+using System.Linq;
 
 namespace Chess
 {
@@ -94,14 +95,18 @@ namespace Chess
 			Captured = false;
 			update ();
 		}
-		public void Reset(){
+		public void Reset(bool animate = true){
 			xAngle = 0f;
 			z = 0f;
-			if (HasMoved)
-				Animation.StartAnimation(new PathAnimation(this, "Position",
-					new BezierPath(
-						Position,
-						new Vector3(InitX + 0.5f, InitY + 0.5f, 0f), Vector3.UnitZ)));
+			if (HasMoved) {
+				if (animate)
+					Animation.StartAnimation (new PathAnimation (this, "Position",
+						new BezierPath (
+							Position,
+							new Vector3 (InitX + 0.5f, InitY + 0.5f, 0f), Vector3.UnitZ)));
+				else
+					Position = new Vector3 (InitX + 0.5f, InitY + 0.5f, 0f);
+			}
 
 			HasMoved = false;
 			Captured = false;
@@ -220,7 +225,6 @@ namespace Chess
 				ref newModelView);
 			GL.BindBuffer (BufferTarget.UniformBuffer, 0);
 		}
-		#endregion
 
 		Tetra.VAOItem vaoiPawn;
 		Tetra.VAOItem vaoiBishop;
@@ -464,7 +468,7 @@ namespace Chess
 		public void createArrows(string move){
 			if (string.IsNullOrEmpty (move))
 				return;
-			
+
 			if (arrows!=null)
 				arrows.Dispose ();
 			arrows = null;
@@ -474,7 +478,7 @@ namespace Chess
 			arrows = new Arrow3d (
 				new Vector3 ((float)pStart.X + 0.5f, (float)pStart.Y + 0.5f, 0), 
 				new Vector3 ((float)pEnd.X + 0.5f, (float)pEnd.Y + 0.5f, 0), 
-					Vector3.UnitZ);
+				Vector3.UnitZ);
 		}
 		void renderArrow(){
 			if (arrows == null)
@@ -488,6 +492,10 @@ namespace Chess
 
 		}
 		#endregion
+
+		#endregion
+
+
 
 		#region Interface
 		GraphicObject uiSplash;
@@ -574,8 +582,13 @@ namespace Chess
 			stockfish.WaitForInputIdle ();
 			stockfish.StandardInput.WriteLine ("go");
 		}
+		void onUndoClick (object sender, MouseButtonEventArgs e){
+			undoLastMove ();
+			undoLastMove ();
+		}
 		void onResetClick (object sender, MouseButtonEventArgs e){
 			resetBoard ();
+			syncStockfish ();
 		}
 
 		#endregion
@@ -598,7 +611,12 @@ namespace Chess
 
 			stockfish.BeginOutputReadLine ();
 		}
-
+		void syncStockfish(){
+			string cmd = stockfishPositionCommand;
+			AddLog (cmd);
+			stockfish.WaitForInputIdle ();
+			stockfish.StandardInput.WriteLine (cmd);
+		}
 		void P_Exited (object sender, EventArgs e)
 		{
 			AddLog ("Stockfish Terminated");
@@ -620,8 +638,7 @@ namespace Chess
 				return;
 			}
 
-			stockfish.WaitForInputIdle ();
-			stockfish.StandardInput.WriteLine (stockfishMoves);
+			//syncStockfish ();
 
 			if (tmp [0] == "bestmove")
 				processMove (tmp [1]);
@@ -651,7 +668,23 @@ namespace Chess
 		int cptWhiteOut = 0;
 		int cptBlackOut = 0;
 
-		string stockfishMoves;
+		List<String> stockfishMoves = new List<string> ();
+
+		public List<String> StockfishMoves {
+			get {
+				return stockfishMoves;
+			}
+			set {
+				stockfishMoves = value;
+			}
+		}
+
+		string stockfishPositionCommand {
+			get {
+				string tmp = "position startpos moves ";
+				return 
+					StockfishMoves.Count == 0 ? tmp : tmp + StockfishMoves.Aggregate ((i, j) => i + " " + j); }
+		}
 
 		volatile bool updateArrows = false;
 		string nextHint;
@@ -827,7 +860,7 @@ namespace Chess
 		Point getChessCell(string s){
 			return new Point ((int)s [0] - 97, int.Parse (s [1].ToString ()) - 1);
 		}
-		void removePiece(ChessPiece p){
+		Vector3 getCurrentCapturePosition(ChessPiece p){
 			float x, y;
 			if (p.Color == ChessColor.White) {
 				x = -0.5f;
@@ -836,7 +869,6 @@ namespace Chess
 					x -= 1f;
 					y += 8f;
 				}
-				cptWhiteOut++;
 			} else {				
 				x = 8.5f;
 				y = 0.5f + cptBlackOut;
@@ -844,19 +876,34 @@ namespace Chess
 					x += 1f;
 					y -= 8f;
 				}
-				cptBlackOut++;
 			}
+			return new Vector3 (x, y, 0f);
+		}
+		void removePiece(ChessPiece p, bool animate = true){
+			Vector3 capturePos = getCurrentCapturePosition (p);
+
+			if (p.Color == ChessColor.White)
+				cptWhiteOut++;
+			else
+				cptBlackOut++;
+
 			p.Captured = true;
 			p.HasMoved = true;
-			Animation.StartAnimation(new PathAnimation(p, "Position",
-				new BezierPath(
-					p.Position,
-					new Vector3(x, y, 0f), Vector3.UnitZ)));
-		}
-		void processMove(string move){
-			AddLog (CurrentPlayer.ToString () + " => " + move);
 
-			stockfishMoves += " " + move;
+			if (animate)
+				Animation.StartAnimation (new PathAnimation (p, "Position",
+					new BezierPath (
+						p.Position,
+						capturePos, Vector3.UnitZ)));
+			else
+				p.Position = capturePos;
+		}
+		void processMove(string move, bool animate = true){
+
+			if (animate)
+				AddLog (CurrentPlayer.ToString () + " => " + move);
+			
+			StockfishMoves.Add (move);
 
 			Point pStart = getChessCell(move.Substring(0,2));
 			Point pEnd = getChessCell(move.Substring(2,2));
@@ -865,15 +912,19 @@ namespace Chess
 			Board [pStart.X, pStart.Y] = null;
 			ChessPiece pTarget = Board [pEnd.X, pEnd.Y];
 			if (pTarget != null)
-				removePiece (pTarget);
+				removePiece (pTarget, animate);
 			Board [pEnd.X, pEnd.Y] = p;
 			p.HasMoved = true;
 
-			Animation.StartAnimation(new PathAnimation(p, "Position",
-				new BezierPath(
-					p.Position,
-					new Vector3(pEnd.X + 0.5f, pEnd.Y + 0.5f, 0f), Vector3.UnitZ)),
-				0, move_AnimationFinished);
+			Vector3 targetPosition = new Vector3 (pEnd.X + 0.5f, pEnd.Y + 0.5f, 0f);
+			if (animate)
+				Animation.StartAnimation (new PathAnimation (p, "Position",
+					new BezierPath (
+						p.Position,
+						targetPosition, Vector3.UnitZ)),
+					0, move_AnimationFinished);
+			else
+				p.Position = targetPosition;
 
 			Active = -1;
 
@@ -882,7 +933,6 @@ namespace Chess
 				int xDelta = pStart.X - pEnd.X;
 				if (Math.Abs (xDelta) == 2) {
 					//rocking
-					ChessPiece tower;
 					if (xDelta > 0) {
 						pStart.X = 0;
 						pEnd.X = pEnd.X + 1;
@@ -890,17 +940,65 @@ namespace Chess
 						pStart.X = 7;
 						pEnd.X = pEnd.X - 1;
 					}
-					tower = Board [pStart.X, pStart.Y];
+					p = Board [pStart.X, pStart.Y];
 					Board [pStart.X, pStart.Y] = null;
-					Board [pEnd.X, pEnd.Y] = tower;
-					tower.HasMoved = true;
-					Animation.StartAnimation(new PathAnimation(tower, "Position",
-						new BezierPath(
-							tower.Position,
-							new Vector3(pEnd.X + 0.5f, pEnd.Y + 0.5f, 0f), Vector3.UnitZ * 2f)));
+					Board [pEnd.X, pEnd.Y] = p;
+					p.HasMoved = true;
+
+					targetPosition = new Vector3 (pEnd.X + 0.5f, pEnd.Y + 0.5f, 0f);
+					if (animate)
+						Animation.StartAnimation (new PathAnimation (p, "Position",
+							new BezierPath (
+								p.Position,
+								targetPosition, Vector3.UnitZ * 2f)));
+					else
+						p.Position = targetPosition;
 				}
 			}
 
+		}
+		void undoLastMove()
+		{
+			if (StockfishMoves.Count == 0)
+				return;
+			
+			string move = StockfishMoves [StockfishMoves.Count - 1];
+			StockfishMoves.RemoveAt (StockfishMoves.Count - 1);
+
+			Point pPreviousPos = getChessCell(move.Substring(0,2));
+			Point pCurPos = getChessCell(move.Substring(2,2));
+
+			ChessPiece p = Board [pCurPos.X, pCurPos.Y];
+
+			replaySilently ();
+
+			p.Position = new Vector3(pCurPos.X + 0.5f, pCurPos.Y + 0.5f, 0f);
+
+			Animation.StartAnimation (new PathAnimation (p, "Position",
+				new BezierPath (
+					p.Position,
+					new Vector3(pPreviousPos.X + 0.5f, pPreviousPos.Y + 0.5f, 0f), Vector3.UnitZ)));
+
+			syncStockfish ();
+
+			//animate undo capture
+			ChessPiece pCaptured = Board [pCurPos.X, pCurPos.Y];
+			if (pCaptured == null)
+				return;
+			Vector3 pCapLastPos = pCaptured.Position;
+			pCaptured.Position = getCurrentCapturePosition (pCaptured);
+
+			Animation.StartAnimation (new PathAnimation (pCaptured, "Position",
+				new BezierPath (
+					pCaptured.Position,
+					pCapLastPos, Vector3.UnitZ)));
+
+		}
+		void replaySilently(){
+			string[] moves = StockfishMoves.ToArray ();
+			resetBoard (false);
+			foreach (string m in moves)
+				processMove (m, false);
 		}
 
 		void switchPlayer(){
@@ -909,8 +1007,7 @@ namespace Chess
 			else
 				CurrentPlayer = ChessColor.White;
 
-			stockfish.WaitForInputIdle ();
-			stockfish.StandardInput.WriteLine (stockfishMoves);
+			syncStockfish ();
 
 			if (CurrentPlayer == ChessColor.Black) {
 				stockfish.WaitForInputIdle ();
@@ -935,7 +1032,7 @@ namespace Chess
 			CurrentPlayer = ChessColor.White;
 			cptWhiteOut = 0;
 			cptBlackOut = 0;
-			stockfishMoves = "position startpos moves";
+			StockfishMoves.Clear ();
 			Active = -1;
 
 			Board = new ChessPiece[8, 8];
@@ -968,19 +1065,19 @@ namespace Chess
 			addPiece (vaoiKing, 0, ChessColor.White, PieceType.King, 4, 0);
 			addPiece (vaoiKing, 1, ChessColor.Black, PieceType.King, 4, 7);
 		}
-		void resetBoard(){
+		void resetBoard(bool animate = true){
 			CurrentPlayer = ChessColor.White;
 			cptWhiteOut = 0;
 			cptBlackOut = 0;
-			stockfishMoves = "position startpos moves";
+			StockfishMoves.Clear ();
 			Active = -1;
 			Board = new ChessPiece[8, 8];
 			foreach (ChessPiece p in Whites) {
-				p.Reset ();
+				p.Reset (animate);
 				Board [p.InitX, p.InitY] = p;
 			}
 			foreach (ChessPiece p in Blacks) {
-				p.Reset ();
+				p.Reset (animate);
 				Board [p.InitX, p.InitY] = p;
 			}
 		}
@@ -1219,7 +1316,7 @@ namespace Chess
 
 		#region CTOR and Main
 		public MainWin ()
-			: base(1024, 800, 32, 24, 1, 8, "test")
+			: base(1024, 800, 32, 24, 1, 4, "test")
 		{
 			VSync = VSyncMode.Off;
 		}
