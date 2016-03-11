@@ -147,7 +147,8 @@ namespace Chess
 		float RotationSpeed = 0.005f;
 		float ZoomSpeed = 1f;
 
-		public Vector4 vLight = new Vector4 (0.5f, 0.5f, -1f, 0f);
+		//public Vector4 vLight = new Vector4 (0.5f, 0.5f, -1f, 0f);
+		public Vector4 vLight = Vector4.Normalize(new Vector4 (0.4f, 0.4f, -0.5f, 0f));
 		#endregion
 
 		#region GL
@@ -479,7 +480,7 @@ namespace Chess
 			if (arrows == null)
 				return;
 			coloredShader.Enable ();
-			changeShadingColor (new Vector4 (1f, 0f, 0f, 0.7f));
+			changeShadingColor (new Vector4 (1f, 0.1f, 0.1f, 0.6f));
 
 			GL.Disable (EnableCap.CullFace);
 			arrows.Render (PrimitiveType.TriangleStrip);
@@ -628,6 +629,7 @@ namespace Chess
 
 		#endregion
 
+		#region game logic
 		volatile GameState currentState = GameState.Init;
 		ChessColor currentPlayer = ChessColor.White;
 
@@ -828,12 +830,20 @@ namespace Chess
 		void removePiece(ChessPiece p){
 			float x, y;
 			if (p.Color == ChessColor.White) {
-				x = -1f;
-				y = 7f - cptWhiteOut;
+				x = -0.5f;
+				y = 7.5f - cptWhiteOut;
+				if (cptWhiteOut > 8) {
+					x -= 1f;
+					y += 8f;
+				}
 				cptWhiteOut++;
-			} else {
-				x = 9f;
-				y = 1f + cptBlackOut;
+			} else {				
+				x = 8.5f;
+				y = 0.5f + cptBlackOut;
+				if (cptBlackOut > 8) {
+					x += 1f;
+					y -= 8f;
+				}
 				cptBlackOut++;
 			}
 			p.Captured = true;
@@ -981,6 +991,7 @@ namespace Chess
 			stockfish.WaitForExit ();
 			this.Quit (null,null);
 		}
+		#endregion
 
 		#region OTK window overrides
 		protected override void OnLoad (EventArgs e)
@@ -1208,7 +1219,7 @@ namespace Chess
 
 		#region CTOR and Main
 		public MainWin ()
-			: base(1024, 800, 32, 24, 1, 1, "test")
+			: base(1024, 800, 32, 24, 1, 8, "test")
 		{
 			VSync = VSyncMode.Off;
 		}

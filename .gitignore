@@ -1,3 +1,4 @@
+Meshes/*.mtl
 #Autosave files
 *~
 
@@ -38,3 +39,4 @@ Thumbs.db
 
 #dotCover
 *.dotCover
+chess1.cs

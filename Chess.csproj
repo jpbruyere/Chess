@@ -74,8 +74,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="chess1.cs" />
-    <None Include="chess0.cs" />
     <None Include="Meshes\pawn.obj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
