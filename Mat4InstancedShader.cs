@@ -69,7 +69,7 @@ namespace Chess
 			void main(void)
 			{
 				vec4 diffTex = texture( tex, texCoord) * Color;
-				if (diffTex.a < 0.5)
+				if (diffTex.a == 0.0)
 					discard;
 
 				vec3 l;
