@@ -17,10 +17,26 @@ namespace Chess
 	enum ChessColor { White, Black};
 	enum PieceType { Pawn, Tower, Horse, Bishop, King, Queen };
 
+	class ChessMoves : List<String>
+	{
+		public void AddMove(string move)
+		{
+			if (!string.IsNullOrEmpty (move))
+				base.Add (move);
+		}
+		public void AddMove(string[] moves){
+			if (moves == null)
+				return;
+			if (moves.Length > 0)
+				base.AddRange (moves);
+		}
+	}
+
 	class ChessPlayer{
 		public string Name;
 		public ChessColor Color;
 		public PlayerType Type;
+		public List<ChessPiece> Pieces = new List<ChessPiece>();
 		public Point[] ValidMoves;
 		public string [] CheckMoves;
 
@@ -32,7 +48,7 @@ namespace Chess
 	class ChessPiece{
 		public VAOItem<VAOChessData> Mesh;
 		public int InstanceIndex;
-		public ChessColor Color;
+		public ChessPlayer Player;
 		PieceType originalType;
 
 		public PieceType Type {
@@ -94,10 +110,10 @@ namespace Chess
 				Matrix4.CreateTranslation(new Vector3(x, y, z));
 			Mesh.UpdateInstancesData ();
 		}
-		public ChessPiece(VAOItem<VAOChessData> vaoi, int idx, ChessColor _color , PieceType _type, int xPos, int yPos){
+		public ChessPiece(VAOItem<VAOChessData> vaoi, int idx, ChessPlayer _player , PieceType _type, int xPos, int yPos){
 			Mesh = vaoi;
 			InstanceIndex = idx;
-			Color = _color;
+			Player = _player;
 			Type = _type;
 			InitX= xPos;
 			InitY= yPos;
@@ -108,11 +124,13 @@ namespace Chess
 			HasMoved = false;
 			Captured = false;
 
-			if (Color == ChessColor.White)
+			if (Player.Color == ChessColor.White)
 				Mesh.Datas [InstanceIndex].color = new Vector4 (0.80f, 0.80f, 0.70f, 1f);
 			else
 				Mesh.Datas [InstanceIndex].color = new Vector4 (0.2f, 0.2f, 0.2f, 1f);
-			
+
+			Player.Pieces.Add (this);
+
 			update ();
 		}
 		public void Reset(bool animate = true){
@@ -409,7 +427,6 @@ namespace Chess
 
 			GL.Enable(EnableCap.StencilTest);
 
-
 			//cut stencil
 			GL.StencilFunc(StencilFunction.Always, 1, 0xff);
 			GL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Replace);
@@ -438,8 +455,8 @@ namespace Chess
 			#region sel squarres
 			GL.Disable (EnableCap.DepthTest);
 
-			if (CurrentPlayer.ValidMoves != null){
-				foreach (Point vm in CurrentPlayer.ValidMoves)
+			if (ValidPositionsForActivePce != null){
+				foreach (Point vm in ValidPositionsForActivePce)
 					drawSquarre(vm, new Vector4(0.0f,0.5f,0.7f,0.7f));
 			}
 
@@ -675,14 +692,11 @@ namespace Chess
 		int currentPlayerIndex = 0;
 
 		ChessPiece[,] Board;
-		List<ChessPiece> Whites;
-		List<ChessPiece> Blacks;
 		Point selection;
 		Point active = new Point(-1,-1);
 
 		int testedPlayer = 0;
-		List<Point> ValidMoves = null;
-		List<string> CheckMoves = null;
+		List<Point> ValidPositionsForActivePce = null;
 
 		int cptWhiteOut = 0;
 		int cptBlackOut = 0;
@@ -703,6 +717,10 @@ namespace Chess
 				CurrentPlayerIndex = Array.IndexOf(Players, value);
 			}
 		}
+		public ChessPlayer Opponent {
+			get { return currentPlayerIndex == 0 ? Players [1] : Players [0]; }
+		}
+
 		Point Active {
 			get {
 				return active;
@@ -715,17 +733,37 @@ namespace Chess
 					NotifyValueChanged ("ActCell", getChessCell(active.X,active.Y) + " => ");
 
 				if (Active < 0) {
-					CurrentPlayer.ValidMoves = null;
+					ValidPositionsForActivePce = null;
 					return;
 				}
 
-				ValidMoves = new List<Point> ();
-				CheckMoves = new List<string> ();
+				ValidPositionsForActivePce = new List<Point> ();
 
-				computeValidMove (Active);
+				foreach (string s in computeValidMove (Active)) {
+					bool kingIsSafe = true;
 
-				CurrentPlayer.ValidMoves = ValidMoves.ToArray ();
-				CurrentPlayer.CheckMoves = CheckMoves.ToArray ();
+					previewBoard (s);
+					foreach (ChessPiece op in Opponent.Pieces) {
+						if (op.Captured)
+							continue;
+						Point opPosition = new Point ((int)Math.Truncate (op.X), (int)Math.Truncate (op.Y));
+						foreach (string opM in computeValidMove (opPosition)) {
+							if (opM.EndsWith ("K")) {
+								kingIsSafe = false;
+								break;
+							}
+						}
+						if (!kingIsSafe)
+							break;
+					}
+					restoreBoardAfterPreview ();
+
+					if (kingIsSafe)
+						addValidMove (getChessCell (s.Substring (2, 2)));
+				}
+
+				if (ValidPositionsForActivePce.Count == 0)
+					ValidPositionsForActivePce = null;
 			}
 		}
 		Point Selection {
@@ -754,34 +792,32 @@ namespace Chess
 			Active = -1;
 
 			Board = new ChessPiece[8, 8];
-			Whites = new List<ChessPiece> ();
-			Blacks = new List<ChessPiece> ();
 
 			for (int i = 0; i < 8; i++)
-				addPiece (vaoiPawn, i, ChessColor.White, PieceType.Pawn, i, 1);
+				addPiece (vaoiPawn, i, 0, PieceType.Pawn, i, 1);
 			for (int i = 0; i < 8; i++)
-				addPiece (vaoiPawn, i+8, ChessColor.Black, PieceType.Pawn, i, 6);
+				addPiece (vaoiPawn, i+8, 1, PieceType.Pawn, i, 6);
 
-			addPiece (vaoiBishop, 0, ChessColor.White, PieceType.Bishop, 2, 0);
-			addPiece (vaoiBishop, 1, ChessColor.White, PieceType.Bishop, 5, 0);
-			addPiece (vaoiBishop, 2, ChessColor.Black, PieceType.Bishop, 2, 7);
-			addPiece (vaoiBishop, 3, ChessColor.Black, PieceType.Bishop, 5, 7);
+			addPiece (vaoiBishop, 0, 0, PieceType.Bishop, 2, 0);
+			addPiece (vaoiBishop, 1, 0, PieceType.Bishop, 5, 0);
+			addPiece (vaoiBishop, 2, 1, PieceType.Bishop, 2, 7);
+			addPiece (vaoiBishop, 3, 1, PieceType.Bishop, 5, 7);
 
-			addPiece (vaoiHorse, 0, ChessColor.White, PieceType.Horse, 1, 0);
-			addPiece (vaoiHorse, 1, ChessColor.White, PieceType.Horse, 6, 0);
-			addPiece (vaoiHorse, 2, ChessColor.Black, PieceType.Horse, 1, 7);
-			addPiece (vaoiHorse, 3, ChessColor.Black, PieceType.Horse, 6, 7);
+			addPiece (vaoiHorse, 0, 0, PieceType.Horse, 1, 0);
+			addPiece (vaoiHorse, 1, 0, PieceType.Horse, 6, 0);
+			addPiece (vaoiHorse, 2, 1, PieceType.Horse, 1, 7);
+			addPiece (vaoiHorse, 3, 1, PieceType.Horse, 6, 7);
 
-			addPiece (vaoiTower, 0, ChessColor.White, PieceType.Tower, 0 ,0);
-			addPiece (vaoiTower, 1, ChessColor.White, PieceType.Tower, 7, 0);
-			addPiece (vaoiTower, 2, ChessColor.Black, PieceType.Tower, 0, 7);
-			addPiece (vaoiTower, 3, ChessColor.Black, PieceType.Tower, 7, 7);
+			addPiece (vaoiTower, 0, 0, PieceType.Tower, 0 ,0);
+			addPiece (vaoiTower, 1, 0, PieceType.Tower, 7, 0);
+			addPiece (vaoiTower, 2, 1, PieceType.Tower, 0, 7);
+			addPiece (vaoiTower, 3, 1, PieceType.Tower, 7, 7);
 
-			addPiece (vaoiQueen, 0, ChessColor.White, PieceType.Queen, 3, 0);
-			addPiece (vaoiQueen, 1, ChessColor.Black, PieceType.Queen, 3, 7);
+			addPiece (vaoiQueen, 0, 0, PieceType.Queen, 3, 0);
+			addPiece (vaoiQueen, 1, 1, PieceType.Queen, 3, 7);
 
-			addPiece (vaoiKing, 0, ChessColor.White, PieceType.King, 4, 0);
-			addPiece (vaoiKing, 1, ChessColor.Black, PieceType.King, 4, 7);
+			addPiece (vaoiKing, 0, 0, PieceType.King, 4, 0);
+			addPiece (vaoiKing, 1, 1, PieceType.King, 4, 7);
 		}
 		void resetBoard(bool animate = true){
 			CurrentPlayerIndex = 0;
@@ -790,163 +826,198 @@ namespace Chess
 			StockfishMoves.Clear ();
 			Active = -1;
 			Board = new ChessPiece[8, 8];
-			foreach (ChessPiece p in Whites) {
-				p.Reset (animate);
-				Board [p.InitX, p.InitY] = p;
-			}
-			foreach (ChessPiece p in Blacks) {
-				p.Reset (animate);
-				Board [p.InitX, p.InitY] = p;
+			foreach (ChessPlayer player in Players) {
+				foreach (ChessPiece p in player.Pieces) {
+					p.Reset (animate);
+					Board [p.InitX, p.InitY] = p;
+				}
 			}
 		}
-		void addPiece(VAOItem<VAOChessData> vaoi, int idx, ChessColor _color, PieceType _type, int col, int line){
-			ChessPiece p = new ChessPiece (vaoi, idx, _color, _type, col, line);
+		void addPiece(VAOItem<VAOChessData> vaoi, int idx, int playerIndex, PieceType _type, int col, int line){
+			ChessPiece p = new ChessPiece (vaoi, idx, Players[playerIndex], _type, col, line);
 			Board [col, line] = p;
-			if (_color == ChessColor.White)
-				Whites.Add (p);
-			else
-				Blacks.Add (p);
 		}
 
-		void addValidMove(int x, int y){
-			Point p = new Point (x, y);
-			if (ValidMoves.Contains (p))
+		void addValidMove(Point p){
+			if (ValidPositionsForActivePce.Contains (p))
 				return;
-			ValidMoves.Add (p);
+			ValidPositionsForActivePce.Add (p);
 		}
-		void checkSingleMove(Point pos, int xDelta, int yDelta, bool onlyForTaking = false){
+
+		string checkSingleMove(Point pos, int xDelta, int yDelta){
 			int x = pos.X + xDelta;
 			int y = pos.Y + yDelta;
 
 			if (x < 0 || x > 7 || y < 0 || y > 7)
-				return;
-			if (Board [x, y] != null) {
-				if (Board [x, y].Color == Board [pos.X, pos.Y].Color)
-					return;
-			} else if (onlyForTaking)
-				return;
+				return null;
+			
+			if (Board [x, y] == null) {
+				if (Board [pos.X, pos.Y].Type == PieceType.Pawn && xDelta != 0)
+					return null;//pawn diagonal moves only for capturing
+				return getChessCell (pos.X, pos.Y) + getChessCell (x, y);
+			}
 
-			addValidMove (x, y);
+			if (Board [x, y].Player == Board [pos.X, pos.Y].Player)
+				return null;
+			if (Board [pos.X, pos.Y].Type == PieceType.Pawn && xDelta == 0)
+				return null;//pawn cant take in front
 
 			if (Board [x, y].Type == PieceType.King)
-				CheckMoves.Add (getChessCell(pos.X,pos.Y) + getChessCell(x,y));
+				return getChessCell (pos.X, pos.Y) + getChessCell (x, y) + "K";
+			
+			return getChessCell (pos.X, pos.Y) + getChessCell (x, y);
 		}
-		void checkIncrementalMove(Point pos, int xDelta, int yDelta){
+		string[] checkIncrementalMove(Point pos, int xDelta, int yDelta){
+
+			List<string> legalMoves = new List<string> ();
+
 			int x = pos.X + xDelta;
 			int y = pos.Y + yDelta;
 
+			string strStart = getChessCell(pos.X,pos.Y);
+
 			while (x >= 0 && x < 8 && y >= 0 && y < 8) {
 				if (Board [x, y] == null) {
-					addValidMove (x, y);
+					legalMoves.Add(strStart + getChessCell(x,y));
 					x += xDelta;
 					y += yDelta;
 					continue;
 				}
 
-				if (Board [x, y].Color == Board [pos.X, pos.Y].Color)
+				if (Board [x, y].Player == Board [pos.X, pos.Y].Player)
 					break;
 
-				addValidMove (x, y);
-
 				if (Board [x, y].Type == PieceType.King)
-					CheckMoves.Add (getChessCell(pos.X,pos.Y) + getChessCell(x,y));
+					legalMoves.Add(strStart + getChessCell(x,y) + "K");
+				else
+					legalMoves.Add(strStart + getChessCell(x,y));
+
 				break;
 			}
+			return legalMoves.ToArray ();
 		}
-		void computeValidMove(Point pos){
+		string[] computeValidMove(Point pos){
 			int x = pos.X;
 			int y = pos.Y;
 
-			ValidMoves = new List<Point> ();
-			CheckMoves = new List<String> ();
-
 			ChessPiece p = Board [x, y];
 
-			if (p == null)
-				return;
 
-			switch (p.Type) {
-			case PieceType.Pawn:
-				if (Board [x, y + 1] == null) {
-					addValidMove (x, y + 1);
-					if (!p.HasMoved && Board [x, y + 2] == null)
-						addValidMove (x, y + 2);
-				}
-				checkSingleMove (pos, -1, 1, true);
-				checkSingleMove (pos, 1, 1, true);
-				break;
-			case PieceType.Tower:
-				checkIncrementalMove (pos, 0, 1);
-				checkIncrementalMove (pos, 0, -1);
-				checkIncrementalMove (pos, 1, 0);
-				checkIncrementalMove (pos, -1, 0);
-				break;
-			case PieceType.Horse:
-				checkSingleMove (pos, 2, 1);
-				checkSingleMove (pos, 2, -1);
-				checkSingleMove (pos, -2, 1);
-				checkSingleMove (pos, -2, -1);
-				checkSingleMove (pos, 1, 2);
-				checkSingleMove (pos, -1, 2);
-				checkSingleMove (pos, 1, -2);
-				checkSingleMove (pos, -1, -2);
-				break;
-			case PieceType.Bishop:
-				checkIncrementalMove (pos, 1, 1);
-				checkIncrementalMove (pos, -1, -1);
-				checkIncrementalMove (pos, 1, -1);
-				checkIncrementalMove (pos, -1, 1);
-				break;
-			case PieceType.King:
-				if (!p.HasMoved) {
-					ChessPiece tower = Board [0, y];
-					if (tower != null) {
-						if (!tower.HasMoved) {
-							for (int i = 1; i < x; i++) {
-								if (Board [i, y] != null)
-									break;
-								if (i == x - 1)
-									addValidMove (x - 2, y);
+				
+
+			ChessMoves validMoves = new ChessMoves ();
+			string tmp;
+
+			if (p != null) {
+				switch (p.Type) {
+				case PieceType.Pawn:
+					validMoves.AddMove (checkSingleMove (pos, 0, 1));
+					if (Board [x, y + 1] == null && !p.HasMoved)
+						validMoves.AddMove (checkSingleMove (pos, 0, 2));
+					validMoves.AddMove (checkSingleMove (pos, -1, 1));
+					validMoves.AddMove (checkSingleMove (pos, 1, 1));
+					break;
+				case PieceType.Tower:
+					validMoves.AddMove (checkIncrementalMove (pos, 0, 1));
+					validMoves.AddMove (checkIncrementalMove (pos, 0, -1));
+					validMoves.AddMove (checkIncrementalMove (pos, 1, 0));
+					validMoves.AddMove (checkIncrementalMove (pos, -1, 0));
+					break;
+				case PieceType.Horse:
+					validMoves.AddMove (checkSingleMove (pos, 2, 1));
+					validMoves.AddMove (checkSingleMove (pos, 2, -1));
+					validMoves.AddMove (checkSingleMove (pos, -2, 1));
+					validMoves.AddMove (checkSingleMove (pos, -2, -1));
+					validMoves.AddMove (checkSingleMove (pos, 1, 2));
+					validMoves.AddMove (checkSingleMove (pos, -1, 2));
+					validMoves.AddMove (checkSingleMove (pos, 1, -2));
+					validMoves.AddMove (checkSingleMove (pos, -1, -2));
+					break;
+				case PieceType.Bishop:
+					validMoves.AddMove (checkIncrementalMove (pos, 1, 1));
+					validMoves.AddMove (checkIncrementalMove (pos, -1, -1));
+					validMoves.AddMove (checkIncrementalMove (pos, 1, -1));
+					validMoves.AddMove (checkIncrementalMove (pos, -1, 1));
+					break;
+				case PieceType.King:
+					if (!p.HasMoved) {
+						ChessPiece tower = Board [0, y];
+						if (tower != null) {
+							if (!tower.HasMoved) {
+								for (int i = 1; i < x; i++) {
+									if (Board [i, y] != null)
+										break;
+									if (i == x - 1)
+										validMoves.Add (getChessCell (x, y) + getChessCell (x - 2, y));
+								}
+							}
+						}
+						tower = Board [7, y];
+						if (tower != null) {
+							if (!tower.HasMoved) {
+								for (int i = x + 1; i < 7; i++) {
+									if (Board [i, y] != null)
+										break;
+									if (i == 6)
+										validMoves.Add (getChessCell (x, y) + getChessCell (x + 2, y));
+								}
 							}
 						}
 					}
-					tower = Board [7, y];
-					if (tower != null) {
-						if (!tower.HasMoved) {
-							for (int i = x + 1; i < 7; i++) {
-								if (Board [i, y] != null)
-									break;
-								if (i == 6)
-									addValidMove (x + 2, y);
-							}
-						}
-					}
+
+					validMoves.AddMove (checkSingleMove (pos, -1, -1));
+					validMoves.AddMove (checkSingleMove (pos, -1, 0));
+					validMoves.AddMove (checkSingleMove (pos, -1, 1));
+					validMoves.AddMove (checkSingleMove (pos, 0, -1));
+					validMoves.AddMove (checkSingleMove (pos, 0, 1));
+					validMoves.AddMove (checkSingleMove (pos, 1, -1));
+					validMoves.AddMove (checkSingleMove (pos, 1, 0));
+					validMoves.AddMove (checkSingleMove (pos, 1, 1));
+
+					break;
+				case PieceType.Queen:
+					validMoves.AddMove (checkIncrementalMove (pos, 0, 1));
+					validMoves.AddMove (checkIncrementalMove (pos, 0, -1));
+					validMoves.AddMove (checkIncrementalMove (pos, 1, 0));
+					validMoves.AddMove (checkIncrementalMove (pos, -1, 0));
+					validMoves.AddMove (checkIncrementalMove (pos, 1, 1));
+					validMoves.AddMove (checkIncrementalMove (pos, -1, -1));
+					validMoves.AddMove (checkIncrementalMove (pos, 1, -1));
+					validMoves.AddMove (checkIncrementalMove (pos, -1, 1));
+					break;
 				}
-
-				checkSingleMove (pos, -1, -1);
-				checkSingleMove (pos, -1,  0);
-				checkSingleMove (pos, -1,  1);
-				checkSingleMove (pos,  0, -1);
-				checkSingleMove (pos,  0,  1);
-				checkSingleMove (pos,  1, -1);
-				checkSingleMove (pos,  1,  0);
-				checkSingleMove (pos,  1,  1);
-
-				break;
-			case PieceType.Queen:
-				checkIncrementalMove (pos, 0, 1);
-				checkIncrementalMove (pos, 0, -1);
-				checkIncrementalMove (pos, 1, 0);
-				checkIncrementalMove (pos, -1, 0);
-				checkIncrementalMove (pos, 1, 1);
-				checkIncrementalMove (pos, -1, -1);
-				checkIncrementalMove (pos, 1, -1);
-				checkIncrementalMove (pos, -1, 1);
-				break;
 			}
-			if (ValidMoves.Count == 0)
-				ValidMoves = null;
+			return validMoves.ToArray ();
 		}
+
+		string preview_Move;
+		bool preview_MoveState;
+		ChessPiece preview_Captured;
+
+		void previewBoard(string move){
+			preview_Move = move;
+
+			Point pStart = getChessCell(preview_Move.Substring(0,2));
+			Point pEnd = getChessCell(preview_Move.Substring(2,2));
+			ChessPiece p = Board [pStart.X, pStart.Y];
+
+			preview_MoveState = p.HasMoved;
+			Board [pStart.X, pStart.Y] = null;
+			p.HasMoved = true;
+			preview_Captured = Board [pEnd.X, pEnd.Y];
+			Board [pEnd.X, pEnd.Y] = p;
+		}
+		void restoreBoardAfterPreview(){
+			Point pStart = getChessCell(preview_Move.Substring(0,2));
+			Point pEnd = getChessCell(preview_Move.Substring(2,2));
+			ChessPiece p = Board [pEnd.X, pEnd.Y];
+			p.HasMoved = preview_MoveState;
+			Board [pStart.X, pStart.Y] = p;
+			Board [pEnd.X, pEnd.Y] = preview_Captured;
+			preview_Move = null;
+			preview_Captured = null;
+		}
+
 		string getChessCell(int col, int line){
 			char c = (char)(col + 97);
 			return c.ToString () + (line + 1).ToString ();
@@ -956,7 +1027,7 @@ namespace Chess
 		}
 		Vector3 getCurrentCapturePosition(ChessPiece p){
 			float x, y;
-			if (p.Color == ChessColor.White) {
+			if (p.Player.Color == ChessColor.White) {
 				x = -0.5f;
 				y = 7.5f - cptWhiteOut;
 				if (cptWhiteOut > 8) {
@@ -973,10 +1044,11 @@ namespace Chess
 			}
 			return new Vector3 (x, y, 0f);
 		}
+
 		void removePiece(ChessPiece p, bool animate = true){
 			Vector3 capturePos = getCurrentCapturePosition (p);
 
-			if (p.Color == ChessColor.White)
+			if (p.Player.Color == ChessColor.White)
 				cptWhiteOut++;
 			else
 				cptBlackOut++;
@@ -1248,7 +1320,7 @@ namespace Chess
 				ChessPiece p = Board [Selection.X, Selection.Y];
 				if (p == null)
 					return;
-				if (p.Color != CurrentPlayer.Color)
+				if (p.Player != CurrentPlayer)
 					return;
 				Active = Selection;
 			} else if (Selection == Active) {
@@ -1257,7 +1329,7 @@ namespace Chess
 			} else {
 				ChessPiece p = Board [Selection.X, Selection.Y];
 				if (p != null) {
-					if (p.Color == CurrentPlayer.Color) {
+					if (p.Player == CurrentPlayer) {
 						//check here if rocking
 						Active = Selection;
 						return;
@@ -1266,9 +1338,9 @@ namespace Chess
 
 
 				//move
-				if (ValidMoves == null)
+				if (ValidPositionsForActivePce == null)
 					return;
-				if (ValidMoves.Contains(Selection))
+				if (ValidPositionsForActivePce.Contains(Selection))
 					processMove(getChessCell(Active.X,Active.Y) + getChessCell(Selection.X,Selection.Y));
 
 			}
