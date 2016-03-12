@@ -1043,6 +1043,8 @@ namespace Chess
 			Board [pStart.X, pStart.Y] = null;
 			p.HasMoved = true;
 			preview_Captured = Board [pEnd.X, pEnd.Y];
+			if (preview_Captured != null)
+				preview_Captured.Captured = true;
 			Board [pEnd.X, pEnd.Y] = p;
 		}
 		void restoreBoardAfterPreview(){
@@ -1050,6 +1052,8 @@ namespace Chess
 			Point pEnd = getChessCell(preview_Move.Substring(2,2));
 			ChessPiece p = Board [pEnd.X, pEnd.Y];
 			p.HasMoved = preview_MoveState;
+			if (preview_Captured != null)
+				preview_Captured.Captured = false;			
 			Board [pStart.X, pStart.Y] = p;
 			Board [pEnd.X, pEnd.Y] = preview_Captured;
 			preview_Move = null;
