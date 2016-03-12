@@ -12,7 +12,7 @@ using Tetra;
 
 namespace Chess
 {
-	enum GameState { Init, MeshesLoading, VAOInit, ComputeTangents, BuildBuffers, Play};
+	enum GameState { Init, MeshesLoading, VAOInit, ComputeTangents, BuildBuffers, Play, Check, Checkmate};
 	enum PlayerType { Human, AI };
 	enum ChessColor { White, Black};
 	enum PieceType { Pawn, Tower, Horse, Bishop, King, Queen };
@@ -36,6 +36,7 @@ namespace Chess
 		public string Name;
 		public ChessColor Color;
 		public PlayerType Type;
+		public ChessPiece King;
 		public List<ChessPiece> Pieces = new List<ChessPiece>();
 		public Point[] ValidMoves;
 		public string [] CheckMoves;
@@ -65,6 +66,10 @@ namespace Chess
 
 		float x, y, z, xAngle;
 		public int InitX, InitY;
+
+		public Point BoardCell{
+			get { return new Point ((int)Math.Truncate (X), (int)Math.Truncate (Y)); }
+		}
 
 		public Vector3 Position {
 			get { return new Vector3 (x, y, z); }
@@ -130,6 +135,9 @@ namespace Chess
 				Mesh.Datas [InstanceIndex].color = new Vector4 (0.2f, 0.2f, 0.2f, 1f);
 
 			Player.Pieces.Add (this);
+
+			if (Type == PieceType.King)
+				Player.King = this;
 
 			update ();
 		}
@@ -465,6 +473,9 @@ namespace Chess
 			if (active >= 0)
 				drawSquarre(Active, new Vector4(0.2f,0.2f,1.0f,0.6f));
 
+			if (currentState == GameState.Check)
+				drawSquarre(CurrentPlayer.King.BoardCell, new Vector4(1.0f,0.2f,0.2f,0.6f));
+
 			GL.Enable (EnableCap.DepthTest);
 			#endregion
 
@@ -514,7 +525,7 @@ namespace Chess
 			if (arrows == null)
 				return;
 			coloredShader.Enable ();
-			changeShadingColor (new Vector4 (1f, 0.1f, 0.1f, 0.6f));
+			changeShadingColor (new Vector4 (0.2f, 1.0f, 0.2f, 0.5f));
 
 			GL.Disable (EnableCap.CullFace);
 			arrows.Render (PrimitiveType.TriangleStrip);
@@ -680,7 +691,7 @@ namespace Chess
 				return;
 			}
 
-			if (tmp [0] == "bestmove")
+			if (tmp [0] == "bestmove" && currentState != GameState.Checkmate)
 				processMove (tmp [1]);
 		}
 
@@ -743,19 +754,9 @@ namespace Chess
 					bool kingIsSafe = true;
 
 					previewBoard (s);
-					foreach (ChessPiece op in Opponent.Pieces) {
-						if (op.Captured)
-							continue;
-						Point opPosition = new Point ((int)Math.Truncate (op.X), (int)Math.Truncate (op.Y));
-						foreach (string opM in computeValidMove (opPosition)) {
-							if (opM.EndsWith ("K")) {
-								kingIsSafe = false;
-								break;
-							}
-						}
-						if (!kingIsSafe)
-							break;
-					}
+
+					kingIsSafe = checkKingIsSafe ();
+
 					restoreBoardAfterPreview ();
 
 					if (kingIsSafe)
@@ -820,6 +821,7 @@ namespace Chess
 			addPiece (vaoiKing, 1, 1, PieceType.King, 4, 7);
 		}
 		void resetBoard(bool animate = true){
+			currentState = GameState.Play;
 			CurrentPlayerIndex = 0;
 			cptWhiteOut = 0;
 			cptBlackOut = 0;
@@ -844,6 +846,39 @@ namespace Chess
 			ValidPositionsForActivePce.Add (p);
 		}
 
+		bool checkKingIsSafe(){
+			foreach (ChessPiece op in Opponent.Pieces) {
+				if (op.Captured)
+					continue;
+				foreach (string opM in computeValidMove (op.BoardCell)) {
+					if (opM.EndsWith ("K"))
+						return false;
+				}
+			}
+			return true;
+		}
+		string[] getLegalMoves(){
+
+			List<String> legalMoves = new List<string> ();
+
+			foreach (ChessPiece p in CurrentPlayer.Pieces) {
+				if (p.Captured)
+					continue;
+				foreach (string s in computeValidMove (p.BoardCell)) {
+					bool kingIsSafe = true;
+
+					previewBoard (s);
+
+					kingIsSafe = checkKingIsSafe ();
+
+					restoreBoardAfterPreview ();
+
+					if (kingIsSafe)
+						legalMoves.Add(s);
+				}
+			}
+			return legalMoves.ToArray ();
+		}
 		string checkSingleMove(Point pos, int xDelta, int yDelta){
 			int x = pos.X + xDelta;
 			int y = pos.Y + yDelta;
@@ -911,11 +946,14 @@ namespace Chess
 			if (p != null) {
 				switch (p.Type) {
 				case PieceType.Pawn:
-					validMoves.AddMove (checkSingleMove (pos, 0, 1));
-					if (Board [x, y + 1] == null && !p.HasMoved)
-						validMoves.AddMove (checkSingleMove (pos, 0, 2));
-					validMoves.AddMove (checkSingleMove (pos, -1, 1));
-					validMoves.AddMove (checkSingleMove (pos, 1, 1));
+					int pawnDirection = 1;
+					if (CurrentPlayer.Color == ChessColor.Black)
+						pawnDirection = -1;
+					validMoves.AddMove (checkSingleMove (pos, 0, 1 * pawnDirection));
+					if (Board [x, y + pawnDirection] == null && !p.HasMoved)
+						validMoves.AddMove (checkSingleMove (pos, 0, 2 * pawnDirection));
+					validMoves.AddMove (checkSingleMove (pos, -1, 1 * pawnDirection));
+					validMoves.AddMove (checkSingleMove (pos, 1, 1 * pawnDirection));
 					break;
 				case PieceType.Tower:
 					validMoves.AddMove (checkIncrementalMove (pos, 0, 1));
@@ -1065,7 +1103,10 @@ namespace Chess
 				p.Position = capturePos;
 		}
 		void processMove(string move, bool animate = true){
-
+			if (string.IsNullOrEmpty (move))
+				return;
+			if (move == "(none)")
+				return;
 			if (animate)
 				AddLog (CurrentPlayer.ToString () + " => " + move);
 			
@@ -1183,7 +1224,14 @@ namespace Chess
 
 		void move_AnimationFinished (Animation a)
 		{
-			switchPlayer ();			
+			switchPlayer ();
+
+			if (checkKingIsSafe ())
+				currentState = GameState.Play;
+			else if (getLegalMoves ().Length == 0)
+				currentState = GameState.Checkmate;
+			else
+				currentState = GameState.Check;			
 		}
 
 		void closeGame(){
@@ -1222,7 +1270,7 @@ namespace Chess
 		}
 		public override void OnRender (FrameEventArgs e)
 		{
-			if (currentState != GameState.Play)
+			if (currentState < GameState.Play)
 				return;
 			draw ();
 		}
@@ -1309,12 +1357,16 @@ namespace Chess
 		#region Mouse
 		void Mouse_ButtonDown (object sender, OpenTK.Input.MouseButtonEventArgs e)
 		{
-			this.CursorVisible = true;
-
+			CursorVisible = true;
 			if (e.Mouse.LeftButton != OpenTK.Input.ButtonState.Pressed)
 				return;
 
 			clearArrows ();
+
+			if (currentState == GameState.Checkmate) {
+				Active = -1;
+				return;
+			}
 
 			if (Active < 0) {
 				ChessPiece p = Board [Selection.X, Selection.Y];
@@ -1352,7 +1404,8 @@ namespace Chess
 		}
 
 		void Mouse_Move(object sender, OpenTK.Input.MouseMoveEventArgs e)
-		{
+		{			
+
 			if (e.XDelta != 0 || e.YDelta != 0)
 			{
 				if (e.Mouse.MiddleButton == OpenTK.Input.ButtonState.Pressed) {
