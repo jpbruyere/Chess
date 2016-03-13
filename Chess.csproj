@@ -37,6 +37,8 @@
     <Compile Include="ChessShader.cs" />
     <Compile Include="SimpleColoredShader.cs" />
     <Compile Include="VAOChessData.cs" />
+    <Compile Include="ChessBoardWidget.cs" />
+    <Compile Include="MovesWidget.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="cairo-sharp, Version=1.10.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756">
@@ -134,5 +136,16 @@
     <EmbeddedResource Include="gui\Splash.crow" />
     <EmbeddedResource Include="splash.png" />
     <EmbeddedResource Include="gui\promote.crow" />
+    <EmbeddedResource Include="gui\options.crow" />
+    <EmbeddedResource Include="gui\SaveDialog.crow">
+      <LogicalName>Chess.gui.saveDialog.crow</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="gui\LoadDialog.crow">
+      <LogicalName>Chess.gui.loadDialog.crow</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="gui\board.crow" />
+    <EmbeddedResource Include="ChessPieces.svg" />
+    <EmbeddedResource Include="gui\checkmate.crow" />
+    <EmbeddedResource Include="gui\moves.crow" />
   </ItemGroup>
 </Project>

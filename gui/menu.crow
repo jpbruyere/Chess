@@ -13,6 +13,10 @@
 		<Button Background="vgradient|0:DimGray|1:Black" Caption="Hint" Width="60" Height="0" MouseClick="onHintClick"/>
 		<Button Background="vgradient|0:DimGray|1:Black" Caption="Undo" Width="60" Height="0" MouseClick="onUndoClick"/>
 		<Button Background="vgradient|0:DimGray|1:Black" Caption="Restart" Width="60" Height="0" MouseClick="onResetClick"/>
+		<GraphicObject Width="10"/>
+		<Button Background="vgradient|0:DimGray|1:Black" Caption="Save" Width="60" Height="0" MouseClick="onSaveClick"/>
+		<Button Background="vgradient|0:DimGray|1:Black" Caption="Load" Width="60" Height="0" MouseClick="onLoadClick"/>
+		<Button Background="vgradient|0:DimGray|1:Black" Caption="Options" Width="60" Height="0" MouseClick="onOptionsClick"/>
 		<GraphicObject Width="20"/>
 		<Button Background="vgradient|0:DimGray|1:Black" Caption="Quit" Width="60" Height="0" MouseClick="onQuitClick"/>
 	</HorizontalStack>

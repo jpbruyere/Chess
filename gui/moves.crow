@@ -1,0 +1,9 @@
+﻿<?xml version="1.0"?>
+<Window Width="50" Height="400"
+	Template="#Chess.gui.tmpWindow.crow"
+	HorizontalAlignment="Left" Top="100" Left="10">
+	<Scroller Margin="5" VerticalScrolling="true">
+		<MovesWidget Font="droid bold, 10" VerticalAlignment="Top" Moves="{StockfishMoves}"
+			Width="0" Height="-1"/>
+	</Scroller>
+</Window>

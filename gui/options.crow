@@ -1,0 +1,24 @@
+﻿<Border Margin="100" VerticalAlignment="Bottom"
+		BorderWidth="1" CornerRadius="5" Background="0,4;0,4;0,4;0,8">
+	<VerticalStack>
+		<HorizontalStack Margin="3" Fit="true" Spacing="10">
+			<GroupBox
+				Caption="Whites" Width="150" Height="200">
+				<VerticalStack>
+					<RadioButton Caption="Human" IsChecked="true"/>
+					<RadioButton Caption="CPU" />
+				</VerticalStack>
+			</GroupBox>
+			<GroupBox 
+				Caption="Blacks" Width="150" Height="200">
+				<VerticalStack>
+					<RadioButton Caption="Human"/>
+					<RadioButton Caption="CPU" IsChecked="true"/>
+				</VerticalStack>
+			</GroupBox>
+		</HorizontalStack>
+		<Button HorizontalAlignment="Right" Background="vgradient|0:DimGray|1:Black" Caption="Close"
+			Width="60" MouseClick="onCloseOptionsClick"/>
+	</VerticalStack>
+</Border>
+

@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<Container>
+	<Border Fit="True"
+			BorderWidth="1" CornerRadius="5" Background="0,4;0,4;0,4;0,8">
+		<VerticalStack Width="400" Height="400" Margin="30">
+			<Label Font="droid bold, 26" Text="Load"/>
+			<TextBox Font="droid , 16" Text="{../lbSavedGames.SelectedItem}" Width="0" Margin="2"/>
+			<ListBox SelectedIndex="0" Name="lbSavedGames" Data="{SavedGames}"
+				SelectedItemChanged="onSelectedFileChanged"/>
+			<HorizontalStack Fit="true" HorizontalAlignment="Right" Margin="3">
+				<Button Caption="Delete" MouseClick="onDeleteFileClick" Background="Gray"/>
+				<GraphicObject Width="20"/>
+				<Button Caption="Load" MouseClick="onLoadOkClick" Background="Gray"/>
+				<Button Caption="Cancel" MouseClick="onLoadCancel" Background="Gray"/>
+			</HorizontalStack>
+		</VerticalStack>
+	</Border>
+</Container>
+
