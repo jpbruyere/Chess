@@ -1,1 +1,17 @@
-﻿
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<Container>
+	<Border Fit="True"
+			BorderWidth="1" CornerRadius="5" Background="0,4;0,4;0,4;0,8">
+		<VerticalStack Fit="True" Margin="30">
+			<Button Background="vgradient|0:DimGray|1:Black" Caption="Queen" Width="100" Height="40"
+				MouseClick="onPromoteToQueenClick"/>
+			<Button Background="vgradient|0:DimGray|1:Black" Caption="Bishop" Width="100" Height="40"
+				MouseClick="onPromoteToBishopClick"/>
+			<Button Background="vgradient|0:DimGray|1:Black" Caption="Rook" Width="100" Height="40"
+				MouseClick="onPromoteToRookClick"/>
+			<Button Background="vgradient|0:DimGray|1:Black" Caption="Knight" Width="100" Height="40"
+				MouseClick="onPromoteToKnightClick"/>
+		</VerticalStack>
+	</Border>
+</Container>
+

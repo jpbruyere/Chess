@@ -1,0 +1,8 @@
+﻿<?xml version="1.0"?>
+<Window Name="mateWin" Width="260" Height="100" CornerRadius ="10"
+	Template="#Chess.gui.tmpWindow.crow">
+	<HorizontalStack Fit="true" Margin="10">
+		<Label Font="droid bold, 24" Text="{CurrentPlayer}"/>
+		<Label Font="droid, 20" Text="is Mate"/>
+	</HorizontalStack>				
+</Window>

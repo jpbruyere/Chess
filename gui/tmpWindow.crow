@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0"?>
 <Border BorderWidth="1" Foreground="White" CornerRadius="3" Height="{../HeightPolicy}" Width="{../WidthPolicy}"
-	Background="vgradient|0:Mantis|1:SeaGreen">
+	Background="vgradient|0:0,6;0,6;0,6;0,5|1:0,4;0,4;0,4;0,3">
 	<VerticalStack Height="{../../HeightPolicy}" Width="{../../WidthPolicy}">
 		<Border HorizontalAlignment="Right" Margin="0"			
 			CornerRadius="6" BorderWidth="1" Foreground="Transparent"  Height="12" Width="12"
