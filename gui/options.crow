@@ -16,7 +16,7 @@
 					</VerticalStack>
 				</GroupBox>
 			</HorizontalStack>
-			<CheckBox Caption="Autoplay on Hint" IsChecked="{AutoPlayHint}"/>
+			<CheckBox Caption="Autoplay on Hint" IsChecked="{²AutoPlayHint}"/>
 			<Button Style="#Chess.gui.Button.style" HorizontalAlignment="Right" Caption="Close"
 				MouseClick="../../../../../../butQuitPress"/>
 		</VerticalStack>

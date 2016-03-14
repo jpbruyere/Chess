@@ -205,8 +205,15 @@ namespace Chess
 				Mesh.Datas [InstanceIndex].color = new Vector4 (0.07f, 0.05f, 0.06f, 1f);			
 		}
 	}
-	class MainWin : OpenTKGameWindow
+	class MainWin : OpenTKGameWindow, IBindable
 	{
+		#region IBindable implementation
+		List<Binding> bindings = new List<Binding> ();
+		public List<Binding> Bindings {
+			get { return bindings; }
+		}
+		#endregion
+
 		[StructLayout(LayoutKind.Sequential)]
 		public struct UBOSharedData
 		{
@@ -765,7 +772,12 @@ namespace Chess
 		}
 
 		void onViewOptionsClick (object sender, MouseButtonEventArgs e){
-			loadWindow(UI_Options);
+			try {
+				loadWindow(UI_Options);
+			} catch (Exception ex) {
+				Debug.WriteLine (ex.ToString ());
+			}
+			Crow.CompilerServices.ResolveBindings (Bindings);
 		}
 		void onViewFpsClick (object sender, MouseButtonEventArgs e){
 			loadWindow(UI_Fps);
@@ -827,6 +839,8 @@ namespace Chess
 		public bool AutoPlayHint {
 			get { return autoPlayHint; }
 			set {
+				if (value == autoPlayHint)
+					return;
 				autoPlayHint = value;
 				NotifyValueChanged ("AutoPlayHint", AutoPlayHint);
 			}
