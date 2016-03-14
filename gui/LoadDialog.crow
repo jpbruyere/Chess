@@ -8,10 +8,10 @@
 			<ListBox SelectedIndex="0" Name="lbSavedGames" Data="{SavedGames}"
 				SelectedItemChanged="onSelectedFileChanged"/>
 			<HorizontalStack Fit="true" HorizontalAlignment="Right" Margin="3">
-				<Button Caption="Delete" MouseClick="onDeleteFileClick" Background="Gray"/>
+				<Button Style="#Chess.gui.Button.style" Caption="Delete" MouseClick="onDeleteFileClick"/>
 				<GraphicObject Width="20"/>
-				<Button Caption="Load" MouseClick="onLoadOkClick" Background="Gray"/>
-				<Button Caption="Cancel" MouseClick="onLoadCancel" Background="Gray"/>
+				<Button Style="#Chess.gui.Button.style" Caption="Load" MouseClick="onLoadOkClick"/>
+				<Button Style="#Chess.gui.Button.style" Caption="Cancel" MouseClick="onLoadCancel"/>
 			</HorizontalStack>
 		</VerticalStack>
 	</Border>

@@ -1,8 +1,8 @@
 ﻿<?xml version="1.0"?>
-<Window Width="230" Height="230"
+<Window Font="droid bold, 10" Title="Mini Board" Width="230" Height="230"
 	Template="#Chess.gui.tmpWindow.crow"
 	HorizontalAlignment="Right" Top="300">
-	<Container Margin="10">
+	<Container Margin="5">
 		<ChessBoardWidget Board="{Board}" Font="droid, 10"/>
 	</Container>
 </Window>

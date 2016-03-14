@@ -39,6 +39,11 @@
     <Compile Include="VAOChessData.cs" />
     <Compile Include="ChessBoardWidget.cs" />
     <Compile Include="MovesWidget.cs" />
+    <Compile Include="lib\Crow\OTKCrow\OpenTKGameWindow.cs" />
+    <Compile Include="lib\Crow\OTKCrow\OpenGL\QuadVAO.cs" />
+    <Compile Include="lib\Crow\OTKCrow\OpenGL\Shader.cs" />
+    <Compile Include="lib\Crow\OTKCrow\OpenGL\TexturedShader.cs" />
+    <Compile Include="lib\Crow\OTKCrow\OpenGL\VertexArrayObject.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="cairo-sharp, Version=1.10.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756">
@@ -61,20 +66,6 @@
     <Reference Include="OpenTK">
       <HintPath>..\..\src\opentk-git\Binaries\OpenTK\Release\OpenTK.dll</HintPath>
     </Reference>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Crow\Crow.csproj">
-      <Project>{C2980F9B-4798-4C05-99E2-E174810F7C7B}</Project>
-      <Name>Crow</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Crow\OTKCrow\OTKCrow.csproj">
-      <Project>{350D4F49-9901-4998-9903-BCA7D48DA58C}</Project>
-      <Name>OTKCrow</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Ottd3D\lib\GGL\GGL.csproj">
-      <Project>{5490AD74-0BB3-438C-9DE4-EB7CFC68BCB5}</Project>
-      <Name>GGL</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="Meshes\pawn.obj">
@@ -116,9 +107,6 @@
     <None Include="Textures\horse_backed.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Textures\chessBoard.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Include="Textures\marble.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -147,5 +135,19 @@
     <EmbeddedResource Include="ChessPieces.svg" />
     <EmbeddedResource Include="gui\checkmate.crow" />
     <EmbeddedResource Include="gui\moves.crow" />
+    <EmbeddedResource Include="gui\tmpPopper.crow" />
+    <EmbeddedResource Include="gui\Button.style" />
+    <EmbeddedResource Include="Textures\chessBoard.png" />
+    <EmbeddedResource Include="Textures\board1.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="lib\Crow\Crow.csproj">
+      <Project>{C2980F9B-4798-4C05-99E2-E174810F7C7B}</Project>
+      <Name>Crow</Name>
+    </ProjectReference>
+    <ProjectReference Include="lib\GGL\GGL.csproj">
+      <Project>{5490AD74-0BB3-438C-9DE4-EB7CFC68BCB5}</Project>
+      <Name>GGL</Name>
+    </ProjectReference>
   </ItemGroup>
 </Project>

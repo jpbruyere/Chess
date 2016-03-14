@@ -194,13 +194,15 @@ namespace Chess
 			Mesh.Datas [InstanceIndex].modelMats =
 				Matrix4.CreateRotationX(xAngle) *
 				Matrix4.CreateTranslation(new Vector3(x, y, z));
+			if (Player.Color == ChessColor.Black)
+				Mesh.Datas [InstanceIndex].modelMats = Matrix4.CreateRotationZ(MathHelper.Pi) * Mesh.Datas [InstanceIndex].modelMats;
 			Mesh.UpdateInstancesData ();
 		}
 		void updateColorData(){
-			if (Player.Color == ChessColor.White)
-				Mesh.Datas [InstanceIndex].color = new Vector4 (0.80f, 0.80f, 0.70f, 1f);
+			if (Player.Color == ChessColor.White)				
+				Mesh.Datas [InstanceIndex].color = new Vector4 (0.80f, 0.80f, 0.74f, 1f);
 			else
-				Mesh.Datas [InstanceIndex].color = new Vector4 (0.2f, 0.2f, 0.2f, 1f);			
+				Mesh.Datas [InstanceIndex].color = new Vector4 (0.07f, 0.05f, 0.06f, 1f);			
 		}
 	}
 	class MainWin : OpenTKGameWindow
@@ -243,7 +245,7 @@ namespace Chess
 		float ZoomSpeed = 2f;
 
 		//public Vector4 vLight = new Vector4 (0.5f, 0.5f, -1f, 0f);
-		public Vector4 vLight = Vector4.Normalize(new Vector4 (0.4f, 0.4f, -0.5f, 0f));
+		public Vector4 vLight = Vector4.Normalize(new Vector4 (0.2f, 0.4f, -0.5f, 0f));
 		#endregion
 
 		#region GL
@@ -357,8 +359,8 @@ namespace Chess
 			float
 			x = 4f,
 			y = 4f,
-			width = 10f,
-			height = 10f;
+			width = 8f,
+			height = 8f;
 
 			boardVAOItem = mainVAO.Add (new Tetra.Mesh (
 				new Vector3[] {
@@ -368,10 +370,10 @@ namespace Chess
 					new Vector3 (x + width / 2f, y - height / 2f, 0f)
 				},
 				new Vector2[] {
-					new Vector2 (0, 1),
+					new Vector2 (0, 2),
 					new Vector2 (0, 0),
-					new Vector2 (1, 1),
-					new Vector2 (1, 0)
+					new Vector2 (2, 2),
+					new Vector2 (2, 0)
 				},
 				new Vector3[] {
 					Vector3.UnitZ,
@@ -380,10 +382,10 @@ namespace Chess
 					Vector3.UnitZ
 				},
 				new ushort[] { 0, 1, 2, 2, 1, 3 }));
-			boardVAOItem.DiffuseTexture = new GGL.Texture ("Textures/chessBoard.jpg");
+			boardVAOItem.DiffuseTexture = new GGL.Texture ("#Chess.Textures.board1.png");
 			boardVAOItem.Datas = new VAOChessData[1];
 			boardVAOItem.Datas[0].modelMats = Matrix4.Identity;
-			boardVAOItem.Datas[0].color = new Vector4(1f,1f,1f,1f);
+			boardVAOItem.Datas[0].color = new Vector4(0.6f,0.6f,0.6f,1f);
 
 			boardVAOItem.UpdateInstancesData ();
 
@@ -581,7 +583,17 @@ namespace Chess
 		#endregion
 
 		#region Interface
-		GraphicObject uiSplash, uiPromote, uiOptions, uiSave, uiLoad;
+		const string UI_Menu = "#Chess.gui.menu.crow";
+		const string UI_Options = "#Chess.gui.options.crow";
+		const string UI_Fps = "#Chess.gui.fps.crow";
+		const string UI_Board = "#Chess.gui.board.crow";
+		const string UI_Log = "#Chess.gui.log.crow";
+		const string UI_Moves = "#Chess.gui.moves.crow";
+		const string UI_Splash = "#Chess.gui.Splash.crow";
+		const string UI_Save = "#Chess.gui.saveDialog.crow";
+		const string UI_Load = "#Chess.gui.loadDialog.crow";
+		const string UI_Promote = "#Chess.gui.promote.crow";
+
 
 		volatile int progressValue=0;
 		volatile int progressMax=200;
@@ -616,6 +628,20 @@ namespace Chess
 			get { return Directory.GetFiles (".", "*.chess"); }
 		}
 
+		void loadWindow(string path){
+			GraphicObject g = CrowInterface.FindByName (path);
+			if (g != null)
+				return;
+			g = CrowInterface.LoadInterface (path);
+			g.Name = path;
+			g.DataSource = this;
+		}
+		void closeWindow (string path){
+			GraphicObject g = CrowInterface.FindByName (path);
+			if (g != null)
+				CrowInterface.DeleteWidget (g);
+		}
+
 		void initInterface(){
 			MouseMove += Mouse_Move;
 			MouseButtonDown += Mouse_ButtonDown;
@@ -623,29 +649,19 @@ namespace Chess
 			MouseWheelChanged += Mouse_WheelChanged;
 			KeyboardKeyDown += MainWin_KeyboardKeyDown;
 
-			GraphicObject g = CrowInterface.LoadInterface ("#Chess.gui.fps.crow");
-			g.DataSource = this;
+			loadWindow (UI_Menu);
 
-			g = CrowInterface.LoadInterface ("#Chess.gui.board.crow");
-			g.DataSource = this;
-
-			g = CrowInterface.LoadInterface ("#Chess.gui.log.crow");
-			g.DataSource = this;
-
-			g = CrowInterface.LoadInterface ("#Chess.gui.moves.crow");
-			g.DataSource = this;
-
-			g = CrowInterface.LoadInterface ("#Chess.gui.menu.crow");
-			g.DataSource = this;
-			NotifyValueChanged ("CurrentColor", Color.Ivory);
-
-			CrowInterface.DeleteWidget (uiSplash);
-			uiSplash = null;
+			closeWindow (UI_Splash);
 		}
 
 		#region LOGS
 		List<string> logBuffer = new List<string> ();
 		int logBuffPtr = 0;
+
+		string log0 = "...";
+		string log1 = "...";
+		string log2 = "...";
+		string log3 = "...";
 
 		void AddLog(string msg)
 		{
@@ -688,8 +704,7 @@ namespace Chess
 		void onSaveClick (object sender, MouseButtonEventArgs e){
 			if (StockfishMoves.Count == 0)
 				return;
-			uiSave = CrowInterface.LoadInterface ("#Chess.gui.saveDialog.crow");
-			uiSave.DataSource = this;
+			loadWindow (UI_Save);
 			FileName = "game-" + DateTime.Now.ToString () + ".chess";
 		}
 		void onSaveOkClick (object sender, MouseButtonEventArgs e){
@@ -703,17 +718,14 @@ namespace Chess
 					}
 				}
 			}
-			CrowInterface.DeleteWidget (uiSave);
-			uiSave = null;
+			closeWindow (UI_Save);
 		}
 		void onSaveCancel (object sender, MouseButtonEventArgs e){
-			CrowInterface.DeleteWidget (uiSave);
-			uiSave = null;
+			closeWindow (UI_Save);
 		}
 
 		void onLoadClick (object sender, MouseButtonEventArgs e){
-			uiLoad = CrowInterface.LoadInterface ("#Chess.gui.loadDialog.crow");
-			uiLoad.DataSource = this;
+			loadWindow (UI_Load);
 		}
 		void onSelectedFileChanged(object sender, SelectionChangeEventArgs e){
 			FileName = e.NewValue.ToString ();
@@ -732,21 +744,27 @@ namespace Chess
 			}
 			syncStockfish ();
 			replaySilently ();
-			CrowInterface.DeleteWidget (uiLoad);
-			uiLoad = null;
+			closeWindow (UI_Load);
 		}
 		void onLoadCancel (object sender, MouseButtonEventArgs e){
-			CrowInterface.DeleteWidget (uiLoad);
-			uiLoad = null;
+			closeWindow (UI_Load);
 		}
 
-		void onOptionsClick (object sender, MouseButtonEventArgs e){
-			uiOptions = CrowInterface.LoadInterface ("#Chess.gui.options.crow");
-			uiOptions.DataSource = this;
+		void onViewOptionsClick (object sender, MouseButtonEventArgs e){
+			loadWindow(UI_Options);
 		}
-		void onCloseOptionsClick (object sender, MouseButtonEventArgs e){
-			CrowInterface.DeleteWidget (uiOptions);
-			uiOptions = null;
+		void onViewFpsClick (object sender, MouseButtonEventArgs e){
+			loadWindow(UI_Fps);
+		}
+		void onViewBoardClick (object sender, MouseButtonEventArgs e){
+			loadWindow(UI_Board);
+		}
+		void onViewMovesClick (object sender, MouseButtonEventArgs e){
+			loadWindow(UI_Moves);
+		}
+		void onViewLogsClick (object sender, MouseButtonEventArgs e){
+			loadWindow(UI_Log);
+			syncLogUi ();
 		}
 		void onQuitClick (object sender, MouseButtonEventArgs e){
 			closeGame ();
@@ -781,12 +799,10 @@ namespace Chess
 			QueueMove (getChessCell (Active.X, Active.Y) + getChessCell (Selection.X, Selection.Y) + "k");
 		}
 		void showPromoteDialog(){
-			uiPromote = CrowInterface.LoadInterface ("#Chess.gui.promote.crow");
-			uiPromote.DataSource = this;
+			loadWindow (UI_Promote);
 		}
 		void deletePromoteDialog(){
-			CrowInterface.DeleteWidget (uiPromote);
-			uiPromote = null;
+			closeWindow (UI_Promote);
 		}
 		#endregion
 
@@ -1538,8 +1554,7 @@ namespace Chess
 
 			base.OnLoad (e);
 
-			uiSplash = CrowInterface.LoadInterface("#Chess.gui.Splash.crow");
-			uiSplash.DataSource = this;
+			loadWindow (UI_Splash);
 
 			initOpenGL ();
 
@@ -1551,7 +1566,7 @@ namespace Chess
 		}
 		public override void GLClear ()
 		{
-			GL.ClearColor(0.2f, 0.2f, 0.4f, 1.0f);
+			GL.ClearColor(0.5f, 0.5f, 0.6f, 1.0f);
 			GL.Clear (ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit | ClearBufferMask.StencilBufferBit);
 		}
 		public override void OnRender (FrameEventArgs e)
@@ -1772,7 +1787,7 @@ namespace Chess
 
 		#region CTOR and Main
 		public MainWin ()
-			: base(1024, 800, 32, 24, 1, 4, "test")
+			: base(1024, 800, 32, 24, 1, 8, "test")
 		{
 			VSync = VSyncMode.Off;
 		}

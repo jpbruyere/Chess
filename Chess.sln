@@ -3,11 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chess", "Chess.csproj", "{5B0EDC22-E4C5-4778-995C-B49595EA2201}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Crow", "..\Crow\Crow.csproj", "{C2980F9B-4798-4C05-99E2-E174810F7C7B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Crow", "lib\Crow\Crow.csproj", "{C2980F9B-4798-4C05-99E2-E174810F7C7B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OTKCrow", "..\Crow\OTKCrow\OTKCrow.csproj", "{350D4F49-9901-4998-9903-BCA7D48DA58C}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GGL", "..\Ottd3D\lib\GGL\GGL.csproj", "{5490AD74-0BB3-438C-9DE4-EB7CFC68BCB5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GGL", "lib\GGL\GGL.csproj", "{5490AD74-0BB3-438C-9DE4-EB7CFC68BCB5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -19,18 +17,6 @@ Global
 		Release|Win_x86 = Release|Win_x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{350D4F49-9901-4998-9903-BCA7D48DA58C}.Debug|Linux_x86.ActiveCfg = Debug|Linux_x86
-		{350D4F49-9901-4998-9903-BCA7D48DA58C}.Debug|Linux_x86.Build.0 = Debug|Linux_x86
-		{350D4F49-9901-4998-9903-BCA7D48DA58C}.Debug|Win_x86.ActiveCfg = Debug|Linux_x86
-		{350D4F49-9901-4998-9903-BCA7D48DA58C}.Debug|Win_x86.Build.0 = Debug|Linux_x86
-		{350D4F49-9901-4998-9903-BCA7D48DA58C}.Debug|x86.ActiveCfg = Debug|Linux_x86
-		{350D4F49-9901-4998-9903-BCA7D48DA58C}.Debug|x86.Build.0 = Debug|Linux_x86
-		{350D4F49-9901-4998-9903-BCA7D48DA58C}.Release|Linux_x86.ActiveCfg = Release|Linux_x86
-		{350D4F49-9901-4998-9903-BCA7D48DA58C}.Release|Linux_x86.Build.0 = Release|Linux_x86
-		{350D4F49-9901-4998-9903-BCA7D48DA58C}.Release|Win_x86.ActiveCfg = Release|Linux_x86
-		{350D4F49-9901-4998-9903-BCA7D48DA58C}.Release|Win_x86.Build.0 = Release|Linux_x86
-		{350D4F49-9901-4998-9903-BCA7D48DA58C}.Release|x86.ActiveCfg = Release|Linux_x86
-		{350D4F49-9901-4998-9903-BCA7D48DA58C}.Release|x86.Build.0 = Release|Linux_x86
 		{5490AD74-0BB3-438C-9DE4-EB7CFC68BCB5}.Debug|Linux_x86.ActiveCfg = Debug|Any CPU
 		{5490AD74-0BB3-438C-9DE4-EB7CFC68BCB5}.Debug|Linux_x86.Build.0 = Debug|Any CPU
 		{5490AD74-0BB3-438C-9DE4-EB7CFC68BCB5}.Debug|Win_x86.ActiveCfg = Debug|Any CPU

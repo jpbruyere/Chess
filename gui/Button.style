@@ -1,0 +1,5 @@
+﻿Focusable = true
+Width=81
+Height=50
+Background=vgradient|0:DimGray|1:Black
+Font=droid bold, 14

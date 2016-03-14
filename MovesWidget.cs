@@ -31,6 +31,7 @@ namespace Crow
 	public class MovesWidget : GraphicObject
 	{		
 		IList moves;
+		Scroller scr;
 
 		[XmlAttributeAttribute()][DefaultValue(null)]
 		public virtual IList Moves {
@@ -74,6 +75,9 @@ namespace Crow
 		{
 			base.onDraw (gr);
 
+			if (moves == null)
+				return;
+			
 			gr.SelectFontFace (Font.Name, Font.Slant, Font.Wheight);
 			gr.SetFontSize (Font.Size);
 
@@ -92,6 +96,47 @@ namespace Crow
 				y += fe.Height;
 			}
 			gr.Fill ();
+
+			const int scrBarWidth = 1;
+			if (scr == null)
+				return;
+			if (scr.ClientRectangle.Height > ClientRectangle.Height)
+				return;
+			Rectangle scrBar = ClientRectangle;
+			scrBar.X += ClientRectangle.Width - scrBarWidth;
+			scrBar.Width = scrBarWidth;
+			scrBar.Height = scr.ClientRectangle.Height;
+			scrBar.Y += (int)scr.ScrollY;
+
+			new SolidColor (Color.LightGray.AdjustAlpha(0.5)).SetAsSource (gr);
+			gr.Rectangle (scrBar);
+			gr.Fill ();
+			new SolidColor (Color.BlueCrayola.AdjustAlpha(0.7)).SetAsSource (gr);
+			double ratio = (double)scr.ClientRectangle.Height / ClientRectangle.Height;
+			scrBar.Height = (int)((double)scr.ClientRectangle.Height * ratio);
+			scrBar.Y += (int)(scr.ScrollY * ratio);
+			gr.Rectangle (scrBar);
+			gr.Fill ();
+		}
+		public override ILayoutable Parent {
+			get {
+				return base.Parent;
+			}
+			set {
+				if (scr != null)
+					scr.Scrolled -= Scr_Scrolled;
+				
+				base.Parent = value;
+
+				scr = Parent as Scroller;
+				if (scr != null)
+					scr.Scrolled += Scr_Scrolled;
+			}
+		}
+
+		void Scr_Scrolled (object sender, ScrollingEventArgs e)
+		{
+			RegisterForGraphicUpdate ();
 		}
 	}
 }

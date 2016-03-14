@@ -1,7 +1,20 @@
 ﻿<?xml version="1.0" encoding="UTF-8" ?>
-<Border Height="40"  VerticalAlignment="Bottom"
+<Border Height="-1"  VerticalAlignment="Bottom"
 		BorderWidth="1" CornerRadius="5" Background="0,4;0,4;0,4;0,8">
-	<HorizontalStack Margin="3">
+	<HorizontalStack Height="-1" Margin="3">
+		<Popper Template="#Chess.gui.tmpPopper.crow"
+			Caption="View" Width="-1">
+			<Border Fit="True" Background="0,4;0,4;0,4;0,8">
+				<HorizontalStack Fit="true">
+					<Button Style="#Chess.gui.Button.style" Font="droid bold, 10" Caption="Mini Board" MouseClick="onViewBoardClick"/>
+					<Button Style="#Chess.gui.Button.style" Caption="Moves" MouseClick="onViewMovesClick"/>
+					<Button Style="#Chess.gui.Button.style" Caption="Logs" MouseClick="onViewLogsClick"/>
+					<Button Style="#Chess.gui.Button.style" Caption="FPS" MouseClick="onViewFpsClick"/>
+					<GraphicObject Width="15" Height="15"/>
+					<Button Style="#Chess.gui.Button.style" Caption="Options" MouseClick="onViewOptionsClick"/>
+				</HorizontalStack>
+			</Border>
+		</Popper>
 		<Label Width="100" TextAlignment="Right" Text="Player: "/>
 		<Label Font="droid bold, 12" Text="{CurrentPlayer}"/>
 		<Label Width="100" TextAlignment="Right" Text="Move: "/>
@@ -10,14 +23,14 @@
 			<Label Font="droid bold, 12" Text="{SelCell}" Height="0"/>
 		</HorizontalStack>
 		<GraphicObject Width="0"/>
-		<Button Background="vgradient|0:DimGray|1:Black" Caption="Hint" Width="60" Height="0" MouseClick="onHintClick"/>
-		<Button Background="vgradient|0:DimGray|1:Black" Caption="Undo" Width="60" Height="0" MouseClick="onUndoClick"/>
-		<Button Background="vgradient|0:DimGray|1:Black" Caption="Restart" Width="60" Height="0" MouseClick="onResetClick"/>
+		<Button Style="#Chess.gui.Button.style" Caption="Hint" MouseClick="onHintClick"/>
+		<Button Style="#Chess.gui.Button.style" Caption="Undo" MouseClick="onUndoClick"/>
+		<Button Style="#Chess.gui.Button.style" Caption="Restart" MouseClick="onResetClick"/>
 		<GraphicObject Width="10"/>
-		<Button Background="vgradient|0:DimGray|1:Black" Caption="Save" Width="60" Height="0" MouseClick="onSaveClick"/>
-		<Button Background="vgradient|0:DimGray|1:Black" Caption="Load" Width="60" Height="0" MouseClick="onLoadClick"/>
-		<Button Background="vgradient|0:DimGray|1:Black" Caption="Options" Width="60" Height="0" MouseClick="onOptionsClick"/>
+
+		<Button Style="#Chess.gui.Button.style" Caption="Save" MouseClick="onSaveClick"/>
+		<Button Style="#Chess.gui.Button.style" Caption="Load" MouseClick="onLoadClick"/>
 		<GraphicObject Width="20"/>
-		<Button Background="vgradient|0:DimGray|1:Black" Caption="Quit" Width="60" Height="0" MouseClick="onQuitClick"/>
+		<Button Style="#Chess.gui.Button.style" Caption="Quit" MouseClick="onQuitClick"/>
 	</HorizontalStack>
 </Border>
