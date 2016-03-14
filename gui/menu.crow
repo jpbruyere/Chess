@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="UTF-8" ?>
 <Border Height="-1"  VerticalAlignment="Bottom"
 		BorderWidth="1" CornerRadius="5" Background="0,4;0,4;0,4;0,8">
-	<HorizontalStack Height="-1" Margin="3">
+	<HorizontalStack Height="-1">
 		<GraphicObject Width="15" Height="15"/>
 		<Popper Template="#Chess.gui.tmpPopper.crow"
 			Caption="Files" Width="-1">

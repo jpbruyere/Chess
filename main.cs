@@ -338,19 +338,19 @@ namespace Chess
 		{
 			currentState = GameState.MeshesLoading;
 
-			meshPawn = Tetra.OBJMeshLoader.Load ("Meshes/pawn.obj");
+			meshPawn = Tetra.OBJMeshLoader.Load ("#Chess.Meshes.pawn.obj");
 			ProgressValue+=20;
-			meshBishop = Tetra.OBJMeshLoader.Load ("Meshes/bishop.obj");
+			meshBishop = Tetra.OBJMeshLoader.Load ("#Chess.Meshes.bishop.obj");
 			ProgressValue+=20;
-			meshHorse = Tetra.OBJMeshLoader.Load ("Meshes/horse.obj");
+			meshHorse = Tetra.OBJMeshLoader.Load ("#Chess.Meshes.horse.obj");
 			ProgressValue+=20;
-			meshTower = Tetra.OBJMeshLoader.Load ("Meshes/tower.obj");
+			meshTower = Tetra.OBJMeshLoader.Load ("#Chess.Meshes.tower.obj");
 			ProgressValue+=20;
-			meshQueen = Tetra.OBJMeshLoader.Load ("Meshes/queen.obj");
+			meshQueen = Tetra.OBJMeshLoader.Load ("#Chess.Meshes.queen.obj");
 			ProgressValue+=20;
-			meshKing = Tetra.OBJMeshLoader.Load ("Meshes/king.obj");
+			meshKing = Tetra.OBJMeshLoader.Load ("#Chess.Meshes.king.obj");
 			ProgressValue+=20;
-			meshBoard = Tetra.OBJMeshLoader.Load ("Meshes/board.obj");
+			meshBoard = Tetra.OBJMeshLoader.Load ("#Chess.Meshes.board.obj");
 			ProgressValue+=20;
 
 			currentState = GameState.VAOInit;
@@ -426,8 +426,8 @@ namespace Chess
 			boardVAOItem = mainVAO.Add (meshBoard);
 			boardVAOItem.DiffuseTexture = new GGL.Texture ("#Chess.Textures.marble1.jpg");
 			boardVAOItem.Datas = new VAOChessData[1];
-			boardVAOItem.Datas [0].modelMats = Matrix4.CreateTranslation (4f, 4f, -0.25f);
-			boardVAOItem.Datas[0].color = new Vector4(0.2f,0.2f,0.22f,1f);
+			boardVAOItem.Datas [0].modelMats = Matrix4.CreateTranslation (4f, 4f, -0.20f);
+			boardVAOItem.Datas[0].color = new Vector4(0.4f,0.4f,0.42f,1f);
 			boardVAOItem.UpdateInstancesData ();
 
 			List<int> tmp = new List<int> ();
@@ -822,7 +822,16 @@ namespace Chess
 
 		#region Stockfish
 		Process stockfish;
-		bool autoPlayHint = true;
+		bool autoPlayHint = false;
+
+		public bool AutoPlayHint {
+			get { return autoPlayHint; }
+			set {
+				autoPlayHint = value;
+				NotifyValueChanged ("AutoPlayHint", AutoPlayHint);
+			}
+		}
+
 		volatile bool waitAnimationFinished = false;
 
 		List<String> stockfishMoves = new List<string> ();
@@ -878,7 +887,7 @@ namespace Chess
 			
 			if (CurrentPlayer.Type == PlayerType.Human) {
 				AddLog ("Hint => " + tmp [1]);
-				if (autoPlayHint)
+				if (AutoPlayHint)
 					QueueMove (tmp [1]);
 				else {
 					nextHint = tmp [1];
@@ -891,11 +900,22 @@ namespace Chess
 		#endregion
 
 		#region game logic
+
 		ChessPlayer[] Players;
+		ChessPiece[,] board;
+
 		volatile GameState currentState = GameState.Init;
 		int currentPlayerIndex = 0;
+		Point selection;
+		Point active = new Point(-1,-1);
+		List<Point> ValidPositionsForActivePce = null;
 
-		ChessPiece[,] board;
+		int cptWhiteOut = 0;
+		int cptBlackOut = 0;
+
+		volatile bool updateArrows = false;
+		string nextHint;
+
 
 		public ChessPiece[,] Board {
 			get { return board; }
@@ -904,17 +924,6 @@ namespace Chess
 				NotifyValueChanged ("Board", board);
 			}
 		}
-
-		Point selection;
-		Point active = new Point(-1,-1);
-
-		List<Point> ValidPositionsForActivePce = null;
-
-		int cptWhiteOut = 0;
-		int cptBlackOut = 0;
-
-		volatile bool updateArrows = false;
-		string nextHint;
 
 		int CurrentPlayerIndex {
 			get { return currentPlayerIndex; }
