@@ -258,7 +258,23 @@ namespace Chess
 
 		Tetra.IndexedVAO<VAOChessData> mainVAO;
 		VAOItem<VAOChessData> boardVAOItem;
+		VAOItem<VAOChessData> boardPlateVAOItem;
 		VAOItem<VAOChessData> cellVAOItem;
+		VAOItem<VAOChessData> vaoiPawn;
+		VAOItem<VAOChessData> vaoiBishop;
+		VAOItem<VAOChessData> vaoiKnight;
+		VAOItem<VAOChessData> vaoiRook;
+		VAOItem<VAOChessData> vaoiQueen;
+		VAOItem<VAOChessData> vaoiKing;
+
+		Tetra.Mesh meshPawn;
+		Tetra.Mesh meshBishop;
+		Tetra.Mesh meshHorse;
+		Tetra.Mesh meshTower;
+		Tetra.Mesh meshQueen;
+		Tetra.Mesh meshKing;
+		Tetra.Mesh meshBoard;
+
 		int[] piecesVAOIndexes;
 
 		void initOpenGL()
@@ -318,20 +334,6 @@ namespace Chess
 			GL.BindBuffer (BufferTarget.UniformBuffer, 0);
 		}
 
-		VAOItem<VAOChessData> vaoiPawn;
-		VAOItem<VAOChessData> vaoiBishop;
-		VAOItem<VAOChessData> vaoiKnight;
-		VAOItem<VAOChessData> vaoiRook;
-		VAOItem<VAOChessData> vaoiQueen;
-		VAOItem<VAOChessData> vaoiKing;
-
-		Tetra.Mesh meshPawn;
-		Tetra.Mesh meshBishop;
-		Tetra.Mesh meshHorse;
-		Tetra.Mesh meshTower;
-		Tetra.Mesh meshQueen;
-		Tetra.Mesh meshKing;
-
 		void loadMeshes()
 		{
 			currentState = GameState.MeshesLoading;
@@ -348,11 +350,12 @@ namespace Chess
 			ProgressValue+=20;
 			meshKing = Tetra.OBJMeshLoader.Load ("Meshes/king.obj");
 			ProgressValue+=20;
+			meshBoard = Tetra.OBJMeshLoader.Load ("Meshes/board.obj");
+			ProgressValue+=20;
 
 			currentState = GameState.VAOInit;
 		}
 		void createMainVAO(){
-			VAOItem<VAOChessData> vaoi = null;
 
 			mainVAO = new Tetra.IndexedVAO<VAOChessData> ();
 
@@ -362,7 +365,7 @@ namespace Chess
 			width = 8f,
 			height = 8f;
 
-			boardVAOItem = mainVAO.Add (new Tetra.Mesh (
+			boardPlateVAOItem = mainVAO.Add (new Tetra.Mesh (
 				new Vector3[] {
 					new Vector3 (x - width / 2f, y + height / 2f, 0f),
 					new Vector3 (x - width / 2f, y - height / 2f, 0f),
@@ -382,15 +385,15 @@ namespace Chess
 					Vector3.UnitZ
 				},
 				new ushort[] { 0, 1, 2, 2, 1, 3 }));
-			boardVAOItem.DiffuseTexture = new GGL.Texture ("#Chess.Textures.board1.png");
-			boardVAOItem.Datas = new VAOChessData[1];
-			boardVAOItem.Datas[0].modelMats = Matrix4.Identity;
-			boardVAOItem.Datas[0].color = new Vector4(0.6f,0.6f,0.6f,1f);
+			boardPlateVAOItem.DiffuseTexture = new GGL.Texture ("#Chess.Textures.board1.png");
+			boardPlateVAOItem.Datas = new VAOChessData[1];
+			boardPlateVAOItem.Datas[0].modelMats = Matrix4.Identity;
+			boardPlateVAOItem.Datas[0].color = new Vector4(0.6f,0.6f,0.6f,1f);
 
-			boardVAOItem.UpdateInstancesData ();
+			boardPlateVAOItem.UpdateInstancesData ();
 
 			x = 0f;
-			y = 0.03f;
+			y = 0f;
 			width = 1.0f;
 			height = 1.0f;
 
@@ -419,6 +422,13 @@ namespace Chess
 			cellVAOItem.Datas[0].modelMats = Matrix4.CreateTranslation (new Vector3 (4.5f, 4.5f, 0f));
 			cellVAOItem.Datas[0].color = new Vector4(1f,1f,1f,1f);
 			cellVAOItem.UpdateInstancesData ();
+
+			boardVAOItem = mainVAO.Add (meshBoard);
+			boardVAOItem.DiffuseTexture = new GGL.Texture ("#Chess.Textures.marble1.jpg");
+			boardVAOItem.Datas = new VAOChessData[1];
+			boardVAOItem.Datas [0].modelMats = Matrix4.CreateTranslation (4f, 4f, -0.25f);
+			boardVAOItem.Datas[0].color = new Vector4(0.2f,0.2f,0.22f,1f);
+			boardVAOItem.UpdateInstancesData ();
 
 			List<int> tmp = new List<int> ();
 
@@ -479,6 +489,12 @@ namespace Chess
 
 			mainVAO.Bind ();
 
+			changeShadingColor(new Vector4(1.0f,1.0f,1.0f,1.0f));
+
+
+
+			mainVAO.Render (PrimitiveType.Triangles, boardVAOItem);
+
 			GL.Enable(EnableCap.StencilTest);
 
 			//cut stencil
@@ -487,9 +503,7 @@ namespace Chess
 			GL.StencilMask (0xff);
 			GL.DepthMask (false);
 
-			//drawSquarre(Selection, new Vector4(0.3f,1.0f,0.3f,0.5f));
-			changeShadingColor(new Vector4(1.0f,1.0f,1.0f,1.0f));
-			mainVAO.Render (PrimitiveType.Triangles, boardVAOItem);
+			mainVAO.Render (PrimitiveType.Triangles, boardPlateVAOItem);
 
 			//draw reflected items
 			GL.CullFace(CullFaceMode.Front);
@@ -735,7 +749,7 @@ namespace Chess
 			NotifyValueChanged ("SavedGames", SavedGames);
 		}
 		void onLoadOkClick (object sender, MouseButtonEventArgs e){
-			resetBoard ();
+			StockfishMoves.Clear ();
 			using (FileStream fs = new FileStream (FileName, FileMode.Open)) {
 				using (StreamReader sw = new StreamReader (fs)) {
 					while (!sw.EndOfStream)
@@ -1330,21 +1344,21 @@ namespace Chess
 		Vector3 getCurrentCapturePosition(ChessPiece p){
 			float x, y;
 			if (p.Player.Color == ChessColor.White) {
-				x = -0.5f;
-				y = 7.5f - cptWhiteOut;
-				if (cptWhiteOut > 8) {
-					x -= 1f;
-					y += 8f;
+				x = -1.0f;
+				y = 6.5f - (float)cptWhiteOut*0.7f;
+				if (cptWhiteOut > 7) {
+					x -= 0.7f;
+					y += 8f*0.7f;
 				}
 			} else {				
-				x = 8.5f;
-				y = 0.5f + cptBlackOut;
-				if (cptBlackOut > 8) {
-					x += 1f;
-					y -= 8f;
+				x = 9.0f;
+				y = 1.5f + (float)cptBlackOut*0.7f;
+				if (cptBlackOut > 7) {
+					x += 0.7f;
+					y -= 8f*0.7f;
 				}
 			}
-			return new Vector3 (x, y, 0f);
+			return new Vector3 (x, y, -0.25f);
 		}
 
 		void capturePiece(ChessPiece p, bool animate = true){

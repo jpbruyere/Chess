@@ -2,10 +2,23 @@
 <Border Height="-1"  VerticalAlignment="Bottom"
 		BorderWidth="1" CornerRadius="5" Background="0,4;0,4;0,4;0,8">
 	<HorizontalStack Height="-1" Margin="3">
+		<GraphicObject Width="15" Height="15"/>
+		<Popper Template="#Chess.gui.tmpPopper.crow"
+			Caption="Files" Width="-1">
+			<Border Fit="True" Background="0,4;0,4;0,4;0,8" Margin="2">
+				<HorizontalStack Fit="true" Margin="10">
+					<Button Style="#Chess.gui.Button.style" Caption="Restart" MouseClick="onResetClick"/>
+					<Button Style="#Chess.gui.Button.style" Caption="Save" MouseClick="onSaveClick"/>
+					<Button Style="#Chess.gui.Button.style" Caption="Load" MouseClick="onLoadClick"/>
+					<GraphicObject Width="15" Height="15"/>
+					<Button Style="#Chess.gui.Button.style" Caption="Quit" MouseClick="onQuitClick"/>
+				</HorizontalStack>
+			</Border>
+		</Popper>
 		<Popper Template="#Chess.gui.tmpPopper.crow"
 			Caption="View" Width="-1">
-			<Border Fit="True" Background="0,4;0,4;0,4;0,8">
-				<HorizontalStack Fit="true">
+			<Border Fit="True" Background="0,4;0,4;0,4;0,8" Margin="2">
+				<HorizontalStack Fit="true" Margin="10">
 					<Button Style="#Chess.gui.Button.style" Font="droid bold, 10" Caption="Mini Board" MouseClick="onViewBoardClick"/>
 					<Button Style="#Chess.gui.Button.style" Caption="Moves" MouseClick="onViewMovesClick"/>
 					<Button Style="#Chess.gui.Button.style" Caption="Logs" MouseClick="onViewLogsClick"/>
@@ -25,12 +38,5 @@
 		<GraphicObject Width="0"/>
 		<Button Style="#Chess.gui.Button.style" Caption="Hint" MouseClick="onHintClick"/>
 		<Button Style="#Chess.gui.Button.style" Caption="Undo" MouseClick="onUndoClick"/>
-		<Button Style="#Chess.gui.Button.style" Caption="Restart" MouseClick="onResetClick"/>
-		<GraphicObject Width="10"/>
-
-		<Button Style="#Chess.gui.Button.style" Caption="Save" MouseClick="onSaveClick"/>
-		<Button Style="#Chess.gui.Button.style" Caption="Load" MouseClick="onLoadClick"/>
-		<GraphicObject Width="20"/>
-		<Button Style="#Chess.gui.Button.style" Caption="Quit" MouseClick="onQuitClick"/>
 	</HorizontalStack>
 </Border>

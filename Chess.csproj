@@ -71,9 +71,6 @@
     <None Include="Meshes\pawn.obj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Textures\wood8.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Include="Textures\pawn_backed.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -110,6 +107,9 @@
     <None Include="Textures\marble.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="Meshes\board.obj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Meshes\" />
@@ -139,6 +139,8 @@
     <EmbeddedResource Include="gui\Button.style" />
     <EmbeddedResource Include="Textures\chessBoard.png" />
     <EmbeddedResource Include="Textures\board1.png" />
+    <EmbeddedResource Include="Textures\wood.jpg" />
+    <EmbeddedResource Include="Textures\marble1.jpg" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="lib\Crow\Crow.csproj">
