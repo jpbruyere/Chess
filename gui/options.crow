@@ -1,7 +1,7 @@
 ﻿<Window Font="droid bold, 26" Width="0" Height="0" Margin="200"  Title="Options"
 	Template="#Chess.gui.tmpWindow.crow">
-	<Container Fit="true">
-		<VerticalStack Fit="true">
+	<Container>
+		<VerticalStack>
 			<HorizontalStack Margin="3" Fit="true" Spacing="10">
 				<GroupBox Caption="Whites" Fit="true">
 					<VerticalStack Margin="10">
@@ -16,7 +16,16 @@
 					</VerticalStack>
 				</GroupBox>
 			</HorizontalStack>
-			<CheckBox Caption="Autoplay on Hint" IsChecked="{²AutoPlayHint}"/>
+			<CheckBox Template="#Chess.gui.tmpCheckBox.crow" Caption="Autoplay on Hint"
+				Margin="10"
+				Foreground="Black"
+				Font="droid bold, 14"
+				MouseEnter="{Background=DimGray}"
+				MouseLeave="{Background=Transparent}"
+				Checked="{Foreground=White}"
+				Unchecked="{Foreground=Black}"
+				IsChecked="{²AutoPlayHint}"/>
+			<GraphicObject/>
 			<Button Style="#Chess.gui.Button.style" HorizontalAlignment="Right" Caption="Close"
 				MouseClick="../../../../../../butQuitPress"/>
 		</VerticalStack>

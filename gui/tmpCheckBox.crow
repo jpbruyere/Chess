@@ -1,0 +1,6 @@
+﻿<?xml version="1.0"?>
+<Group Margin="1" Height="{../HeightPolicy}" Width="{../WidthPolicy}">
+	<Label Margin="10" Font="{../../Font}" Foreground="{../../Foreground}" 
+		Text="{../../Caption}" Height="{../../HeightPolicy}" Width="{../../WidthPolicy}"/>
+	<GraphicObject Background="0,7;0,1;0,5;0,3" Visible="{../../IsChecked}"/>
+</Group>

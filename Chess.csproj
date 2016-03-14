@@ -139,6 +139,7 @@
     <EmbeddedResource Include="Meshes\board.obj">
       <Gettext-ScanForTranslations>False</Gettext-ScanForTranslations>
     </EmbeddedResource>
+    <EmbeddedResource Include="gui\tmpCheckBox.crow" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="lib\Crow\Crow.csproj">
