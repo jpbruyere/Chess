@@ -641,6 +641,8 @@ namespace Chess
 		public string FileName {
 			get { return fileName; }
 			set {
+				if (fileName == value)
+					return;
 				fileName = value; 
 				NotifyValueChanged("FileName", fileName);
 			}
@@ -656,6 +658,8 @@ namespace Chess
 			g = CrowInterface.LoadInterface (path);
 			g.Name = path;
 			g.DataSource = this;
+
+			Crow.CompilerServices.ResolveBindings (this.Bindings);
 		}
 		void closeWindow (string path){
 			GraphicObject g = CrowInterface.FindByName (path);
@@ -772,12 +776,7 @@ namespace Chess
 		}
 
 		void onViewOptionsClick (object sender, MouseButtonEventArgs e){
-			try {
-				loadWindow(UI_Options);
-			} catch (Exception ex) {
-				Debug.WriteLine (ex.ToString ());
-			}
-			Crow.CompilerServices.ResolveBindings (Bindings);
+			loadWindow(UI_Options);
 		}
 		void onViewFpsClick (object sender, MouseButtonEventArgs e){
 			loadWindow(UI_Fps);
@@ -876,11 +875,12 @@ namespace Chess
 			stockfish.Start();
 
 			stockfish.BeginOutputReadLine ();
+			stockfish.WaitForInputIdle ();
+			stockfish.StandardInput.WriteLine ("uci");
 		}
 		void syncStockfish(){
 			NotifyValueChanged ("StockfishMoves", StockfishMoves);
 			string cmd = stockfishPositionCommand;
-			AddLog (cmd);
 			stockfish.WaitForInputIdle ();
 			stockfish.StandardInput.WriteLine (cmd);
 		}
@@ -896,19 +896,29 @@ namespace Chess
 
 			string[] tmp = e.Data.Split (' ');
 
-			if (tmp [0] != "bestmove" || currentState == GameState.Checkmate)
+			switch (tmp[0]) {
+			case "uciok":
+				stockfish.WaitForInputIdle ();
+				stockfish.StandardInput.WriteLine ("setoption name Skill Level value 0");
 				return;
-			
-			if (CurrentPlayer.Type == PlayerType.Human) {
-				AddLog ("Hint => " + tmp [1]);
-				if (AutoPlayHint)
+			case "bestmove":
+				if (currentState == GameState.Checkmate)
+					return;
+				if (CurrentPlayer.Type == PlayerType.Human) {
+					AddLog ("Hint => " + tmp [1]);
+					if (AutoPlayHint)
+						QueueMove (tmp [1]);
+					else {
+						nextHint = tmp [1];
+						updateArrows = true;
+					}
+				} else
 					QueueMove (tmp [1]);
-				else {
-					nextHint = tmp [1];
-					updateArrows = true;
-				}
-			}else
-				QueueMove (tmp [1]);
+				return;
+			default:
+				return;
+			}
+
 		}
 
 		#endregion
@@ -1426,6 +1436,10 @@ namespace Chess
 			Point pEnd = getChessCell(move.Substring(2,2));
 
 			ChessPiece p = Board [pStart.X, pStart.Y];
+			if (p == null) {
+				AddLog ("\timpossible move.");
+				return;
+			}
 			Board [pStart.X, pStart.Y] = null;
 			ChessPiece pTarget = Board [pEnd.X, pEnd.Y];
 			if (pTarget != null)

@@ -3,7 +3,7 @@
 	Template="#Chess.gui.tmpWindow.crow">
 	<VerticalStack Height="-1" Margin="30" Spacing="5">
 		<Label Text="File Name:" Margin="2"/>
-		<TextBox Font="droid , 16" Text="{FileName}" Width="0" Margin="5"/>
+		<TextBox Font="droid , 16" Text="{²FileName}" Width="0" Margin="5"/>
 		<HorizontalStack Fit="true" HorizontalAlignment="Right" Margin="3">				
 			<Button Style="#Chess.gui.Button.style" Caption="Ok" MouseClick="onSaveOkClick"/>
 			<Button Style="#Chess.gui.Button.style" Caption="Cancel" MouseClick="onSaveCancel"/>
