@@ -10,8 +10,6 @@
 					<Button Style="#Chess.gui.Button.style" Caption="Restart" MouseClick="onResetClick"/>
 					<Button Style="#Chess.gui.Button.style" Caption="Save" MouseClick="onSaveClick"/>
 					<Button Style="#Chess.gui.Button.style" Caption="Load" MouseClick="onLoadClick"/>
-					<GraphicObject Width="15" Height="15"/>
-					<Button Style="#Chess.gui.Button.style" Caption="Quit" MouseClick="onQuitClick"/>
 				</HorizontalStack>
 			</Border>
 		</Popper>
@@ -29,18 +27,24 @@
 			</Border>
 		</Popper>
 		<VerticalStack Height="-1" Width="120" Spacing="5">
-			<Label Font="droid, 10" Text="Current Player"/>
+			<Label Font="droid, 10" Foreground="Ivory" Text="Current Player"/>
 			<Label Font="droid bold, 16" Text="{CurrentPlayer}"/>
 		</VerticalStack>
 		<VerticalStack Height="-1" Width="120" Spacing="5">
-			<Label Font="droid, 10" Text="Move"/>
+			<Label Font="droid, 10" Foreground="Ivory" Text="Game State"/>
+			<Label Font="droid bold, 16" Text="{CurrentState}"/>
+		</VerticalStack>
+		<VerticalStack Height="-1" Width="120" Spacing="5">
+			<Label Font="droid, 10" Foreground="Ivory" Text="Move"/>
 			<HorizontalStack Fit="true">
-				<Label Font="droid bold, 16" Text="{ActCell}"/>
-				<Label Font="droid bold, 16" Text="{SelCell}"/>
+				<Label Font="droid bold, 14" Text="{ActCell}"/>
+				<Label Font="droid bold, 14" Text="{SelCell}"/>
 			</HorizontalStack>
 		</VerticalStack>
 		<GraphicObject Width="0"/>
 		<Button Style="#Chess.gui.Button.style" Caption="Hint" MouseClick="onHintClick"/>
 		<Button Style="#Chess.gui.Button.style" Caption="Undo" MouseClick="onUndoClick"/>
+		<GraphicObject Width="15"/>
+		<Button Style="#Chess.gui.Button.style" Caption="Quit" MouseClick="onQuitClick"/>
 	</HorizontalStack>
 </Border>

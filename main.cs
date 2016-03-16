@@ -13,7 +13,7 @@ using System.IO;
 
 namespace Chess
 {
-	public enum GameState { Init, MeshesLoading, VAOInit, ComputeTangents, BuildBuffers, Play, Checked, Checkmate};
+	public enum GameState { Init, MeshesLoading, VAOInit, ComputeTangents, BuildBuffers, Play, Checked, Pad, Checkmate};
 	public enum PlayerType { Human, AI };
 	public enum ChessColor { White, Black};
 	public enum PieceType { Pawn, Rook, Knight, Bishop, King, Queen };
@@ -49,8 +49,8 @@ namespace Chess
 			return Color.ToString();
 		}
 	}
-	public class ChessPiece{		
-		float x, y, z, xAngle;
+	public class ChessPiece{
+		float x, y, z, xAngle, zAngle;
 		VAOItem<VAOChessData> newMesh;//replacment mesh when promote or unpromote
 		PieceType originalType;
 		PieceType promotion;
@@ -125,7 +125,15 @@ namespace Chess
 				updatePos ();
 			}
 		}
-
+		public float ZAngle {
+			get {return zAngle;}
+			set {
+				if (zAngle == value)
+					return;
+				zAngle = value;
+				updatePos ();
+			}
+		}
 		public ChessPiece(VAOItem<VAOChessData> vaoi, int idx, ChessPlayer _player , PieceType _type, int xPos, int yPos){
 			Mesh = vaoi;
 			InstanceIndex = idx;
@@ -165,7 +173,7 @@ namespace Chess
 			HasMoved = false;
 			Captured = false;
 			updateColor ();
-		}	
+		}
 		public void Promote(char prom, bool preview = false){
 			if (IsPromoted)
 				throw new Exception ("trying to promote already promoted " + Type.ToString());
@@ -224,17 +232,25 @@ namespace Chess
 		}
 		void updatePos(){
 			Mesh.Datas [InstanceIndex].modelMats =
-				Matrix4.CreateRotationX(xAngle) *
+				Matrix4.CreateRotationZ(zAngle) *
+				Matrix4.CreateTranslation(new Vector3(-0.32f, 0, 0)) *
+				Matrix4.CreateRotationY(xAngle) *
+				Matrix4.CreateTranslation(new Vector3(0.32f, 0, 0)) *
+				Matrix4.CreateRotationZ(xAngle/2f) *
+//				Matrix4.CreateTranslation(new Vector3(0, 0.32f, 0)) *
+//				Matrix4.CreateRotationX(xAngle) *
+//				Matrix4.CreateTranslation(new Vector3(0, -0.32f, 0)) *
 				Matrix4.CreateTranslation(new Vector3(x, y, z));
-			if (Player.Color == ChessColor.Black)
-				Mesh.Datas [InstanceIndex].modelMats = Matrix4.CreateRotationZ(MathHelper.Pi) * Mesh.Datas [InstanceIndex].modelMats;
 			OpenGLSync = false;
 		}
 		void updateColor(){
-			if (Player.Color == ChessColor.White)				
+			if (Player.Color == ChessColor.White) {
 				Mesh.Datas [InstanceIndex].color = new Vector4 (0.80f, 0.80f, 0.74f, 1f);
-			else
-				Mesh.Datas [InstanceIndex].color = new Vector4 (0.07f, 0.05f, 0.06f, 1f);			
+				ZAngle = 0f;
+			} else {
+				Mesh.Datas [InstanceIndex].color = new Vector4 (0.07f, 0.05f, 0.06f, 1f);
+				ZAngle = MathHelper.Pi;
+			}
 			OpenGLSync = false;
 		}
 		void removePieceInstance()
@@ -252,8 +268,8 @@ namespace Chess
 					if (pce.InstanceIndex > InstanceIndex) {
 						pce.InstanceIndex--;
 						bool savedState = pce.OpenGLSync;
-						pce.updatePos ();
 						pce.updateColor ();
+						pce.updatePos ();
 						pce.OpenGLSync = savedState; //will be update one for all pce
 					}
 				}
@@ -410,7 +426,7 @@ namespace Chess
 
 		void loadMeshes()
 		{
-			currentState = GameState.MeshesLoading;
+			CurrentState = GameState.MeshesLoading;
 
 			meshPawn = Tetra.OBJMeshLoader.Load ("#Chess.Meshes.pawn.obj");
 			ProgressValue+=20;
@@ -427,7 +443,7 @@ namespace Chess
 			meshBoard = Tetra.OBJMeshLoader.Load ("#Chess.Meshes.board.obj");
 			ProgressValue+=20;
 
-			currentState = GameState.VAOInit;
+			CurrentState = GameState.VAOInit;
 		}
 		void createMainVAO(){
 
@@ -554,7 +570,7 @@ namespace Chess
 		}
 		void computeTangents(){
 			mainVAO.ComputeTangents();
-			currentState = GameState.BuildBuffers;
+			CurrentState = GameState.BuildBuffers;
 		}
 
 		void draw()
@@ -609,7 +625,7 @@ namespace Chess
 			if (active >= 0)
 				drawSquarre(Active, new Vector4(0.2f,0.2f,1.0f,0.6f));
 
-			if (currentState > GameState.Play)
+			if (CurrentState > GameState.Play)
 				drawSquarre(CurrentPlayer.King.BoardCell, new Vector4(1.0f,0.2f,0.2f,0.6f));
 
 			GL.Enable (EnableCap.DepthTest);
@@ -653,8 +669,8 @@ namespace Chess
 			Point pStart = getChessCell(move.Substring(0,2));
 			Point pEnd = getChessCell(move.Substring(2,2));
 			arrows = new Arrow3d (
-				new Vector3 ((float)pStart.X + 0.5f, (float)pStart.Y + 0.5f, 0), 
-				new Vector3 ((float)pEnd.X + 0.5f, (float)pEnd.Y + 0.5f, 0), 
+				new Vector3 ((float)pStart.X + 0.5f, (float)pStart.Y + 0.5f, 0),
+				new Vector3 ((float)pEnd.X + 0.5f, (float)pEnd.Y + 0.5f, 0),
 				Vector3.UnitZ);
 		}
 		void renderArrow(){
@@ -712,7 +728,7 @@ namespace Chess
 			set {
 				if (fileName == value)
 					return;
-				fileName = value; 
+				fileName = value;
 				NotifyValueChanged("FileName", fileName);
 			}
 		}
@@ -890,6 +906,30 @@ namespace Chess
 		#region Stockfish
 		Process stockfish;
 		bool autoPlayHint = false;
+		volatile bool waitAnimationFinished = false;
+		List<String> stockfishMoves = new List<string> ();
+		int stockfishLevel = 20;
+		public int StockfishLevel{
+			get { return stockfishLevel; }
+			set
+			{
+				if (value == stockfishLevel)
+					return;
+
+				stockfishLevel = value;
+
+				stockfish.WaitForInputIdle ();
+				stockfish.StandardInput.WriteLine ("setoption name Skill Level value " + stockfishLevel.ToString());
+
+				NotifyValueChanged ("StockfishLevel", StockfishLevel);
+			}
+		}
+		string stockfishPositionCommand {
+			get {
+				string tmp = "position startpos moves ";
+				return
+					StockfishMoves.Count == 0 ? tmp : tmp + StockfishMoves.Aggregate ((i, j) => i + " " + j); }
+		}
 
 		public bool AutoPlayHint {
 			get { return autoPlayHint; }
@@ -900,20 +940,9 @@ namespace Chess
 				NotifyValueChanged ("AutoPlayHint", AutoPlayHint);
 			}
 		}
-
-		volatile bool waitAnimationFinished = false;
-
-		List<String> stockfishMoves = new List<string> ();
-
 		public List<String> StockfishMoves {
 			get { return stockfishMoves; }
 			set { stockfishMoves = value; }
-		}
-		string stockfishPositionCommand {
-			get {
-				string tmp = "position startpos moves ";
-				return 
-					StockfishMoves.Count == 0 ? tmp : tmp + StockfishMoves.Aggregate ((i, j) => i + " " + j); }
 		}
 
 		void initStockfish()
@@ -956,21 +985,16 @@ namespace Chess
 
 			switch (tmp[0]) {
 			case "uciok":
-				stockfish.WaitForInputIdle ();
-				stockfish.StandardInput.WriteLine ("setoption name Skill Level value 0");
+				StockfishLevel = 0;
 				return;
 			case "bestmove":
-				if (currentState == GameState.Checkmate)
+				if (tmp [1] == "(none)")
 					return;
-				if (CurrentPlayer.Type == PlayerType.Human) {					
-					if (AutoPlayHint)
-						processMove (tmp [1]);
-					else {
-						nextHint = tmp [1];
-						updateArrows = true;
-					}
-				} else
-					processMove (tmp [1]);
+				if (CurrentState == GameState.Checkmate) {
+					AddLog ("Error: received bestmove while game in Checkmate state");
+					return;
+				}
+				bestMove = tmp [1];
 				return;
 			default:
 				return;
@@ -994,15 +1018,24 @@ namespace Chess
 		int cptBlackOut = 0;
 
 		volatile bool updateArrows = false;
-		string nextHint;
+		volatile string bestMove;
 
 		public static ChessPlayer[] Players;
 
 		public ChessPiece[,] Board {
 			get { return board; }
-			set { 
-				board = value; 
+			set {
+				board = value;
 				NotifyValueChanged ("Board", board);
+			}
+		}
+		public GameState CurrentState{
+			get { return currentState; }
+			set {
+				if (currentState == value)
+					return;
+				currentState = value;
+				NotifyValueChanged ("CurrentState", currentState);
 			}
 		}
 
@@ -1118,7 +1151,7 @@ namespace Chess
 			addPiece (vaoiKing, 1, 1, PieceType.King, 4, 7);
 		}
 		void resetBoard(bool animate = true){
-			currentState = GameState.Play;
+			CurrentState = GameState.Play;
 			GraphicObject g = CrowInterface.FindByName ("mateWin");
 			if (g != null)
 				CrowInterface.DeleteWidget (g);
@@ -1189,7 +1222,7 @@ namespace Chess
 
 			if (x < 0 || x > 7 || y < 0 || y > 7)
 				return null;
-			
+
 			if (Board [x, y] == null) {
 				if (Board [pos.X, pos.Y].Type == PieceType.Pawn){
 					if (xDelta != 0)
@@ -1216,7 +1249,7 @@ namespace Chess
 			if (Board [x, y].Type == PieceType.King)
 				return new string[] { getChessCell (pos.X, pos.Y) + getChessCell (x, y) + "K"};
 
-			if (Board [pos.X, pos.Y].Type == PieceType.Pawn && 
+			if (Board [pos.X, pos.Y].Type == PieceType.Pawn &&
 				y ==  Board [pos.X, pos.Y].Player.PawnPromotionY){
 				string basicPawnMove = getChessCell (pos.X, pos.Y) + getChessCell (x, y);
 				return new string[] {
@@ -1361,7 +1394,7 @@ namespace Chess
 				AddLog ("Previewing: " + move);
 				move = move.Substring (0, 4);
 			}
-			
+
 			preview_Move = move;
 
 			Point pStart = getChessCell(preview_Move.Substring(0,2));
@@ -1374,7 +1407,7 @@ namespace Chess
 				preview_wasPromoted = true;
 			}else
 				preview_wasPromoted = false;
-			
+
 			preview_MoveState = p.HasMoved;
 			Board [pStart.X, pStart.Y] = null;
 			p.HasMoved = true;
@@ -1391,7 +1424,7 @@ namespace Chess
 			if (preview_wasPromoted)
 				p.Unpromote ();
 			if (preview_Captured != null)
-				preview_Captured.Captured = false;			
+				preview_Captured.Captured = false;
 			Board [pStart.X, pStart.Y] = p;
 			Board [pEnd.X, pEnd.Y] = preview_Captured;
 			preview_Move = null;
@@ -1414,7 +1447,7 @@ namespace Chess
 					x -= 0.7f;
 					y += 8f*0.7f;
 				}
-			} else {				
+			} else {
 				x = 9.0f;
 				y = 1.5f + (float)cptBlackOut*0.7f;
 				if (cptBlackOut > 7) {
@@ -1524,7 +1557,7 @@ namespace Chess
 		{
 			if (StockfishMoves.Count == 0)
 				return;
-			
+
 			string move = StockfishMoves [StockfishMoves.Count - 1];
 			StockfishMoves.RemoveAt (StockfishMoves.Count - 1);
 
@@ -1584,14 +1617,21 @@ namespace Chess
 
 			switchPlayer ();
 
-			if (checkKingIsSafe ())
-				currentState = GameState.Play;
-			else if (getLegalMoves ().Length == 0) {
-				currentState = GameState.Checkmate;
-				GraphicObject g = CrowInterface.LoadInterface ("#Chess.gui.checkmate.crow");
-				g.DataSource = this;
-			}else
-				currentState = GameState.Checked;			
+			bool kingIsSafe = checkKingIsSafe ();
+			if (getLegalMoves ().Length == 0) {
+				if (kingIsSafe)
+					CurrentState = GameState.Pad;
+				else {
+					CurrentState = GameState.Checkmate;
+					GraphicObject g = CrowInterface.LoadInterface ("#Chess.gui.checkmate.crow");
+					g.DataSource = this;
+					Animation.StartAnimation (new AngleAnimation (CurrentPlayer.King, "XAngle", MathHelper.Pi * 0.53f));
+					Animation.StartAnimation (new AngleAnimation (CurrentPlayer.King, "ZAngle", CurrentPlayer.King.ZAngle - MathHelper.Pi, 0.2f));
+				}
+			}else if (kingIsSafe)
+				CurrentState = GameState.Play;
+			else
+				CurrentState = GameState.Checked;
 		}
 
 		void closeGame(){
@@ -1629,7 +1669,7 @@ namespace Chess
 		}
 		public override void OnRender (FrameEventArgs e)
 		{
-			if (currentState < GameState.Play)
+			if (CurrentState < GameState.Play)
 				return;
 			draw ();
 		}
@@ -1642,7 +1682,7 @@ namespace Chess
 		{
 			base.OnUpdateFrame (e);
 
-			switch (currentState) {
+			switch (CurrentState) {
 			case GameState.Init:
 			case GameState.MeshesLoading:
 			case GameState.ComputeTangents:
@@ -1652,7 +1692,7 @@ namespace Chess
 
 				createMainVAO ();
 
-				currentState = GameState.ComputeTangents;
+				CurrentState = GameState.ComputeTangents;
 
 				Thread t = new Thread (computeTangents);
 				t.IsBackground = true;
@@ -1662,20 +1702,27 @@ namespace Chess
 				mainVAO.BuildBuffers ();
 				initBoard ();
 				initInterface ();
-				currentState = GameState.Play;
+				CurrentState = GameState.Play;
 				break;
 			case GameState.Play:
 			case GameState.Checked:
-				if (updateArrows) {
-					updateArrows = false;
-					createArrows (nextHint);
+				if (string.IsNullOrEmpty (bestMove))
+					break;
+				if (CurrentPlayer.Type == PlayerType.Human) {
+					if (!AutoPlayHint) {
+						createArrows (bestMove);
+						break;
+					}
 				}
+				clearArrows ();
+				processMove (bestMove);
+				bestMove = null;
 				break;
 			}
 			Animation.ProcessAnimations ();
 
 			foreach (ChessPlayer p in Players) {
-				foreach (ChessPiece pce in p.Pieces) {					
+				foreach (ChessPiece pce in p.Pieces) {
 					pce.SyncGL ();
 				}
 			}
@@ -1728,7 +1775,7 @@ namespace Chess
 
 			clearArrows ();
 
-			if (currentState == GameState.Checkmate) {
+			if (CurrentState == GameState.Checkmate) {
 				Active = -1;
 				return;
 			}
@@ -1771,7 +1818,7 @@ namespace Chess
 		}
 
 		void Mouse_Move(object sender, OpenTK.Input.MouseMoveEventArgs e)
-		{			
+		{
 
 			if (e.XDelta != 0 || e.YDelta != 0)
 			{

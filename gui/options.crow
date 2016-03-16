@@ -36,6 +36,7 @@
 				Checked="{Foreground=White}"
 				Unchecked="{Foreground=Black}"
 				IsChecked="{²AutoPlayHint}"/>
+			<Spinner Caption="Level" Value="{²StockfishLevel}" Minimum="0" Maximum="20"/>
 			<GraphicObject/>
 			<Button Style="#Chess.gui.Button.style" HorizontalAlignment="Right" Caption="Close"
 				MouseClick="../../../../../../butQuitPress"/>
