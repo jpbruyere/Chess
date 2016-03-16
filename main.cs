@@ -824,8 +824,27 @@ namespace Chess
 						StockfishMoves.Add(sw.ReadLine ());
 				}
 			}
+			//save current pces pos
+			List<Vector3> oldPositions = new List<Vector3>();
+			foreach (ChessPlayer p in Players) {
+				foreach (ChessPiece pce in p.Pieces) {
+					oldPositions.Add (pce.Position);
+				}
+			}
 			syncStockfish ();
 			replaySilently ();
+			int i = 0;
+			foreach (ChessPlayer p in Players) {
+				foreach (ChessPiece pce in p.Pieces) {
+					if (oldPositions [i] != pce.Position) {
+						Animation.StartAnimation (new PathAnimation (pce, "Position",
+							new BezierPath (
+								oldPositions [i],
+								pce.Position, Vector3.UnitZ)));
+					}
+					i++;
+				}
+			}
 			closeWindow (UI_Load);
 		}
 		void onLoadCancel (object sender, MouseButtonEventArgs e){
@@ -1450,6 +1469,8 @@ namespace Chess
 				return;
 			if (move == "(none)")
 				return;
+			if (animate)
+				AddLog (CurrentPlayer.ToString () + " => " + move);
 
 			Point pStart = getChessCell(move.Substring(0,2));
 			Point pEnd = getChessCell(move.Substring(2,2));
@@ -1459,9 +1480,6 @@ namespace Chess
 				AddLog ("\timpossible move.");
 				return;
 			}
-
-			if (animate)
-				AddLog (CurrentPlayer.ToString () + " => " + move);
 
 			StockfishMoves.Add (move);
 			NotifyValueChanged ("StockfishMoves", StockfishMoves);
