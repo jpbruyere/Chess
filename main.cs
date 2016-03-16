@@ -32,15 +32,7 @@ namespace Chess
 				base.AddRange (moves);
 		}
 	}
-	public class MoveQueueItem{
-		public string Move;
-		public bool Animate;
-		public MoveQueueItem(string _move, bool _animate)
-		{
-			Move = _move;
-			Animate = _animate;
-		}
-	}
+
 	public class ChessPlayer{
 		public string Name;
 		public ChessColor Color;
@@ -57,13 +49,17 @@ namespace Chess
 			return Color.ToString();
 		}
 	}
-	public class ChessPiece{
+	public class ChessPiece{		
+		float x, y, z, xAngle;
+		VAOItem<VAOChessData> newMesh;//replacment mesh when promote or unpromote
+		PieceType originalType;
+		PieceType promotion;
+
 		public VAOItem<VAOChessData> Mesh;
 		public int InstanceIndex;
 		public ChessPlayer Player;
-		PieceType originalType;
 		public bool IsPromoted;
-		PieceType promotion;
+		public bool OpenGLSync = false;
 
 		public PieceType Type {
 			get { return IsPromoted ? promotion : originalType; }
@@ -75,7 +71,6 @@ namespace Chess
 		public bool HasMoved;
 		public bool Captured;
 
-		float x, y, z, xAngle;
 		public int InitX, InitY;
 
 		public Point BoardCell{
@@ -85,39 +80,49 @@ namespace Chess
 		public Vector3 Position {
 			get { return new Vector3 (x, y, z); }
 			set {
+				if (value == Position)
+					return;
 				x = value.X;
 				y = value.Y;
 				z = value.Z;
-				update ();
+				updatePos ();
 			}
 		}
 
 		public float X {
 			get {return x;}
 			set {
+				if (x == value)
+					return;
 				x = value;
-				update();
+				updatePos ();
 			}
 		}
 		public float Y {
 			get {return y;}
 			set {
+				if (y == value)
+					return;
 				y = value;
-				update();
+				updatePos ();
 			}
 		}
 		public float Z {
 			get {return z;}
 			set {
+				if (z == value)
+					return;
 				z = value;
-				update();
+				updatePos ();
 			}
 		}
 		public float XAngle {
 			get {return xAngle;}
 			set {
+				if (xAngle == value)
+					return;
 				xAngle = value;
-				update();
+				updatePos ();
 			}
 		}
 
@@ -135,14 +140,13 @@ namespace Chess
 			HasMoved = false;
 			Captured = false;
 
-			updateColorData ();
+			updateColor ();
+			updatePos ();
 
 			Player.Pieces.Add (this);
 
 			if (Type == PieceType.King)
 				Player.King = this;
-
-			update ();
 		}
 		public void Reset(bool animate = true){
 			xAngle = 0f;
@@ -156,54 +160,107 @@ namespace Chess
 				else
 					Position = new Vector3 (InitX + 0.5f, InitY + 0.5f, 0f);
 			}
+			Unpromote ();
 			IsPromoted = false;
 			HasMoved = false;
 			Captured = false;
-			updateColorData ();
-			update ();
+			updateColor ();
 		}	
-		public void Promote(char prom){
+		public void Promote(char prom, bool preview = false){
+			if (IsPromoted)
+				throw new Exception ("trying to promote already promoted " + Type.ToString());
 			if (Type != PieceType.Pawn)
 				throw new Exception ("trying to promote " + Type.ToString());
 			IsPromoted = true;
 			switch (prom) {
 			case 'q':
 				promotion = PieceType.Queen;
+				newMesh = MainWin.vaoiQueen;
 				break;
 			case 'r':
 				promotion = PieceType.Rook;
+				newMesh = MainWin.vaoiRook;
 				break;
 			case 'b':
 				promotion = PieceType.Bishop;
+				newMesh = MainWin.vaoiBishop;
 				break;
 			case 'k':
 				promotion = PieceType.Knight;
+				newMesh = MainWin.vaoiKnight;
 				break;
 			default:
 				throw new Exception ("Unrecognized promotion");
 			}
+			if (preview) {
+				newMesh = null;
+				return;
+			}
+			OpenGLSync = false;
 		}
 		public void Unpromote(){
+			if (!IsPromoted)
+				return;
 			IsPromoted = false;
+			if (Mesh == MainWin.vaoiPawn)
+				return;
+			newMesh = MainWin.vaoiPawn;
+			OpenGLSync = false;
 		}
-		public void UpdateInstanceDatas(){
-			updateColorData ();
-			update ();
+
+		public void SyncGL(){
+			if (OpenGLSync)
+				return;
+			if (newMesh != null) {
+				removePieceInstance ();
+				Mesh = newMesh;
+				newMesh = null;
+				InstanceIndex = Mesh.AddInstance ();
+				updatePos ();
+				updateColor ();
+			}
+			Mesh.UpdateInstancesData ();
+			OpenGLSync = true;
 		}
-		void update(){
+		void updatePos(){
 			Mesh.Datas [InstanceIndex].modelMats =
 				Matrix4.CreateRotationX(xAngle) *
 				Matrix4.CreateTranslation(new Vector3(x, y, z));
 			if (Player.Color == ChessColor.Black)
 				Mesh.Datas [InstanceIndex].modelMats = Matrix4.CreateRotationZ(MathHelper.Pi) * Mesh.Datas [InstanceIndex].modelMats;
-			Mesh.UpdateInstancesData ();
+			OpenGLSync = false;
 		}
-		void updateColorData(){
+		void updateColor(){
 			if (Player.Color == ChessColor.White)				
 				Mesh.Datas [InstanceIndex].color = new Vector4 (0.80f, 0.80f, 0.74f, 1f);
 			else
 				Mesh.Datas [InstanceIndex].color = new Vector4 (0.07f, 0.05f, 0.06f, 1f);			
+			OpenGLSync = false;
 		}
+		void removePieceInstance()
+		{
+			Mesh.RemoveInstance (InstanceIndex);
+
+			if (InstanceIndex == Mesh.Datas.Length)
+				return;
+
+			//reindex pce instances
+			foreach (ChessPlayer pl in MainWin.Players) {
+				foreach (ChessPiece pce in pl.Pieces) {
+					if (pce == this || pce.Mesh != Mesh)
+						continue;
+					if (pce.InstanceIndex > InstanceIndex) {
+						pce.InstanceIndex--;
+						bool savedState = pce.OpenGLSync;
+						pce.updatePos ();
+						pce.updateColor ();
+						pce.OpenGLSync = savedState; //will be update one for all pce
+					}
+				}
+			}
+			Mesh.UpdateInstancesData();
+		}
+
 	}
 	class MainWin : OpenTKGameWindow, IBindable
 	{
@@ -263,16 +320,16 @@ namespace Chess
 		public static Mat4InstancedShader piecesShader;
 		public static SimpleColoredShader coloredShader;
 
-		Tetra.IndexedVAO<VAOChessData> mainVAO;
-		VAOItem<VAOChessData> boardVAOItem;
-		VAOItem<VAOChessData> boardPlateVAOItem;
-		VAOItem<VAOChessData> cellVAOItem;
-		VAOItem<VAOChessData> vaoiPawn;
-		VAOItem<VAOChessData> vaoiBishop;
-		VAOItem<VAOChessData> vaoiKnight;
-		VAOItem<VAOChessData> vaoiRook;
-		VAOItem<VAOChessData> vaoiQueen;
-		VAOItem<VAOChessData> vaoiKing;
+		public static Tetra.IndexedVAO<VAOChessData> mainVAO;
+		public static VAOItem<VAOChessData> boardVAOItem;
+		public static VAOItem<VAOChessData> boardPlateVAOItem;
+		public static VAOItem<VAOChessData> cellVAOItem;
+		public static VAOItem<VAOChessData> vaoiPawn;
+		public static VAOItem<VAOChessData> vaoiBishop;
+		public static VAOItem<VAOChessData> vaoiKnight;
+		public static VAOItem<VAOChessData> vaoiRook;
+		public static VAOItem<VAOChessData> vaoiQueen;
+		public static VAOItem<VAOChessData> vaoiKing;
 
 		Tetra.Mesh meshPawn;
 		Tetra.Mesh meshBishop;
@@ -809,19 +866,19 @@ namespace Chess
 		}
 		void onPromoteToQueenClick (object sender, MouseButtonEventArgs e){
 			deletePromoteDialog ();
-			QueueMove (getChessCell (Active.X, Active.Y) + getChessCell (Selection.X, Selection.Y) + "q");
+			processMove (getChessCell (Active.X, Active.Y) + getChessCell (Selection.X, Selection.Y) + "q");
 		}
 		void onPromoteToBishopClick (object sender, MouseButtonEventArgs e){
 			deletePromoteDialog ();
-			QueueMove (getChessCell (Active.X, Active.Y) + getChessCell (Selection.X, Selection.Y) + "b");
+			processMove (getChessCell (Active.X, Active.Y) + getChessCell (Selection.X, Selection.Y) + "b");
 		}
 		void onPromoteToRookClick (object sender, MouseButtonEventArgs e){
 			deletePromoteDialog ();
-			QueueMove (getChessCell (Active.X, Active.Y) + getChessCell (Selection.X, Selection.Y) + "r");
+			processMove (getChessCell (Active.X, Active.Y) + getChessCell (Selection.X, Selection.Y) + "r");
 		}
 		void onPromoteToKnightClick (object sender, MouseButtonEventArgs e){
 			deletePromoteDialog ();
-			QueueMove (getChessCell (Active.X, Active.Y) + getChessCell (Selection.X, Selection.Y) + "k");
+			processMove (getChessCell (Active.X, Active.Y) + getChessCell (Selection.X, Selection.Y) + "k");
 		}
 		void showPromoteDialog(){
 			loadWindow (UI_Promote);
@@ -907,13 +964,13 @@ namespace Chess
 				if (CurrentPlayer.Type == PlayerType.Human) {
 					AddLog ("Hint => " + tmp [1]);
 					if (AutoPlayHint)
-						QueueMove (tmp [1]);
+						processMove (tmp [1]);
 					else {
 						nextHint = tmp [1];
 						updateArrows = true;
 					}
 				} else
-					QueueMove (tmp [1]);
+					processMove (tmp [1]);
 				return;
 			default:
 				return;
@@ -925,7 +982,6 @@ namespace Chess
 
 		#region game logic
 
-		ChessPlayer[] Players;
 		ChessPiece[,] board;
 
 		volatile GameState currentState = GameState.Init;
@@ -940,6 +996,7 @@ namespace Chess
 		volatile bool updateArrows = false;
 		string nextHint;
 
+		public static ChessPlayer[] Players;
 
 		public ChessPiece[,] Board {
 			get { return board; }
@@ -1061,8 +1118,6 @@ namespace Chess
 			addPiece (vaoiKing, 1, 1, PieceType.King, 4, 7);
 		}
 		void resetBoard(bool animate = true){
-			lock (moveQueue)
-				moveQueue.Clear ();
 			currentState = GameState.Play;
 			GraphicObject g = CrowInterface.FindByName ("mateWin");
 			if (g != null)
@@ -1077,39 +1132,13 @@ namespace Chess
 			Board = new ChessPiece[8, 8];
 			foreach (ChessPlayer player in Players) {
 				foreach (ChessPiece p in player.Pieces) {
-					if (p.IsPromoted) {
-						removePieceInstance(p);
-						p.Mesh = vaoiPawn;
-						p.InstanceIndex = p.Mesh.AddInstance ();
-					}
 					p.Reset (animate);
 					Board [p.InitX, p.InitY] = p;
 				}
 			}
 		}
-		void removePieceInstance(ChessPiece p)
-		{
-			p.Mesh.RemoveInstance (p.InstanceIndex);
 
-			if (p.InstanceIndex == p.Mesh.Datas.Length)
-				return;
 
-			//reindex pce instances
-			List<ChessPiece> Pces = new List<ChessPiece> ();
-			foreach (ChessPlayer pl in Players) {
-				foreach (ChessPiece pce in pl.Pieces) {
-					if (pce.Mesh == p.Mesh && pce != p)
-						Pces.Add (pce);
-				}
-				
-			}
-			foreach (ChessPiece pce in Pces) {
-				if (pce.InstanceIndex > p.InstanceIndex) {
-					pce.InstanceIndex--;
-					pce.UpdateInstanceDatas ();
-				}
-			}
-		}
 		void addPiece(VAOItem<VAOChessData> vaoi, int idx, int playerIndex, PieceType _type, int col, int line){
 			ChessPiece p = new ChessPiece (vaoi, idx, Players[playerIndex], _type, col, line);
 			Board [col, line] = p;
@@ -1339,7 +1368,7 @@ namespace Chess
 
 			//pawn promotion
 			if (preview_Move.Length == 5) {
-				p.Promote (preview_Move [4]);
+				p.Promote (preview_Move [4],true);
 				preview_wasPromoted = true;
 			}else
 				preview_wasPromoted = false;
@@ -1413,12 +1442,7 @@ namespace Chess
 			else
 				p.Position = capturePos;
 		}
-		Queue<MoveQueueItem> moveQueue = new Queue<MoveQueueItem>();
 
-		void QueueMove(string move, bool animate = true){
-			lock(moveQueue)
-				moveQueue.Enqueue (new MoveQueueItem (move, animate));
-		}
 		void processMove(string move, bool animate = true){
 			if (waitAnimationFinished)
 				return;
@@ -1491,27 +1515,9 @@ namespace Chess
 			}
 
 			//check promotion
-			if (move.Length == 5){				
+			if (move.Length == 5)
 				p.Promote (move [4]);
-				removePieceInstance (p);
-				//p.Mesh.UpdateInstancesData ();
-				switch (p.Type) {
-				case PieceType.Rook:
-					p.Mesh = vaoiRook;
-					break;
-				case PieceType.Knight:
-					p.Mesh = vaoiKnight;
-					break;
-				case PieceType.Bishop:
-					p.Mesh = vaoiBishop;
-					break;
-				case PieceType.Queen:
-					p.Mesh = vaoiQueen;
-					break;
-				}
-				p.InstanceIndex = p.Mesh.AddInstance ();
-				p.UpdateInstanceDatas ();
-			}
+
 			NotifyValueChanged ("Board", board);
 		}
 
@@ -1556,7 +1562,7 @@ namespace Chess
 			string[] moves = StockfishMoves.ToArray ();
 			resetBoard (false);
 			foreach (string m in moves)
-				QueueMove (m, false);
+				processMove (m, false);
 		}
 
 		void switchPlayer(){
@@ -1661,12 +1667,6 @@ namespace Chess
 				break;
 			case GameState.Play:
 			case GameState.Checked:
-				lock (moveQueue) {
-					while(moveQueue.Count > 0){
-						MoveQueueItem mqi = moveQueue.Dequeue ();
-						processMove (mqi.Move, mqi.Animate);
-					}
-				}
 				if (updateArrows) {
 					updateArrows = false;
 					createArrows (nextHint);
@@ -1674,6 +1674,12 @@ namespace Chess
 				break;
 			}
 			Animation.ProcessAnimations ();
+
+			foreach (ChessPlayer p in Players) {
+				foreach (ChessPiece pce in p.Pieces) {					
+					pce.SyncGL ();
+				}
+			}
 		}
 		protected override void OnClosing (System.ComponentModel.CancelEventArgs e)
 		{
@@ -1757,7 +1763,7 @@ namespace Chess
 					if (mp.Type == PieceType.Pawn && Selection.Y == mp.Player.PawnPromotionY) {
 						showPromoteDialog ();
 					}else
-						QueueMove (getChessCell (Active.X, Active.Y) + getChessCell (Selection.X, Selection.Y));
+						processMove (getChessCell (Active.X, Active.Y) + getChessCell (Selection.X, Selection.Y));
 				}
 			}
 		}
