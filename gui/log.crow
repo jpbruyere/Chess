@@ -1,11 +1,12 @@
 ﻿<?xml version="1.0" encoding="UTF-8" ?>
-<Window Font="droid bold, 8" Template="#Chess.gui.tmpWindow.crow" Resizable="false"
-		Title="Log"
+<Window Font="droid bold, 10" Template="#Chess.gui.tmpWindow.crow"
+		Title="Stockfish Logs"
 		VerticalAlignment="Top"  Width="0" Height="80">
-	<VerticalStack Height="-1" Focusable="true" MouseWheelChanged="onLogsWheel">
+		<TextScrollerWidget Lines="{LogBuffer}" Margin="5"/>
+<!--	<VerticalStack Height="-1" Focusable="true" MouseWheelChanged="onLogsWheel">
 		<Label Text="{log0}" Width="0"/>
 		<Label Text="{log1}" Width="0"/>
 		<Label Text="{log2}" Width="0"/>
 		<Label Text="{log3}" Width="0"/>
-	</VerticalStack>
+	</VerticalStack>-->
 </Window>

@@ -317,6 +317,15 @@ namespace Chess
 		UBOSharedData shaderSharedData;
 		int uboShaderSharedData;
 
+		Tetra.Mesh meshPawn;
+		Tetra.Mesh meshBishop;
+		Tetra.Mesh meshHorse;
+		Tetra.Mesh meshTower;
+		Tetra.Mesh meshQueen;
+		Tetra.Mesh meshKing;
+		Tetra.Mesh meshBoard;
+		int[] piecesVAOIndexes;
+
 		public static Mat4InstancedShader piecesShader;
 		public static SimpleColoredShader coloredShader;
 
@@ -331,15 +340,16 @@ namespace Chess
 		public static VAOItem<VAOChessData> vaoiQueen;
 		public static VAOItem<VAOChessData> vaoiKing;
 
-		Tetra.Mesh meshPawn;
-		Tetra.Mesh meshBishop;
-		Tetra.Mesh meshHorse;
-		Tetra.Mesh meshTower;
-		Tetra.Mesh meshQueen;
-		Tetra.Mesh meshKing;
-		Tetra.Mesh meshBoard;
-
-		int[] piecesVAOIndexes;
+		bool reflexion = true;
+		public bool Reflexion {
+			get { return reflexion; }
+			set {
+				if (reflexion == value)
+					return;
+				reflexion = value;
+				NotifyValueChanged ("Reflexion", reflexion);
+			}
+		}
 
 		void initOpenGL()
 		{
@@ -555,29 +565,31 @@ namespace Chess
 
 			changeShadingColor(new Vector4(1.0f,1.0f,1.0f,1.0f));
 
-
-
 			mainVAO.Render (PrimitiveType.Triangles, boardVAOItem);
 
-			GL.Enable(EnableCap.StencilTest);
+			if (Reflexion) {
+				GL.Enable (EnableCap.StencilTest);
 
-			//cut stencil
-			GL.StencilFunc(StencilFunction.Always, 1, 0xff);
-			GL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Replace);
-			GL.StencilMask (0xff);
-			GL.DepthMask (false);
+				//cut stencil
+				GL.StencilFunc (StencilFunction.Always, 1, 0xff);
+				GL.StencilOp (StencilOp.Keep, StencilOp.Keep, StencilOp.Replace);
+				GL.StencilMask (0xff);
+				GL.DepthMask (false);
+			}
 
 			mainVAO.Render (PrimitiveType.Triangles, boardPlateVAOItem);
 
-			//draw reflected items
-			GL.CullFace(CullFaceMode.Front);
+			if (Reflexion) {
+				//draw reflected items
+				GL.CullFace (CullFaceMode.Front);
 
-			GL.StencilFunc(StencilFunction.Equal, 1, 0xff);
-			GL.StencilMask (0x00);
-			GL.DepthMask (true);
+				GL.StencilFunc (StencilFunction.Equal, 1, 0xff);
+				GL.StencilMask (0x00);
+				GL.DepthMask (true);
 
-			changeModelView (reflectedModelview);
-			drawPieces (0.3f);
+				changeModelView (reflectedModelview);
+				drawPieces (0.3f);
+			}
 
 			//draw scene
 			GL.CullFace(CullFaceMode.Back);
@@ -738,48 +750,17 @@ namespace Chess
 
 		#region LOGS
 		List<string> logBuffer = new List<string> ();
-		int logBuffPtr = 0;
-
-		string log0 = "...";
-		string log1 = "...";
-		string log2 = "...";
-		string log3 = "...";
+		public List<string> LogBuffer {
+			get { return logBuffer; }
+			set { logBuffer = value; }
+		}
 
 		void AddLog(string msg)
 		{
 			if (string.IsNullOrEmpty (msg))
 				return;
-			const int maxLength = 200;
-			int x = maxLength;
-			int i = 0;
-			while (x < msg.Length) {
-				i++;
-				msg = msg.Insert (x, "\n");
-				x+= maxLength + i;
-			}
-			foreach (string s in msg.Split('\n')) {
-				logBuffer.Add (s);
-			}
-			logBuffPtr = 0;
-			syncLogUi ();
-		}
-		void syncLogUi()
-		{
-			for (int i = 0; i < 4; i++) {
-				int ptr = logBuffer.Count - (i + 1 + logBuffPtr);
-				if (ptr < 0)
-					break;
-				NotifyValueChanged ("log" + (3 - i).ToString (), logBuffer [ptr]);
-			}
-		}
-		void onLogsWheel(object sender, Crow.MouseWheelEventArgs e){
-			logBuffPtr += e.Delta;
-			int limUp = logBuffer.Count - 4;
-			if (logBuffPtr > limUp)
-				logBuffPtr = limUp;
-			if (logBuffPtr < 0)
-				logBuffPtr = 0;
-			syncLogUi ();
+			LogBuffer.Add (msg);
+			NotifyValueChanged ("LogBuffer", logBuffer);
 		}
 		#endregion
 
@@ -865,7 +846,6 @@ namespace Chess
 		}
 		void onViewLogsClick (object sender, MouseButtonEventArgs e){
 			loadWindow(UI_Log);
-			syncLogUi ();
 		}
 		void onQuitClick (object sender, MouseButtonEventArgs e){
 			closeGame ();
@@ -970,6 +950,8 @@ namespace Chess
 			if (string.IsNullOrEmpty (e.Data))
 				return;
 
+			AddLog (e.Data);
+
 			string[] tmp = e.Data.Split (' ');
 
 			switch (tmp[0]) {
@@ -980,8 +962,7 @@ namespace Chess
 			case "bestmove":
 				if (currentState == GameState.Checkmate)
 					return;
-				if (CurrentPlayer.Type == PlayerType.Human) {
-					AddLog ("Hint => " + tmp [1]);
+				if (CurrentPlayer.Type == PlayerType.Human) {					
 					if (AutoPlayHint)
 						processMove (tmp [1]);
 					else {
@@ -1055,7 +1036,7 @@ namespace Chess
 				if (active < 0)
 					NotifyValueChanged ("ActCell", "" );
 				else
-					NotifyValueChanged ("ActCell", getChessCell(active.X,active.Y) + " => ");
+					NotifyValueChanged ("ActCell", getChessCell(active.X,active.Y));
 
 				if (Active < 0) {
 					ValidPositionsForActivePce = null;
@@ -1376,13 +1357,15 @@ namespace Chess
 		ChessPiece preview_Captured;
 
 		void previewBoard(string move){
+			if (move.EndsWith ("K")) {
+				AddLog ("Previewing: " + move);
+				move = move.Substring (0, 4);
+			}
+			
 			preview_Move = move;
 
 			Point pStart = getChessCell(preview_Move.Substring(0,2));
 			Point pEnd = getChessCell(preview_Move.Substring(2,2));
-			if (preview_Move.EndsWith ("K"))
-				Debugger.Break ();//cant preview after king is checked
-			
 			ChessPiece p = Board [pStart.X, pStart.Y];
 
 			//pawn promotion
@@ -1469,15 +1452,13 @@ namespace Chess
 				return;
 			if (move == "(none)")
 				return;
-			if (animate)
-				AddLog (CurrentPlayer.ToString () + " => " + move);
 
 			Point pStart = getChessCell(move.Substring(0,2));
 			Point pEnd = getChessCell(move.Substring(2,2));
 
 			ChessPiece p = Board [pStart.X, pStart.Y];
 			if (p == null) {
-				AddLog ("\timpossible move.");
+				AddLog ("ERROR: impossible move.");
 				return;
 			}
 

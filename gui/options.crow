@@ -16,8 +16,19 @@
 					</VerticalStack>
 				</GroupBox>
 			</HorizontalStack>
-			<CheckBox Template="#Chess.gui.tmpCheckBox.crow" Caption="Autoplay on Hint"
-				Margin="10"
+			<CheckBox Template="#Chess.gui.tmpCheckBox.crow"
+				Caption="Reflexion"
+				Margin="2"
+				Foreground="Black"
+				Font="droid bold, 14"
+				MouseEnter="{Background=DimGray}"
+				MouseLeave="{Background=Transparent}"
+				Checked="{Foreground=White}"
+				Unchecked="{Foreground=Black}"
+				IsChecked="{²Reflexion}"/>
+			<CheckBox Template="#Chess.gui.tmpCheckBox.crow"
+				Caption="Autoplay on Hint"
+				Margin="2"
 				Foreground="Black"
 				Font="droid bold, 14"
 				MouseEnter="{Background=DimGray}"
