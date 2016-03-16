@@ -540,7 +540,7 @@ namespace Chess
 			if (active >= 0)
 				drawSquarre(Active, new Vector4(0.2f,0.2f,1.0f,0.6f));
 
-			if (currentState == GameState.Checked)
+			if (currentState > GameState.Play)
 				drawSquarre(CurrentPlayer.King.BoardCell, new Vector4(1.0f,0.2f,0.2f,0.6f));
 
 			GL.Enable (EnableCap.DepthTest);
@@ -1426,11 +1426,6 @@ namespace Chess
 				return;
 			if (move == "(none)")
 				return;
-			if (animate)
-				AddLog (CurrentPlayer.ToString () + " => " + move);
-			
-			StockfishMoves.Add (move);
-			NotifyValueChanged ("StockfishMoves", StockfishMoves);
 
 			Point pStart = getChessCell(move.Substring(0,2));
 			Point pEnd = getChessCell(move.Substring(2,2));
@@ -1440,6 +1435,13 @@ namespace Chess
 				AddLog ("\timpossible move.");
 				return;
 			}
+
+			if (animate)
+				AddLog (CurrentPlayer.ToString () + " => " + move);
+
+			StockfishMoves.Add (move);
+			NotifyValueChanged ("StockfishMoves", StockfishMoves);
+
 			Board [pStart.X, pStart.Y] = null;
 			ChessPiece pTarget = Board [pEnd.X, pEnd.Y];
 			if (pTarget != null)
