@@ -1241,7 +1241,7 @@ namespace Chess
 				switch (p.Type) {
 				case PieceType.Pawn:
 					int pawnDirection = 1;
-					if (CurrentPlayer.Color == ChessColor.Black)
+					if (p.Player.Color == ChessColor.Black)
 						pawnDirection = -1;
 					validMoves.AddMove (checkSingleMove (pos, 0, 1 * pawnDirection));
 					if (Board [x, y + pawnDirection] == null && !p.HasMoved)
