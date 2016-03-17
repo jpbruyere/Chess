@@ -867,8 +867,8 @@ namespace Chess
 			closeGame ();
 		}
 		void onHintClick (object sender, MouseButtonEventArgs e){
-			stockfish.WaitForInputIdle ();
-			stockfish.StandardInput.WriteLine ("go");
+			if (CurrentPlayer.Type == PlayerType.Human)
+				sendToStockfish("go");
 		}
 		void onUndoClick (object sender, MouseButtonEventArgs e){
 			CursorVisible = true;
@@ -907,6 +907,8 @@ namespace Chess
 		Process stockfish;
 		bool autoPlayHint = false;
 		volatile bool waitAnimationFinished = false;
+		volatile bool waitStockfishIsReady = false;
+		Queue<string> stockfishCmdQueue = new Queue<string>();
 		List<String> stockfishMoves = new List<string> ();
 		int stockfishLevel = 20;
 		public int StockfishLevel{
@@ -918,8 +920,7 @@ namespace Chess
 
 				stockfishLevel = value;
 
-				stockfish.WaitForInputIdle ();
-				stockfish.StandardInput.WriteLine ("setoption name Skill Level value " + stockfishLevel.ToString());
+				sendToStockfish ("setoption name Skill Level value " + stockfishLevel.ToString());
 
 				NotifyValueChanged ("StockfishLevel", StockfishLevel);
 			}
@@ -960,33 +961,52 @@ namespace Chess
 			stockfish.Start();
 
 			stockfish.BeginOutputReadLine ();
-			stockfish.WaitForInputIdle ();
-			stockfish.StandardInput.WriteLine ("uci");
+
+			sendToStockfish ("uci");
 		}
 		void syncStockfish(){
 			NotifyValueChanged ("StockfishMoves", StockfishMoves);
-			string cmd = stockfishPositionCommand;
+			sendToStockfish (stockfishPositionCommand);
+		}
+		void askStockfishIsReady(){
+			if (waitStockfishIsReady)
+				return;
+			waitStockfishIsReady = true;
 			stockfish.WaitForInputIdle ();
-			stockfish.StandardInput.WriteLine (cmd);
+			stockfish.StandardInput.WriteLine ("isready");
+		}
+		void sendToStockfish(string msg){
+			stockfishCmdQueue.Enqueue(msg);
 		}
 		void P_Exited (object sender, EventArgs e)
 		{
 			AddLog ("Stockfish Terminated");
 		}
-
 		void dataReceived (object sender, DataReceivedEventArgs e)
 		{
 			if (string.IsNullOrEmpty (e.Data))
 				return;
 
-			AddLog (e.Data);
-
 			string[] tmp = e.Data.Split (' ');
 
+			if (tmp[0] != "readyok")
+				AddLog (e.Data);
+
 			switch (tmp[0]) {
+			case "readyok":
+				if (stockfishCmdQueue.Count == 0) {
+					AddLog ("Error: no command on queue after readyok");
+					return;
+				}
+				string cmd = stockfishCmdQueue.Dequeue ();
+				AddLog ("=>" + cmd);
+				stockfish.WaitForInputIdle ();
+				stockfish.StandardInput.WriteLine (cmd);
+				waitStockfishIsReady = false;
+				return;
 			case "uciok":
 				StockfishLevel = 0;
-				return;
+				break;
 			case "bestmove":
 				if (tmp [1] == "(none)")
 					return;
@@ -995,11 +1015,8 @@ namespace Chess
 					return;
 				}
 				bestMove = tmp [1];
-				return;
-			default:
-				return;
+				break;
 			}
-
 		}
 
 		#endregion
@@ -1598,6 +1615,9 @@ namespace Chess
 		}
 
 		void switchPlayer(){
+			bestMove = null;
+			clearArrows ();
+
 			if (CurrentPlayerIndex == 0)
 				CurrentPlayerIndex = 1;
 			else
@@ -1605,10 +1625,8 @@ namespace Chess
 
 			syncStockfish ();
 
-			if (CurrentPlayer.Type == PlayerType.AI) {
-				stockfish.WaitForInputIdle ();
-				stockfish.StandardInput.WriteLine ("go");
-			}
+			if (CurrentPlayer.Type == PlayerType.AI)
+				sendToStockfish("go");
 		}
 
 		void move_AnimationFinished (Animation a)
@@ -1635,6 +1653,7 @@ namespace Chess
 		}
 
 		void closeGame(){
+			AddLog ("Stockfish temrminating");
 			stockfish.WaitForInputIdle ();
 			stockfish.StandardInput.WriteLine ("quit");
 			stockfish.WaitForExit ();
@@ -1681,6 +1700,10 @@ namespace Chess
 		protected override void OnUpdateFrame (FrameEventArgs e)
 		{
 			base.OnUpdateFrame (e);
+
+			//stockfish
+			if (stockfishCmdQueue.Count > 0)
+				askStockfishIsReady ();
 
 			switch (CurrentState) {
 			case GameState.Init:
