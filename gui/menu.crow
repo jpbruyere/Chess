@@ -7,7 +7,7 @@
 			Caption="Files" Width="-1">
 			<Border Fit="True" Background="0,4;0,4;0,4;0,8" Margin="2">
 				<HorizontalStack Fit="true" Margin="10">
-					<Button Style="#Chess.gui.Button.style" Caption="Restart" MouseClick="onResetClick"/>
+					<Button Style="#Chess.gui.Button.style" Caption="New Game" MouseClick="onResetClick" Width="150"/>
 					<Button Style="#Chess.gui.Button.style" Caption="Save" MouseClick="onSaveClick"/>
 					<Button Style="#Chess.gui.Button.style" Caption="Load" MouseClick="onLoadClick"/>
 				</HorizontalStack>

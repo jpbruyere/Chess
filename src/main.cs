@@ -324,6 +324,7 @@ namespace Chess
 		float MoveSpeed = 0.02f;
 		float RotationSpeed = 0.005f;
 		float ZoomSpeed = 2f;
+		float viewZangle, viewXangle;
 
 		//public Vector4 vLight = new Vector4 (0.5f, 0.5f, -1f, 0f);
 		public Vector4 vLight = Vector4.Normalize(new Vector4 (0.2f, 0.4f, -0.5f, 0f));
@@ -370,8 +371,6 @@ namespace Chess
 
 		void initOpenGL()
 		{
-			vLook = vLookInit;
-
 			GL.ClearColor(0.0f, 0.0f, 0.2f, 1.0f);
 			GL.Enable (EnableCap.CullFace);
 			GL.CullFace (CullFaceMode.Back);
@@ -693,6 +692,7 @@ namespace Chess
 
 		#region Interface
 		const string UI_Menu = "#Chess.gui.menu.crow";
+		const string UI_NewGame = "#Chess.gui.newGame.crow";
 		const string UI_Options = "#Chess.gui.options.crow";
 		const string UI_Fps = "#Chess.gui.fps.crow";
 		const string UI_Board = "#Chess.gui.board.crow";
@@ -874,13 +874,32 @@ namespace Chess
 				sendToStockfish("go");
 		}
 		void onUndoClick (object sender, MouseButtonEventArgs e){
-			CursorVisible = true;
 			undoLastMove ();
 			undoLastMove ();
 		}
 		void onResetClick (object sender, MouseButtonEventArgs e){
+			loadWindow (UI_NewGame);
 			resetBoard ();
 			syncStockfish ();
+		}
+		void onNewWhiteGame (object sender, MouseButtonEventArgs e){
+			closeWindow (UI_NewGame);
+			viewZangle = 0;
+			UpdateViewMatrix ();
+			Players [0].Type = PlayerType.Human;
+			Players [1].Type = PlayerType.AI;
+			resetBoard ();
+			syncStockfish ();
+		}
+		void onNewBlackGame (object sender, MouseButtonEventArgs e){
+			closeWindow (UI_NewGame);
+			viewZangle = MathHelper.Pi;
+			UpdateViewMatrix ();
+			Players [0].Type = PlayerType.AI;
+			Players [1].Type = PlayerType.Human;
+			resetBoard ();
+			syncStockfish ();
+			sendToStockfish("go");
 		}
 		void onPromoteToQueenClick (object sender, MouseButtonEventArgs e){
 			deletePromoteDialog ();
@@ -1766,6 +1785,10 @@ namespace Chess
 			Rectangle r = this.ClientRectangle;
 			GL.Viewport( r.X, r.Y, r.Width, r.Height);
 			projection = Matrix4.CreatePerspectiveFieldOfView (fovY, r.Width / (float)r.Height, zNear, zFar);
+			vLook = Vector3.Transform (vLookInit,
+				Matrix4.CreateRotationX (viewXangle)*
+				Matrix4.CreateRotationZ (viewZangle));
+			vLook.Normalize();
 			vEye = vEyeTarget + vLook * eyeDist;
 			modelview = Matrix4.LookAt(vEye, vEyeTarget, Vector3.UnitZ);
 			GL.GetInteger(GetPName.Viewport, viewport);
@@ -1842,7 +1865,6 @@ namespace Chess
 		void Mouse_ButtonUp (object sender, OpenTK.Input.MouseButtonEventArgs e)
 		{
 		}
-		float viewZangle, viewXangle;
 		void Mouse_Move(object sender, OpenTK.Input.MouseMoveEventArgs e)
 		{
 
@@ -1851,13 +1873,10 @@ namespace Chess
 				if (e.Mouse.MiddleButton == OpenTK.Input.ButtonState.Pressed) {
 					viewZangle -= (float)e.XDelta * RotationSpeed;
 					viewXangle -= (float)e.YDelta * RotationSpeed;
-					Vector3 tmp = Vector3.Transform (vLookInit,
-						Matrix4.CreateRotationX (viewXangle)*
-						Matrix4.CreateRotationZ (viewZangle));
-					tmp.Normalize();
-					if (tmp.Z <= 0f)
-						return;
-					vLook = tmp;
+					if (viewXangle < - 0.75f)
+						viewXangle = -0.75f;
+					else if (viewXangle > MathHelper.PiOver4)
+						viewXangle = MathHelper.PiOver4;
 					UpdateViewMatrix ();
 				}else if (e.Mouse.LeftButton == OpenTK.Input.ButtonState.Pressed) {
 					return;

@@ -145,6 +145,7 @@
       <Gettext-ScanForTranslations>False</Gettext-ScanForTranslations>
     </EmbeddedResource>
     <EmbeddedResource Include="gui\tmpCheckBox.crow" />
+    <EmbeddedResource Include="gui\newGame.crow" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="lib\Crow\Crow.csproj">

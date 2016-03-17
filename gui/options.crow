@@ -1,7 +1,7 @@
 ﻿<Window Font="droid bold, 26" Width="0" Height="0" Margin="200"  Title="Options"
 	Template="#Chess.gui.tmpWindow.crow">
 	<Container>
-		<VerticalStack>
+		<VerticalStack Margin="30" Spacing="5">
 			<HorizontalStack Margin="3" Fit="true" Spacing="10">
 				<GroupBox Caption="Whites" Fit="true">
 					<VerticalStack Margin="10">
@@ -38,7 +38,7 @@
 				IsChecked="{²AutoPlayHint}"/>
 			<Spinner Caption="Level" Value="{²StockfishLevel}" Minimum="0" Maximum="20"/>
 			<GraphicObject/>
-			<Button Style="#Chess.gui.Button.style" HorizontalAlignment="Right" Caption="Close"
+			<Button Width="150" Style="#Chess.gui.Button.style" HorizontalAlignment="Right" Caption="Close"
 				MouseClick="../../../../../../butQuitPress"/>
 		</VerticalStack>
 	</Container>
