@@ -101,6 +101,11 @@ namespace Crow
 					}
 				}
 				visibleLines = (int)Math.Floor ((double)ClientRectangle.Height / fe.Height);
+
+				//force adjusting current scroll
+				int tmp = scroll;
+				scroll = 0;
+				Scroll = tmp;
 			}
 		}
 		protected override void onDraw (Cairo.Context gr)
