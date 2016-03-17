@@ -46,6 +46,9 @@
     <Compile Include="src\SimpleColoredShader.cs" />
     <Compile Include="src\TextScrollerWidget.cs" />
     <Compile Include="src\VAOChessData.cs" />
+    <Compile Include="src\ChessMoves.cs" />
+    <Compile Include="src\ChessPlayer.cs" />
+    <Compile Include="src\ChessPiece.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
