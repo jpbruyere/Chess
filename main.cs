@@ -313,7 +313,8 @@ namespace Chess
 		}
 		public Vector3 vEyeTarget = new Vector3(4f, 4f, 0f);
 		public Vector3 vEye;
-		public Vector3 vLook = Vector3.Normalize(new Vector3(0.0f, -0.7f, 0.7f));  // Camera vLook Vector
+		public Vector3 vLookInit = Vector3.Normalize(new Vector3(0.0f, -0.7f, 0.7f));
+		public Vector3 vLook;  // Camera vLook Vector
 		public float zFar = 30.0f;
 		public float zNear = 0.1f;
 		public float fovY = (float)Math.PI / 4;
@@ -369,6 +370,8 @@ namespace Chess
 
 		void initOpenGL()
 		{
+			vLook = vLookInit;
+
 			GL.ClearColor(0.0f, 0.0f, 0.2f, 1.0f);
 			GL.Enable (EnableCap.CullFace);
 			GL.CullFace (CullFaceMode.Back);
@@ -1839,18 +1842,20 @@ namespace Chess
 		void Mouse_ButtonUp (object sender, OpenTK.Input.MouseButtonEventArgs e)
 		{
 		}
-
+		float viewZangle, viewXangle;
 		void Mouse_Move(object sender, OpenTK.Input.MouseMoveEventArgs e)
 		{
 
 			if (e.XDelta != 0 || e.YDelta != 0)
 			{
 				if (e.Mouse.MiddleButton == OpenTK.Input.ButtonState.Pressed) {
-					Vector3 tmp = Vector3.Transform (vLook,
-						Matrix4.CreateRotationX (-e.YDelta * RotationSpeed)*
-						Matrix4.CreateRotationZ (-e.XDelta * RotationSpeed));
+					viewZangle -= (float)e.XDelta * RotationSpeed;
+					viewXangle -= (float)e.YDelta * RotationSpeed;
+					Vector3 tmp = Vector3.Transform (vLookInit,
+						Matrix4.CreateRotationX (viewXangle)*
+						Matrix4.CreateRotationZ (viewZangle));
 					tmp.Normalize();
-					if (tmp.Y >= 0f || tmp.Z <= 0f)
+					if (tmp.Z <= 0f)
 						return;
 					vLook = tmp;
 					UpdateViewMatrix ();
