@@ -67,7 +67,7 @@ namespace Chess
 		float viewZangle, viewXangle;
 
 		//public Vector4 vLight = new Vector4 (0.5f, 0.5f, -1f, 0f);
-		public Vector4 vLight = Vector4.Normalize(new Vector4 (0.2f, 0.4f, -0.5f, 0f));
+		public Vector4 vLight = Vector4.Normalize(new Vector4 (0.1f, 0.1f, -0.8f, 0f));
 		#endregion
 
 		#region GL
