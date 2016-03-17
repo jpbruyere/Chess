@@ -119,15 +119,21 @@ namespace Crow
 
 			double y = ClientRectangle.Y;
 			double x = ClientRectangle.X;
-
+			Fill errorFill = new SolidColor (Color.Carmine);
 			for (int i = 0; i < visibleLines; i++) {
 				if (i + Scroll >= Lines.Count)
 					break;
+				if ((lines [i + Scroll] as string).StartsWith ("error", StringComparison.OrdinalIgnoreCase)) {
+					errorFill.SetAsSource (gr);
+					gr.Rectangle (x, y, (double)r.Width, fe.Height);
+					gr.Fill ();
+					Foreground.SetAsSource (gr);
+				}
 				gr.MoveTo (x, y + fe.Ascent);
 				gr.ShowText (lines[i+Scroll] as string);
 				y += fe.Height;
+				gr.Fill ();
 			}
-			gr.Fill ();
 
 			if (Lines.Count <= visibleLines)
 				return;
