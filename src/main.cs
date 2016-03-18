@@ -66,8 +66,8 @@ namespace Chess
 		float ZoomSpeed = 2f;
 		float viewZangle, viewXangle;
 
-		//public Vector4 vLight = new Vector4 (0.5f, 0.5f, -1f, 0f);
-		public Vector4 vLight = Vector4.Normalize(new Vector4 (0.1f, 0.1f, -0.8f, 0f));
+		public Vector4 vLight = new Vector4 (0.5f, 0.5f, -1f, 0f);
+		//public Vector4 vLight = Vector4.Normalize(new Vector4 (0.1f, 0.1f, -0.8f, 0f));
 		#endregion
 
 		#region GL
@@ -625,6 +625,7 @@ namespace Chess
 		void onNewWhiteGame (object sender, MouseButtonEventArgs e){
 			closeWindow (UI_NewGame);
 			viewZangle = 0;
+			vLight = new Vector4 (0.5f, 0.5f, -1f, 0f);
 			UpdateViewMatrix ();
 			Players [0].Type = PlayerType.Human;
 			Players [1].Type = PlayerType.AI;
@@ -634,6 +635,7 @@ namespace Chess
 		void onNewBlackGame (object sender, MouseButtonEventArgs e){
 			closeWindow (UI_NewGame);
 			viewZangle = MathHelper.Pi;
+			vLight = new Vector4 (-0.5f, -0.5f, -1f, 0f);
 			UpdateViewMatrix ();
 			Players [0].Type = PlayerType.AI;
 			Players [1].Type = PlayerType.Human;
@@ -1372,8 +1374,14 @@ namespace Chess
 		void replaySilently(){
 			string[] moves = StockfishMoves.ToArray ();
 			resetBoard (false);
-			foreach (string m in moves)
+			foreach (string m in moves) {
 				processMove (m, false);
+				if (currentPlayerIndex == 0)
+					currentPlayerIndex = 1;
+				else
+					currentPlayerIndex = 0;
+			}
+			CurrentPlayerIndex = currentPlayerIndex;
 		}
 
 		void switchPlayer(){
