@@ -98,14 +98,14 @@ namespace Chess
 		public static VAOItem<VAOChessData> vaoiQueen;
 		public static VAOItem<VAOChessData> vaoiKing;
 
-		bool reflexion = true;
+		bool reflexion;
 		public bool Reflexion {
-			get { return reflexion; }
+			get { return Crow.Configuration.Get<bool> ("Reflexion"); }
 			set {
-				if (reflexion == value)
-					return;
-				reflexion = value;
-				NotifyValueChanged ("Reflexion", reflexion);
+				if (Reflexion == value)
+					return;				
+				Crow.Configuration.Set ("Reflexion", value);
+				NotifyValueChanged ("Reflexion", value);
 			}
 		}
 
@@ -669,24 +669,21 @@ namespace Chess
 
 		#region Stockfish
 		Process stockfish;
-		bool autoPlayHint = false;
 		volatile bool waitAnimationFinished = false;
 		volatile bool waitStockfishIsReady = false;
 		Queue<string> stockfishCmdQueue = new Queue<string>();
 		List<String> stockfishMoves = new List<string> ();
-		int stockfishLevel = 20;
+
 		public int StockfishLevel{
-			get { return stockfishLevel; }
+			get { return Crow.Configuration.Get<int> ("Level"); }
 			set
 			{
-				if (value == stockfishLevel)
+				if (value == StockfishLevel)
 					return;
 
-				stockfishLevel = value;
-
-				sendToStockfish ("setoption name Skill Level value " + stockfishLevel.ToString());
-
-				NotifyValueChanged ("StockfishLevel", StockfishLevel);
+				Crow.Configuration.Set ("Level", value);
+				sendToStockfish ("setoption name Skill Level value " + value.ToString());
+				NotifyValueChanged ("StockfishLevel", value);
 			}
 		}
 		string stockfishPositionCommand {
@@ -697,12 +694,12 @@ namespace Chess
 		}
 
 		public bool AutoPlayHint {
-			get { return autoPlayHint; }
+			get { return Crow.Configuration.Get<bool> ("AutoPlayHint"); }
 			set {
-				if (value == autoPlayHint)
-					return;
-				autoPlayHint = value;
-				NotifyValueChanged ("AutoPlayHint", AutoPlayHint);
+				if (value == AutoPlayHint)
+					return;				
+				Crow.Configuration.Set ("AutoPlayHint", value);
+				NotifyValueChanged ("AutoPlayHint", value);
 			}
 		}
 		public List<String> StockfishMoves {
@@ -768,8 +765,8 @@ namespace Chess
 				stockfish.StandardInput.WriteLine (cmd);
 				waitStockfishIsReady = false;
 				return;
-			case "uciok":
-				StockfishLevel = 0;
+			case "uciok":				
+				sendToStockfish ("setoption name Skill Level value " + StockfishLevel.ToString());
 				break;
 			case "bestmove":
 				if (tmp [1] == "(none)")
