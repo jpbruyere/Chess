@@ -1003,8 +1003,27 @@ namespace Chess
 
 			if (Board [x, y] == null) {
 				if (Board [pos.X, pos.Y].Type == PieceType.Pawn){
-					if (xDelta != 0)
-						return null;//pawn diagonal moves only for capturing
+					if (xDelta != 0){
+						//check En passant capturing
+						int epY;
+						string validEP;
+						if (Board [pos.X, pos.Y].Player.Color == ChessColor.White) {
+							epY = 4;
+							validEP = getChessCell (x, 6) + getChessCell (x, 4);
+						} else {
+							epY = 3;
+							validEP = getChessCell (x, 1) + getChessCell (x, 3);
+						}
+						if (pos.Y != epY)
+							return null;
+						if (Board [x, epY] == null)
+							return null;
+						if (Board [x, epY].Type != PieceType.Pawn)
+							return null;
+						if (StockfishMoves [StockfishMoves.Count-1] != validEP)
+							return null;
+						return new string[] { getChessCell (pos.X, pos.Y) + getChessCell (x, y) + "EP"};
+					}
 					//check pawn promotion
 					if (y ==  Board [pos.X, pos.Y].Player.PawnPromotionY){
 						string basicPawnMove = getChessCell (pos.X, pos.Y) + getChessCell (x, y);
@@ -1189,9 +1208,16 @@ namespace Chess
 			preview_MoveState = p.HasMoved;
 			Board [pStart.X, pStart.Y] = null;
 			p.HasMoved = true;
-			preview_Captured = Board [pEnd.X, pEnd.Y];
+
+			//pawn en passant
+			if (preview_Move.Length == 6)
+				preview_Captured = Board [pEnd.X, pStart.Y];
+			else
+				preview_Captured = Board [pEnd.X, pEnd.Y];
+
 			if (preview_Captured != null)
 				preview_Captured.Captured = true;
+
 			Board [pEnd.X, pEnd.Y] = p;
 		}
 		void restoreBoardAfterPreview(){
@@ -1204,7 +1230,11 @@ namespace Chess
 			if (preview_Captured != null)
 				preview_Captured.Captured = false;
 			Board [pStart.X, pStart.Y] = p;
-			Board [pEnd.X, pEnd.Y] = preview_Captured;
+			Board [pEnd.X, pEnd.Y] = null;
+			if (preview_Move.Length == 6)
+				Board [pEnd.X, pStart.Y] = preview_Captured;
+			else
+				Board [pEnd.X, pEnd.Y] = preview_Captured;
 			preview_Move = null;
 			preview_Captured = null;
 		}
@@ -1272,14 +1302,19 @@ namespace Chess
 				AddLog ("ERROR: impossible move.");
 				return;
 			}
+			bool enPassant = false;
+			if (p.Type == PieceType.Pawn && pStart.X != pEnd.X && Board[pEnd.X, pEnd.Y] == null)
+				enPassant = true;
 
 			StockfishMoves.Add (move);
 			NotifyValueChanged ("StockfishMoves", StockfishMoves);
 
 			Board [pStart.X, pStart.Y] = null;
-			ChessPiece pTarget = Board [pEnd.X, pEnd.Y];
-			if (pTarget != null)
-				capturePiece (pTarget, animate);
+			Point pTarget = pEnd;
+			if (enPassant)
+				pTarget.Y = pStart.Y;
+			if (Board[pTarget.X, pTarget.Y] != null)
+				capturePiece (Board[pTarget.X, pTarget.Y], animate);
 			Board [pEnd.X, pEnd.Y] = p;
 			p.HasMoved = true;
 
@@ -1296,38 +1331,39 @@ namespace Chess
 
 			Active = -1;
 
-			//check if rockMove
-			if (p.Type == PieceType.King) {
-				int xDelta = pStart.X - pEnd.X;
-				if (Math.Abs (xDelta) == 2) {
-					//rocking
-					if (xDelta > 0) {
-						pStart.X = 0;
-						pEnd.X = pEnd.X + 1;
-					} else {
-						pStart.X = 7;
-						pEnd.X = pEnd.X - 1;
+			if (!enPassant) {
+				//check if rockMove
+				if (p.Type == PieceType.King) {
+					int xDelta = pStart.X - pEnd.X;
+					if (Math.Abs (xDelta) == 2) {
+						//rocking
+						if (xDelta > 0) {
+							pStart.X = 0;
+							pEnd.X = pEnd.X + 1;
+						} else {
+							pStart.X = 7;
+							pEnd.X = pEnd.X - 1;
+						}
+						p = Board [pStart.X, pStart.Y];
+						Board [pStart.X, pStart.Y] = null;
+						Board [pEnd.X, pEnd.Y] = p;
+						p.HasMoved = true;
+
+						targetPosition = new Vector3 (pEnd.X + 0.5f, pEnd.Y + 0.5f, 0f);
+						if (animate)
+							Animation.StartAnimation (new PathAnimation (p, "Position",
+								new BezierPath (
+									p.Position,
+									targetPosition, Vector3.UnitZ * 2f)));
+						else
+							p.Position = targetPosition;
 					}
-					p = Board [pStart.X, pStart.Y];
-					Board [pStart.X, pStart.Y] = null;
-					Board [pEnd.X, pEnd.Y] = p;
-					p.HasMoved = true;
-
-					targetPosition = new Vector3 (pEnd.X + 0.5f, pEnd.Y + 0.5f, 0f);
-					if (animate)
-						Animation.StartAnimation (new PathAnimation (p, "Position",
-							new BezierPath (
-								p.Position,
-								targetPosition, Vector3.UnitZ * 2f)));
-					else
-						p.Position = targetPosition;
 				}
+
+				//check promotion
+				if (move.Length == 5)
+					p.Promote (move [4]);
 			}
-
-			//check promotion
-			if (move.Length == 5)
-				p.Promote (move [4]);
-
 			NotifyValueChanged ("Board", board);
 		}
 
