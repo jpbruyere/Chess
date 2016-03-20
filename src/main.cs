@@ -1267,6 +1267,9 @@ namespace Chess
 		}
 
 		void capturePiece(ChessPiece p, bool animate = true){
+			Point pos = p.BoardCell;
+			Board [pos.X, pos.Y] = null;
+
 			Vector3 capturePos = getCurrentCapturePosition (p);
 
 			if (p.Player.Color == ChessColor.White)
