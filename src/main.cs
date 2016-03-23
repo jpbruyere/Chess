@@ -217,10 +217,12 @@ namespace Chess
 					Vector3.UnitZ
 				},
 				new ushort[] { 0, 1, 2, 2, 1, 3 }));
-			boardPlateVAOItem.DiffuseTexture = new GGL.Texture ("#Chess.Textures.board1.png");
+			//boardPlateVAOItem.DiffuseTexture = new GGL.Texture ("#Chess.Textures.board1.png");
+			boardPlateVAOItem.DiffuseTexture = new GGL.Texture ("#Chess.Textures.board3.png");
+			//boardPlateVAOItem.DiffuseTexture = new GGL.Texture ("#Chess.Textures.marble2.jpg");
 			boardPlateVAOItem.Datas = new VAOChessData[1];
 			boardPlateVAOItem.Datas[0].modelMats = Matrix4.Identity;
-			boardPlateVAOItem.Datas[0].color = new Vector4(0.6f,0.6f,0.6f,1f);
+			boardPlateVAOItem.Datas[0].color = new Vector4(0.5f,0.5f,0.5f,1f);
 
 			boardPlateVAOItem.UpdateInstancesData ();
 

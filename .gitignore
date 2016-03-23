@@ -2,7 +2,7 @@ Meshes/*.mtl
 #Autosave files
 *~
 
-#build
+build/
 [Oo]bj/
 [Bb]in/
 packages/

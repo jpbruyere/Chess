@@ -163,6 +163,14 @@ namespace Crow
 			else
 				Scroll++;
 		}
+		public override void onKeyDown (object sender, KeyboardKeyEventArgs e)
+		{
+			base.onKeyDown (sender, e);
+			if (e.Key == Key.Home)
+				Scroll = 0;
+			else if (e.Key == Key.End)
+				Scroll = Lines.Count - visibleLines;
+		}
 	}
 }
 
