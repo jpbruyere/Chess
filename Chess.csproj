@@ -7,6 +7,7 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>Chess</RootNamespace>
     <AssemblyName>Chess</AssemblyName>
+    <DefineConstants>__linux__</DefineConstants>
     <StartupObject>Chess.MainWin</StartupObject>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <OutputPath>$(SolutionDir)/build/$(Configuration)</OutputPath>
@@ -30,7 +31,7 @@
     <DebugSymbols>false</DebugSymbols>
     <DebugType>none</DebugType>
     <Optimize>true</Optimize>
-    <WarningLevel>4</WarningLevel>
+    <WarningLevel>0</WarningLevel>
   </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="packages\gtk-sharp.Linux.3.14.3.14.7\build\net40\gtk-sharp.Linux.3.14.targets" Condition="Exists('packages\gtk-sharp.Linux.3.14.3.14.7\build\net40\gtk-sharp.Linux.3.14.targets')" />
