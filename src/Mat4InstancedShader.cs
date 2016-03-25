@@ -3,6 +3,7 @@ using OpenTK.Graphics.OpenGL;
 using System.Diagnostics;
 using OpenTK;
 using Tetra;
+using System.Runtime.InteropServices;
 
 
 namespace Chess
@@ -18,8 +19,9 @@ namespace Chess
 			layout (location = 0) in vec3 in_position;
 			layout (location = 1) in vec2 in_tex;
 			layout (location = 2) in vec3 in_normal;
-			layout (location = 4) in mat4 in_model;
-			layout (location = 8) in vec4 in_color;
+			layout (location = 4) in vec4 in_weights;
+			layout (location = 5) in mat4 in_model;
+			layout (location = 9) in vec4 in_color;
 
 			layout (std140, index = 0) uniform block_data{
 				vec4 Color;
@@ -28,6 +30,8 @@ namespace Chess
 				mat4 Normal;
 				vec4 lightPos;
 			};
+
+			uniform mat4 bones[4];
 
 			out vec2 texCoord;			
 			out vec3 n;			
@@ -104,7 +108,24 @@ namespace Chess
 			Compile ();
 		}
 
-		public int DiffuseTexture;
+		public int DiffuseTexture, bonesLocation;
+		Matrix4[] bones;
+
+		public Matrix4[] Bones {
+			get { return bones; }
+			set {
+				bones = value;
+				int m4Size = Marshal.SizeOf (typeof(Matrix4));
+				float[] vBones = new float[bones.Length * m4Size];
+				for (int i = 0; i < bones.Length; i++) {
+					IntPtr ptr = Marshal.AllocHGlobal(m4Size);
+					Marshal.StructureToPtr (bones [i], ptr, false);
+					Marshal.Copy (ptr, vBones, i * m4Size, m4Size);
+				}
+
+				GL.UniformMatrix4 (bonesLocation, 4, false, vBones);
+			}
+		}
 
 		protected override void BindVertexAttributes ()
 		{
@@ -114,7 +135,8 @@ namespace Chess
 			GL.BindAttribLocation(pgmId, Tetra.IndexedVAO.instanceBufferIndex, "in_model");
 		}
 		protected override void GetUniformLocations ()
-		{	
+		{
+			bonesLocation = GL.GetUniformLocation(pgmId, "bones");
 			GL.UniformBlockBinding(pgmId, GL.GetUniformBlockIndex(pgmId, "block_data"), 0);
 		}	
 		public override void Enable ()
