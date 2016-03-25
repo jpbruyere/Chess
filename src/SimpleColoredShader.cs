@@ -6,9 +6,11 @@ using Tetra;
 
 namespace Chess
 {
-	public class SimpleColoredShader : Shader
+	public class SimpleColoredShader : Tetra.Shader
 	{
-		public SimpleColoredShader ()
+		public SimpleColoredShader ():base(){
+		}
+		public override void Init ()
 		{
 			vertSource = @"
 			#version 330
@@ -48,7 +50,8 @@ namespace Chess
 			{
 				out_frag_color = Color;
 			}";
-			Compile ();
+
+			base.Init ();
 		}
 		protected override void BindVertexAttributes ()
 		{

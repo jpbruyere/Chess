@@ -98,12 +98,16 @@ namespace Chess
 		public static VAOItem<VAOChessData> vaoiQueen;
 		public static VAOItem<VAOChessData> vaoiKing;
 
-		bool reflexion;
 		public bool Reflexion {
 			get { return Crow.Configuration.Get<bool> ("Reflexion"); }
-			set {
+			set {				
 				if (Reflexion == value)
-					return;				
+					return;
+				if (value)
+					initReflexionFbo ();
+				else
+					disableReflexionFbo ();
+					
 				Crow.Configuration.Set ("Reflexion", value);
 				NotifyValueChanged ("Reflexion", value);
 			}
@@ -111,7 +115,6 @@ namespace Chess
 
 		void initOpenGL()
 		{
-			GL.ClearColor(0.0f, 0.0f, 0.2f, 1.0f);
 			GL.Enable (EnableCap.CullFace);
 			GL.CullFace (CullFaceMode.Back);
 			GL.Enable(EnableCap.DepthTest);
@@ -121,6 +124,7 @@ namespace Chess
 			GL.Enable (EnableCap.Blend);
 			GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
 
+			reflexionShader = new ReflexionShader();
 			piecesShader = new Mat4InstancedShader();
 			coloredShader = new SimpleColoredShader ();
 
@@ -136,6 +140,7 @@ namespace Chess
 
 			int b;
 			GL.GetInteger(GetPName.StencilBits, out b);
+
 
 			ErrorCode err = GL.GetError ();
 			Debug.Assert (err == ErrorCode.NoError, "OpenGL Error");
@@ -335,26 +340,30 @@ namespace Chess
 				GL.StencilOp (StencilOp.Keep, StencilOp.Keep, StencilOp.Replace);
 				GL.StencilMask (0xff);
 				GL.DepthMask (false);
-			}
 
-			mainVAO.Render (PrimitiveType.Triangles, boardPlateVAOItem);
+				mainVAO.Render (PrimitiveType.Triangles, boardPlateVAOItem);
 
-			if (Reflexion) {
 				//draw reflected items
 				GL.CullFace (CullFaceMode.Front);
 
 				GL.StencilFunc (StencilFunction.Equal, 1, 0xff);
 				GL.StencilMask (0x00);
-				GL.DepthMask (true);
 
-				changeModelView (reflectedModelview);
-				drawPieces (0.3f);
-			}
+				mainVAO.Unbind ();
+
+				drawReflexion ();
+
+				piecesShader.Enable ();
+				mainVAO.Bind ();
+				changeShadingColor(new Vector4(1.0f,1.0f,1.0f,1.0f));
+
+				GL.CullFace(CullFaceMode.Back);
+				GL.Disable(EnableCap.StencilTest);
+				GL.DepthMask (true);
+			}else
+				mainVAO.Render (PrimitiveType.Triangles, boardPlateVAOItem);
 
 			//draw scene
-			GL.CullFace(CullFaceMode.Back);
-			GL.Disable(EnableCap.StencilTest);
-			changeModelView (modelview);
 
 			#region sel squarres
 			GL.Disable (EnableCap.DepthTest);
@@ -430,6 +439,94 @@ namespace Chess
 		}
 		#endregion
 
+		#region ReflexionFBO
+
+		int reflexionTex, fboReflexion, depthRenderbuffer;
+		QuadVAO cacheQuad;
+		public static ReflexionShader reflexionShader;
+
+		void disableReflexionFbo()
+		{
+			if (cacheQuad != null)
+				cacheQuad.Dispose ();
+			if (GL.IsTexture (reflexionTex)) {
+				GL.DeleteTexture (reflexionTex);
+				GL.DeleteRenderbuffer (depthRenderbuffer);
+				GL.DeleteFramebuffer (fboReflexion);
+			}
+		}
+		void initReflexionFbo()
+		{
+			disableReflexionFbo ();
+
+			System.Drawing.Size cz = ClientRectangle.Size;
+
+			cacheQuad = new QuadVAO (0, 0, ClientRectangle.Width, ClientRectangle.Height, 0, 1, 1, -1);
+			reflexionShader.MVP = Matrix4.CreateOrthographicOffCenter 
+				(0, ClientRectangle.Width, 0, ClientRectangle.Height, 0, 1);
+			
+
+			Tetra.Texture.DefaultMagFilter = TextureMagFilter.Nearest;
+			Tetra.Texture.DefaultMinFilter = TextureMinFilter.Nearest;
+			Tetra.Texture.GenerateMipMaps = false;
+			{
+				reflexionTex = new Tetra.Texture (cz.Width, cz.Height);
+			}
+			Tetra.Texture.ResetToDefaultLoadingParams ();
+
+			// Create Depth Renderbuffer
+			GL.GenRenderbuffers( 1, out depthRenderbuffer );
+			GL.BindRenderbuffer( RenderbufferTarget.Renderbuffer, depthRenderbuffer );
+			GL.RenderbufferStorage(RenderbufferTarget.Renderbuffer, (RenderbufferStorage)All.DepthComponent32, cz.Width, cz.Height);
+
+			GL.GenFramebuffers(1, out fboReflexion);
+
+			GL.BindFramebuffer(FramebufferTarget.Framebuffer, fboReflexion);
+			GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0,
+				TextureTarget.Texture2D, reflexionTex, 0);
+			GL.FramebufferRenderbuffer(FramebufferTarget.Framebuffer, FramebufferAttachment.DepthAttachment, RenderbufferTarget.Renderbuffer, depthRenderbuffer );
+
+
+			if (GL.CheckFramebufferStatus(FramebufferTarget.Framebuffer) != FramebufferErrorCode.FramebufferComplete)
+			{
+				throw new Exception(GL.CheckFramebufferStatus(FramebufferTarget.Framebuffer).ToString());
+			}
+
+			GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+		}
+		void updateReflexionFbo()
+		{
+			piecesShader.Enable ();
+
+			mainVAO.Bind ();
+
+			changeShadingColor(new Vector4(1.0f,1.0f,1.0f,1.0f));
+
+			GL.BindFramebuffer(FramebufferTarget.Framebuffer, fboReflexion);
+
+			//GL.DrawBuffers(1, new DrawBuffersEnum[]{DrawBuffersEnum.ColorAttachment0});
+			GL.ClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+			GL.Clear (ClearBufferMask.ColorBufferBit|ClearBufferMask.DepthBufferBit);
+			GL.CullFace(CullFaceMode.Front);
+			changeModelView (reflectedModelview);
+			drawPieces ();
+			changeModelView (modelview);
+			GL.CullFace(CullFaceMode.Back);
+			GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+			//GL.DrawBuffer(DrawBufferMode.Back);
+			mainVAO.Unbind ();
+		}
+		void drawReflexion(){						
+			GL.CullFace(CullFaceMode.Front);
+			reflexionShader.Enable ();
+
+			GL.ActiveTexture (TextureUnit.Texture0);
+			GL.BindTexture (TextureTarget.Texture2D, reflexionTex);
+			cacheQuad.Render (PrimitiveType.TriangleStrip);
+			GL.BindTexture (TextureTarget.Texture2D, 0);
+			GL.CullFace(CullFaceMode.Back);
+		}
+		#endregion
 		#endregion
 
 		#region Interface
@@ -1504,6 +1601,8 @@ namespace Chess
 		{
 			base.OnResize (e);
 			UpdateViewMatrix();
+			if (Reflexion)
+				initReflexionFbo ();
 		}
 		protected override void OnUpdateFrame (FrameEventArgs e)
 		{
@@ -1557,6 +1656,8 @@ namespace Chess
 					pce.SyncGL ();
 				}
 			}
+			if (Reflexion)
+				updateReflexionFbo ();
 		}
 		protected override void OnClosing (System.ComponentModel.CancelEventArgs e)
 		{

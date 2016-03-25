@@ -7,9 +7,12 @@ using Tetra;
 
 namespace Chess
 {
-	public class Mat4InstancedShader : Shader
+	public class Mat4InstancedShader : Tetra.Shader
 	{
-		public Mat4InstancedShader ()
+		public Mat4InstancedShader ():base(){}
+		public int DiffuseTexture;
+
+		public override void Init ()
 		{
 			vertSource = @"
 			#version 330
@@ -101,11 +104,8 @@ namespace Chess
 
 				out_frag_color = vec4(pow(colorLinear, vec3(1.0/screenGamma)), diffTex.a);
 			}";
-			Compile ();
+			base.Init ();
 		}
-
-		public int DiffuseTexture;
-
 		protected override void BindVertexAttributes ()
 		{
 			base.BindVertexAttributes ();

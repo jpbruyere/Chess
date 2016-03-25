@@ -52,6 +52,7 @@
     <Compile Include="src\ChessMoves.cs" />
     <Compile Include="src\ChessPlayer.cs" />
     <Compile Include="src\ChessPiece.cs" />
+    <Compile Include="src\ReflexionShader.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
