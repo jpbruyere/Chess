@@ -208,16 +208,16 @@ namespace Chess
 			OpenGLSync = true;
 		}
 		void updatePos(){
+//			Mesh.Datas [InstanceIndex].modelMats =
+//				Matrix4.CreateRotationZ(zAngle) *
+//				Matrix4.CreateTranslation(new Vector3(-0.32f, 0, 0)) *
+//				Matrix4.CreateRotationY(xAngle) *
+//				Matrix4.CreateTranslation(new Vector3(0.32f, 0, 0)) *
+//				Matrix4.CreateRotationZ(xAngle/2f) *
+//				Matrix4.CreateTranslation(new Vector3(x, y, z));
+			Quaternion q = Quaternion.FromEulerAngles (zAngle, 0f, xAngle);
 			Mesh.Datas [InstanceIndex].modelMats =
-				Matrix4.CreateRotationZ(zAngle) *
-				Matrix4.CreateTranslation(new Vector3(-0.32f, 0, 0)) *
-				Matrix4.CreateRotationY(xAngle) *
-				Matrix4.CreateTranslation(new Vector3(0.32f, 0, 0)) *
-				Matrix4.CreateRotationZ(xAngle/2f) *
-				//				Matrix4.CreateTranslation(new Vector3(0, 0.32f, 0)) *
-				//				Matrix4.CreateRotationX(xAngle) *
-				//				Matrix4.CreateTranslation(new Vector3(0, -0.32f, 0)) *
-				Matrix4.CreateTranslation(new Vector3(x, y, z));
+				Matrix4.CreateFromQuaternion(q) * Matrix4.CreateTranslation(new Vector3(x, y, z));
 			OpenGLSync = false;
 		}
 		void updateColor(){
