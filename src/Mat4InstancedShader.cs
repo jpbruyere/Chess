@@ -4,6 +4,7 @@ using System.Diagnostics;
 using OpenTK;
 using Tetra;
 
+using Tetra.DynamicShading;
 
 namespace Chess
 {
@@ -24,7 +25,7 @@ namespace Chess
 			layout (location = 4) in mat4 in_model;
 			layout (location = 8) in vec4 in_color;
 
-			layout (std140, index = 0) uniform block_data{
+			layout (std140) uniform block_data{
 				vec4 Color;
 				mat4 ModelView;
 				mat4 Projection;
@@ -58,7 +59,7 @@ namespace Chess
 
 			uniform sampler2D tex;			
 
-			layout (std140, index = 0) uniform block_data{
+			layout (std140) uniform block_data{
 				vec4 Color;
 				mat4 ModelView;
 				mat4 Projection;
@@ -111,11 +112,13 @@ namespace Chess
 			base.BindVertexAttributes ();
 
 			GL.BindAttribLocation(pgmId, 2, "in_normal");
-			GL.BindAttribLocation(pgmId, Tetra.IndexedVAO.instanceBufferIndex, "in_model");
+			GL.BindAttribLocation(pgmId, VertexArrayObject.instanceBufferIndex, "in_model");
 		}
+		int bi1;
 		protected override void GetUniformLocations ()
 		{	
-			GL.UniformBlockBinding(pgmId, GL.GetUniformBlockIndex(pgmId, "block_data"), 0);
+			bi1 = GL.GetUniformBlockIndex (pgmId, "block_data");
+			GL.UniformBlockBinding(pgmId, bi1, 0);
 		}	
 		public override void Enable ()
 		{

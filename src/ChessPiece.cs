@@ -216,16 +216,16 @@ namespace Chess
 //				Matrix4.CreateRotationZ(xAngle/2f) *
 //				Matrix4.CreateTranslation(new Vector3(x, y, z));
 			Quaternion q = Quaternion.FromEulerAngles (zAngle, 0f, xAngle);
-			Mesh.Datas [InstanceIndex].modelMats =
+			Mesh.InstancedDatas [InstanceIndex].modelMats =
 				Matrix4.CreateFromQuaternion(q) * Matrix4.CreateTranslation(new Vector3(x, y, z));
 			OpenGLSync = false;
 		}
 		void updateColor(){
 			if (Player.Color == ChessColor.White) {
-				Mesh.Datas [InstanceIndex].color = new Vector4 (0.80f, 0.80f, 0.74f, 1f);
+				Mesh.InstancedDatas [InstanceIndex].color = new Vector4 (0.80f, 0.80f, 0.74f, 1f);
 				ZAngle = 0f;
 			} else {
-				Mesh.Datas [InstanceIndex].color = new Vector4 (0.10f, 0.10f, 0.10f, 1f);
+				Mesh.InstancedDatas [InstanceIndex].color = new Vector4 (0.10f, 0.10f, 0.10f, 1f);
 				ZAngle = MathHelper.Pi;
 			}
 			OpenGLSync = false;
@@ -234,7 +234,7 @@ namespace Chess
 		{
 			Mesh.RemoveInstance (InstanceIndex);
 
-			if (InstanceIndex == Mesh.Datas.Length)
+			if (InstanceIndex == Mesh.InstancedDatas.Length)
 				return;
 
 			//reindex pce instances

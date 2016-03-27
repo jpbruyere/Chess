@@ -10,6 +10,7 @@ using System.Threading;
 using System.Linq;
 using Tetra;
 using System.IO;
+using Tetra.DynamicShading;
 
 namespace Chess
 {
@@ -75,19 +76,19 @@ namespace Chess
 		UBOSharedData shaderSharedData;
 		int uboShaderSharedData;
 
-		Tetra.Mesh meshPawn;
-		Tetra.Mesh meshBishop;
-		Tetra.Mesh meshHorse;
-		Tetra.Mesh meshTower;
-		Tetra.Mesh meshQueen;
-		Tetra.Mesh meshKing;
-		Tetra.Mesh meshBoard;
+		Mesh<MeshData> meshPawn;
+		Mesh<MeshData> meshBishop;
+		Mesh<MeshData> meshHorse;
+		Mesh<MeshData> meshTower;
+		Mesh<MeshData> meshQueen;
+		Mesh<MeshData> meshKing;
+		Mesh<MeshData> meshBoard;
 		int[] piecesVAOIndexes;
 
 		public static Mat4InstancedShader piecesShader;
 		public static SimpleColoredShader coloredShader;
 
-		public static Tetra.IndexedVAO<VAOChessData> mainVAO;
+		public static VertexArrayObject<MeshData, VAOChessData> mainVAO;
 		public static VAOItem<VAOChessData> boardVAOItem;
 		public static VAOItem<VAOChessData> boardPlateVAOItem;
 		public static VAOItem<VAOChessData> cellVAOItem;
@@ -112,7 +113,8 @@ namespace Chess
 				NotifyValueChanged ("Reflexion", value);
 			}
 		}
-
+		//DynamicShader dynShader;
+		const int GBP_UBO0 = 0;
 		void initOpenGL()
 		{
 			GL.Enable (EnableCap.CullFace);
@@ -124,9 +126,22 @@ namespace Chess
 			GL.Enable (EnableCap.Blend);
 			GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
 
-			reflexionShader = new ReflexionShader();
 			piecesShader = new Mat4InstancedShader();
+			reflexionShader = new ReflexionShader();
 			coloredShader = new SimpleColoredShader ();
+
+			#region test DynamicShading
+//			dynShader = new DynamicShader ();
+//			dynShader.RegisterUBODataStruct (new UBOModel<UBOSharedData> (GBP_UBO0));
+//			dynShader.BuildSources();
+//
+//			UniformBufferObject<UBOSharedData> ubo = new UniformBufferObject<UBOSharedData> ();
+//			ubo.Datas.Color = new Vector4(1,1,1,1);
+//			ubo.UpdateGPU();
+
+			//ubo.Bind(GBP_UBO0);
+			#endregion
+
 
 			shaderSharedData.Color = new Vector4(1,1,1,1);
 			uboShaderSharedData = GL.GenBuffer ();
@@ -134,7 +149,7 @@ namespace Chess
 			GL.BufferData(BufferTarget.UniformBuffer,Marshal.SizeOf(shaderSharedData),
 				ref shaderSharedData, BufferUsageHint.DynamicCopy);
 			GL.BindBuffer (BufferTarget.UniformBuffer, 0);
-			GL.BindBufferBase (BufferTarget.UniformBuffer, 0, uboShaderSharedData);
+			GL.BindBufferBase (BufferRangeTarget.UniformBuffer, 0, uboShaderSharedData);
 
 			GL.ActiveTexture (TextureUnit.Texture0);
 
@@ -175,26 +190,25 @@ namespace Chess
 		{
 			CurrentState = GameState.MeshesLoading;
 
-			meshPawn = Tetra.OBJMeshLoader.Load ("#Chess.Meshes.pawn.obj");
+			meshPawn = OBJMeshLoader.Load ("#Chess.Meshes.pawn.obj");
 			ProgressValue+=20;
-			meshBishop = Tetra.OBJMeshLoader.Load ("#Chess.Meshes.bishop.obj");
+			meshBishop = OBJMeshLoader.Load ("#Chess.Meshes.bishop.obj");
 			ProgressValue+=20;
-			meshHorse = Tetra.OBJMeshLoader.Load ("#Chess.Meshes.horse.obj");
+			meshHorse = OBJMeshLoader.Load ("#Chess.Meshes.horse.obj");
 			ProgressValue+=20;
-			meshTower = Tetra.OBJMeshLoader.Load ("#Chess.Meshes.tower.obj");
+			meshTower = OBJMeshLoader.Load ("#Chess.Meshes.tower.obj");
 			ProgressValue+=20;
-			meshQueen = Tetra.OBJMeshLoader.Load ("#Chess.Meshes.queen.obj");
+			meshQueen = OBJMeshLoader.Load ("#Chess.Meshes.queen.obj");
 			ProgressValue+=20;
-			meshKing = Tetra.OBJMeshLoader.Load ("#Chess.Meshes.king.obj");
+			meshKing = OBJMeshLoader.Load ("#Chess.Meshes.king.obj");
 			ProgressValue+=20;
-			meshBoard = Tetra.OBJMeshLoader.Load ("#Chess.Meshes.board.obj");
+			meshBoard = OBJMeshLoader.Load ("#Chess.Meshes.board.obj");
 			ProgressValue+=20;
 
 			CurrentState = GameState.VAOInit;
 		}
-		void createMainVAO(){
-
-			mainVAO = new Tetra.IndexedVAO<VAOChessData> ();
+		void createMainVAO(){			
+			mainVAO = new VertexArrayObject<MeshData, VAOChessData> ();
 
 			float
 			x = 4f,
@@ -202,32 +216,33 @@ namespace Chess
 			width = 8f,
 			height = 8f;
 
-			boardPlateVAOItem = mainVAO.Add (new Tetra.Mesh (
+			boardPlateVAOItem = mainVAO.Add (new Mesh<MeshData> (
 				new Vector3[] {
 					new Vector3 (x - width / 2f, y + height / 2f, 0f),
 					new Vector3 (x - width / 2f, y - height / 2f, 0f),
 					new Vector3 (x + width / 2f, y + height / 2f, 0f),
 					new Vector3 (x + width / 2f, y - height / 2f, 0f)
 				},
-				new Vector2[] {
-					new Vector2 (0, 2),
-					new Vector2 (0, 0),
-					new Vector2 (2, 2),
-					new Vector2 (2, 0)
-				},
-				new Vector3[] {
-					Vector3.UnitZ,
-					Vector3.UnitZ,
-					Vector3.UnitZ,
-					Vector3.UnitZ
-				},
-				new ushort[] { 0, 1, 2, 2, 1, 3 }));
+				new MeshData(
+					new Vector2[] {
+						new Vector2 (0, 2),
+						new Vector2 (0, 0),
+						new Vector2 (2, 2),
+						new Vector2 (2, 0)
+					},
+					new Vector3[] {
+						Vector3.UnitZ,
+						Vector3.UnitZ,
+						Vector3.UnitZ,
+						Vector3.UnitZ
+						}
+				), new ushort[] { 0, 1, 2, 2, 1, 3 }));
 			//boardPlateVAOItem.DiffuseTexture = new GGL.Texture ("#Chess.Textures.board1.png");
 			boardPlateVAOItem.DiffuseTexture = new GGL.Texture ("#Chess.Textures.board3.png");
 			//boardPlateVAOItem.DiffuseTexture = new GGL.Texture ("#Chess.Textures.marble2.jpg");
-			boardPlateVAOItem.Datas = new VAOChessData[1];
-			boardPlateVAOItem.Datas[0].modelMats = Matrix4.Identity;
-			boardPlateVAOItem.Datas[0].color = new Vector4(0.5f,0.5f,0.5f,1f);
+			boardPlateVAOItem.InstancedDatas = new VAOChessData[1];
+			boardPlateVAOItem.InstancedDatas[0].modelMats = Matrix4.Identity;
+			boardPlateVAOItem.InstancedDatas[0].color = new Vector4(0.5f,0.5f,0.5f,1f);
 
 			boardPlateVAOItem.UpdateInstancesData ();
 
@@ -236,74 +251,75 @@ namespace Chess
 			width = 1.0f;
 			height = 1.0f;
 
-			cellVAOItem = mainVAO.Add (new Tetra.Mesh (
+			cellVAOItem = mainVAO.Add (new Mesh<MeshData>(
 				new Vector3[] {
 					new Vector3 (x - width / 2f, y + height / 2f, 0f),
 					new Vector3 (x - width / 2f, y - height / 2f, 0f),
 					new Vector3 (x + width / 2f, y + height / 2f, 0f),
 					new Vector3 (x + width / 2f, y - height / 2f, 0f)
 				},
-				new Vector2[] {
-					new Vector2 (0, 1),
-					new Vector2 (0, 0),
-					new Vector2 (1, 1),
-					new Vector2 (1, 0)
-				},
-				new Vector3[] {
-					Vector3.UnitZ,
-					Vector3.UnitZ,
-					Vector3.UnitZ,
-					Vector3.UnitZ
-				},
-				new ushort[] { 0, 1, 2, 2, 1, 3 }));
+				new MeshData(
+					new Vector2[] {
+						new Vector2 (0, 1),
+						new Vector2 (0, 0),
+						new Vector2 (1, 1),
+						new Vector2 (1, 0)
+					},
+					new Vector3[] {
+						Vector3.UnitZ,
+						Vector3.UnitZ,
+						Vector3.UnitZ,
+						Vector3.UnitZ
+					}
+				), new ushort[] { 0, 1, 2, 2, 1, 3 }));
 			cellVAOItem.DiffuseTexture = new GGL.Texture ("Textures/marble.jpg");
-			cellVAOItem.Datas = new VAOChessData[1];
-			cellVAOItem.Datas[0].modelMats = Matrix4.CreateTranslation (new Vector3 (4.5f, 4.5f, 0f));
-			cellVAOItem.Datas[0].color = new Vector4(1f,1f,1f,1f);
+			cellVAOItem.InstancedDatas = new VAOChessData[1];
+			cellVAOItem.InstancedDatas[0].modelMats = Matrix4.CreateTranslation (new Vector3 (4.5f, 4.5f, 0f));
+			cellVAOItem.InstancedDatas[0].color = new Vector4(1f,1f,1f,1f);
 			cellVAOItem.UpdateInstancesData ();
 
 			boardVAOItem = mainVAO.Add (meshBoard);
 			boardVAOItem.DiffuseTexture = new GGL.Texture ("#Chess.Textures.marble1.jpg");
-			boardVAOItem.Datas = new VAOChessData[1];
-			boardVAOItem.Datas [0].modelMats = Matrix4.CreateTranslation (4f, 4f, -0.20f);
-			boardVAOItem.Datas[0].color = new Vector4(0.4f,0.4f,0.42f,1f);
+			boardVAOItem.InstancedDatas = new VAOChessData[1];
+			boardVAOItem.InstancedDatas [0].modelMats = Matrix4.CreateTranslation (4f, 4f, -0.20f);
+			boardVAOItem.InstancedDatas[0].color = new Vector4(0.4f,0.4f,0.42f,1f);
 			boardVAOItem.UpdateInstancesData ();
 
 			List<int> tmp = new List<int> ();
 
 			vaoiPawn = mainVAO.Add (meshPawn);
 			vaoiPawn.DiffuseTexture = new GGL.Texture ("Textures/pawn_backed.png");
-			vaoiPawn.Datas = new VAOChessData[16];
+			vaoiPawn.InstancedDatas = new VAOChessData[16];
 			tmp.Add (mainVAO.Meshes.IndexOf (vaoiPawn));
 			ProgressValue++;
 
 			vaoiBishop = mainVAO.Add (meshBishop);
 			vaoiBishop.DiffuseTexture = new GGL.Texture ("Textures/bishop_backed.png");
-			vaoiBishop.Datas = new VAOChessData[4];
+			vaoiBishop.InstancedDatas = new VAOChessData[4];
 			tmp.Add (mainVAO.Meshes.IndexOf (vaoiBishop));
 			ProgressValue++;
 
 			vaoiKnight = mainVAO.Add (meshHorse);
 			vaoiKnight.DiffuseTexture = new GGL.Texture ("Textures/horse_backed.png");
-			vaoiKnight.Datas = new VAOChessData[4];
+			vaoiKnight.InstancedDatas = new VAOChessData[4];
 			tmp.Add (mainVAO.Meshes.IndexOf (vaoiKnight));
 			ProgressValue++;
 
 			vaoiRook = mainVAO.Add (meshTower);
 			vaoiRook.DiffuseTexture = new GGL.Texture ("Textures/tower_backed.png");
-			vaoiRook.Datas = new VAOChessData[4];
+			vaoiRook.InstancedDatas = new VAOChessData[4];
 			tmp.Add (mainVAO.Meshes.IndexOf (vaoiRook));
 			ProgressValue++;
 
 			vaoiQueen = mainVAO.Add (meshQueen);
 			vaoiQueen.DiffuseTexture = new GGL.Texture ("Textures/queen_backed.png");
-			vaoiQueen.Datas = new VAOChessData[2];
+			vaoiQueen.InstancedDatas = new VAOChessData[2];
 			tmp.Add (mainVAO.Meshes.IndexOf (vaoiQueen));
 			ProgressValue++;
 
 			vaoiKing = mainVAO.Add (meshKing);
 			vaoiKing.DiffuseTexture = new GGL.Texture ("Textures/king_backed.png");
-			vaoiKing.Datas = new VAOChessData[2];
+			vaoiKing.InstancedDatas = new VAOChessData[2];
 			tmp.Add (mainVAO.Meshes.IndexOf (vaoiKing));
 			ProgressValue++;
 
@@ -318,7 +334,7 @@ namespace Chess
 			meshKing = null;
 		}
 		void computeTangents(){
-			mainVAO.ComputeTangents();
+			//mainVAO.ComputeTangents();
 			CurrentState = GameState.BuildBuffers;
 		}
 
@@ -398,7 +414,7 @@ namespace Chess
 		}
 		void drawSquarre(Point pos, Vector4 color){
 			changeShadingColor(color);
-			cellVAOItem.Datas[0].modelMats = Matrix4.CreateTranslation
+			cellVAOItem.InstancedDatas[0].modelMats = Matrix4.CreateTranslation
 				((float)pos.X+0.5f, (float)pos.Y+0.5f, 0);
 			cellVAOItem.UpdateInstancesData ();
 			mainVAO.Render (PrimitiveType.Triangles, cellVAOItem);
@@ -1576,9 +1592,9 @@ namespace Chess
 
 			base.OnLoad (e);
 
-			loadWindow (UI_Splash);
-
 			initOpenGL ();
+
+			loadWindow (UI_Splash);
 
 			initStockfish ();
 
