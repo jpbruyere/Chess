@@ -76,13 +76,13 @@ namespace Chess
 		UBOSharedData shaderSharedData;
 		int uboShaderSharedData;
 
-		Mesh<MeshData> meshPawn;
-		Mesh<MeshData> meshBishop;
-		Mesh<MeshData> meshHorse;
-		Mesh<MeshData> meshTower;
-		Mesh<MeshData> meshQueen;
-		Mesh<MeshData> meshKing;
-		Mesh<MeshData> meshBoard;
+		Mesh meshPawn;
+		Mesh meshBishop;
+		Mesh meshHorse;
+		Mesh meshTower;
+		Mesh meshQueen;
+		Mesh meshKing;
+		Mesh meshBoard;
 		int[] piecesVAOIndexes;
 
 		public static Mat4InstancedShader piecesShader;
@@ -216,7 +216,7 @@ namespace Chess
 			width = 8f,
 			height = 8f;
 
-			boardPlateVAOItem = mainVAO.Add (new Mesh<MeshData> (
+			boardPlateVAOItem = (VAOItem<VAOChessData>)mainVAO.Add (new Mesh<MeshData> (
 				new Vector3[] {
 					new Vector3 (x - width / 2f, y + height / 2f, 0f),
 					new Vector3 (x - width / 2f, y - height / 2f, 0f),
@@ -251,7 +251,7 @@ namespace Chess
 			width = 1.0f;
 			height = 1.0f;
 
-			cellVAOItem = mainVAO.Add (new Mesh<MeshData>(
+			cellVAOItem = (VAOItem<VAOChessData>)mainVAO.Add (new Mesh<MeshData>(
 				new Vector3[] {
 					new Vector3 (x - width / 2f, y + height / 2f, 0f),
 					new Vector3 (x - width / 2f, y - height / 2f, 0f),
@@ -278,7 +278,7 @@ namespace Chess
 			cellVAOItem.InstancedDatas[0].color = new Vector4(1f,1f,1f,1f);
 			cellVAOItem.UpdateInstancesData ();
 
-			boardVAOItem = mainVAO.Add (meshBoard);
+			boardVAOItem = (VAOItem<VAOChessData>)mainVAO.Add (meshBoard);
 			boardVAOItem.DiffuseTexture = new GGL.Texture ("#Chess.Textures.marble1.jpg");
 			boardVAOItem.InstancedDatas = new VAOChessData[1];
 			boardVAOItem.InstancedDatas [0].modelMats = Matrix4.CreateTranslation (4f, 4f, -0.20f);
@@ -287,37 +287,37 @@ namespace Chess
 
 			List<int> tmp = new List<int> ();
 
-			vaoiPawn = mainVAO.Add (meshPawn);
+			vaoiPawn = (VAOItem<VAOChessData>)mainVAO.Add (meshPawn);
 			vaoiPawn.DiffuseTexture = new GGL.Texture ("Textures/pawn_backed.png");
 			vaoiPawn.InstancedDatas = new VAOChessData[16];
 			tmp.Add (mainVAO.Meshes.IndexOf (vaoiPawn));
 			ProgressValue++;
 
-			vaoiBishop = mainVAO.Add (meshBishop);
+			vaoiBishop = (VAOItem<VAOChessData>)mainVAO.Add (meshBishop);
 			vaoiBishop.DiffuseTexture = new GGL.Texture ("Textures/bishop_backed.png");
 			vaoiBishop.InstancedDatas = new VAOChessData[4];
 			tmp.Add (mainVAO.Meshes.IndexOf (vaoiBishop));
 			ProgressValue++;
 
-			vaoiKnight = mainVAO.Add (meshHorse);
+			vaoiKnight = (VAOItem<VAOChessData>)mainVAO.Add (meshHorse);
 			vaoiKnight.DiffuseTexture = new GGL.Texture ("Textures/horse_backed.png");
 			vaoiKnight.InstancedDatas = new VAOChessData[4];
 			tmp.Add (mainVAO.Meshes.IndexOf (vaoiKnight));
 			ProgressValue++;
 
-			vaoiRook = mainVAO.Add (meshTower);
+			vaoiRook = (VAOItem<VAOChessData>)mainVAO.Add (meshTower);
 			vaoiRook.DiffuseTexture = new GGL.Texture ("Textures/tower_backed.png");
 			vaoiRook.InstancedDatas = new VAOChessData[4];
 			tmp.Add (mainVAO.Meshes.IndexOf (vaoiRook));
 			ProgressValue++;
 
-			vaoiQueen = mainVAO.Add (meshQueen);
+			vaoiQueen = (VAOItem<VAOChessData>)mainVAO.Add (meshQueen);
 			vaoiQueen.DiffuseTexture = new GGL.Texture ("Textures/queen_backed.png");
 			vaoiQueen.InstancedDatas = new VAOChessData[2];
 			tmp.Add (mainVAO.Meshes.IndexOf (vaoiQueen));
 			ProgressValue++;
 
-			vaoiKing = mainVAO.Add (meshKing);
+			vaoiKing = (VAOItem<VAOChessData>)mainVAO.Add (meshKing);
 			vaoiKing.DiffuseTexture = new GGL.Texture ("Textures/king_backed.png");
 			vaoiKing.InstancedDatas = new VAOChessData[2];
 			tmp.Add (mainVAO.Meshes.IndexOf (vaoiKing));
