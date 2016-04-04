@@ -74,10 +74,10 @@ namespace Chess
 			
 			out vec4 out_frag_color;
 
-			const vec3 diffuse = vec3(1.4, 1.4, 1.4);
-			const vec3 ambient = vec3(0.01, 0.01, 0.01);
-			const vec3 specular = vec3(1.0, 1.0, 1.0);
-			const float shininess = 30.0;
+			const vec3 diffuse = vec3(1.0, 1.0, 1.0);
+			const vec3 ambient = vec3(0.3, 0.3, 0.3);
+			const vec3 specular = vec3(1.0,1.0,1.0);
+			const float shininess =8.0;
 			const float screenGamma = 1.0;
 
 			void main(void)
@@ -101,7 +101,7 @@ namespace Chess
 				vec3 Ispec = specular * pow(specAngle, shininess);
 				vec3 Idiff = diffuse * max(dot(n,vLight), 0.0);
 
-				vec3 colorLinear = diffTex.rgb + diffTex.rgb * (ambient + Idiff) + Ispec;
+				vec3 colorLinear = diffTex.rgb * (ambient + Idiff) + Ispec;
 
 				out_frag_color = vec4(pow(colorLinear, vec3(1.0/screenGamma)), diffTex.a);
 			}";

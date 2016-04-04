@@ -222,7 +222,7 @@ namespace Chess
 		}
 		void updateColor(){
 			if (Player.Color == ChessColor.White) {
-				Mesh.InstancedDatas [InstanceIndex].color = new Vector4 (0.80f, 0.80f, 0.74f, 1f);
+				Mesh.InstancedDatas [InstanceIndex].color = new Vector4 (1.0f, 1.00f, 1.00f, 1f);
 				ZAngle = 0f;
 			} else {
 				Mesh.InstancedDatas [InstanceIndex].color = new Vector4 (0.10f, 0.10f, 0.10f, 1f);
