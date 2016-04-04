@@ -75,9 +75,9 @@ namespace Chess
 			out vec4 out_frag_color;
 
 			const vec3 diffuse = vec3(1.0, 1.0, 1.0);
-			const vec3 ambient = vec3(0.3, 0.3, 0.3);
+			const vec3 ambient = vec3(0.5, 0.5, 0.5);
 			const vec3 specular = vec3(1.0,1.0,1.0);
-			const float shininess =8.0;
+			const float shininess =32.0;
 			const float screenGamma = 1.0;
 
 			void main(void)
