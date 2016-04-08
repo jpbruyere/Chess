@@ -292,7 +292,7 @@ namespace Chess
 			cellVAOItem.DiffuseTexture = new GGL.Texture ("Textures/marble.jpg");
 			cellVAOItem.InstancedDatas = new VAOChessData[1];
 			cellVAOItem.InstancedDatas[0].modelMats = Matrix4.CreateTranslation (new Vector3 (4.5f, 4.5f, 0f));
-			cellVAOItem.InstancedDatas[0].color = new Vector4(1f,1f,1f,1f);
+			cellVAOItem.InstancedDatas [0].color = new Vector4 (0.3f, 1.0f, 0.3f, 0.5f);
 			cellVAOItem.UpdateInstancesData ();
 
 			boardVAOItem = (VAOItem<VAOChessData>)mainVAO.Add (meshBoard);
@@ -392,18 +392,7 @@ namespace Chess
 			#region sel squarres
 			GL.Disable (EnableCap.DepthTest);
 
-			if (ValidPositionsForActivePce != null){
-				foreach (Point vm in ValidPositionsForActivePce)
-					drawSquarre(vm, new Vector4(0.0f,0.5f,0.7f,0.7f));
-			}
-
-			drawSquarre(Selection, new Vector4(0.3f,1.0f,0.3f,0.5f));
-
-			if (active >= 0)
-				drawSquarre(Active, new Vector4(0.2f,0.2f,1.0f,0.6f));
-
-			if (CurrentState > GameState.Play)
-				drawSquarre(CurrentPlayer.King.BoardCell, new Vector4(1.0f,0.2f,0.2f,0.6f));
+			mainVAO.Render (PrimitiveType.Triangles, cellVAOItem);
 
 			GL.Enable (EnableCap.DepthTest);
 			#endregion
@@ -419,13 +408,6 @@ namespace Chess
 		void drawPieces(float alpha = 1.0f){
 			changeShadingColor(new Vector4(1f,1f,1f,alpha));
 			mainVAO.Render (PrimitiveType.Triangles, piecesVAOIndexes);
-		}
-		void drawSquarre(Point pos, Vector4 color){
-			changeShadingColor(color);
-			cellVAOItem.InstancedDatas[0].modelMats = Matrix4.CreateTranslation
-				((float)pos.X+0.5f, (float)pos.Y+0.5f, 0);
-			cellVAOItem.UpdateInstancesData ();
-			mainVAO.Render (PrimitiveType.Triangles, cellVAOItem);
 		}
 
 		#region Arrows
@@ -1615,6 +1597,15 @@ namespace Chess
 			if (Reflexion)
 				initReflexionFbo ();
 		}
+		Vector4 validPosColor = new Vector4 (0.0f, 0.5f, 0.7f, 0.7f);
+		Vector4 activeColor = new Vector4 (0.2f, 0.2f, 1.0f, 0.6f);
+		Vector4 kingCheckedColor = new Vector4 (1.0f, 0.2f, 0.2f, 0.6f);
+		void addCellLight(Vector4 cellColor, Point pos){
+			cellVAOItem.AddInstance (new VAOChessData () { 
+				color = cellColor, 
+				modelMats = Matrix4.CreateTranslation (0.5f + (float)pos.X, 0.5f + (float)pos.Y, 0)
+			});
+		}
 		protected override void OnUpdateFrame (FrameEventArgs e)
 		{
 			base.OnUpdateFrame (e);
@@ -1660,6 +1651,25 @@ namespace Chess
 				bestMove = null;
 				break;
 			}
+
+			cellVAOItem.InstancedDatas[0].modelMats = Matrix4.CreateTranslation(0.5f + (float)selection.X, 0.5f + (float)selection.Y, 0);
+
+			if (ValidPositionsForActivePce != null){
+				for (int i = 1; i < cellVAOItem.InstancedDatas.Length; i++)
+					cellVAOItem.RemoveInstance (i);					
+				foreach (Point vm in ValidPositionsForActivePce)
+					addCellLight (validPosColor, vm);				
+			}else
+				for (int i = 1; i < cellVAOItem.InstancedDatas.Length; i++)
+					cellVAOItem.RemoveInstance (i);
+			if (active >= 0)
+				addCellLight (activeColor, Active);					
+			
+			if (CurrentState > GameState.Play)
+				addCellLight(kingCheckedColor, CurrentPlayer.King.BoardCell);
+
+			cellVAOItem.UpdateInstancesData ();
+
 			Animation.ProcessAnimations ();
 
 			foreach (ChessPlayer p in Players) {
@@ -1837,16 +1847,14 @@ namespace Chess
 
 		#region CTOR and Main
 		public MainWin ()
-			: base(1024, 800, 32, 24, 1, 8, "test")
+			: base(1024, 800, 32, 24, 1, 4, "Chess")
 		{
-			VSync = VSyncMode.Off;
+			//VSync = VSyncMode.Off;
 		}
 
 		[STAThread]
 		static void Main ()
 		{
-			Console.WriteLine ("starting example");
-
 			using (MainWin win = new MainWin( )) {
 				win.Run (30.0);
 			}
