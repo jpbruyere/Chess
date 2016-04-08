@@ -361,6 +361,7 @@ namespace Chess
 		void draw()
 		{
 			piecesShader.Enable ();
+			piecesShader.SetLightingPass ();
 
 			mainVAO.Bind ();
 
@@ -494,6 +495,7 @@ namespace Chess
 		void updateReflexionFbo()
 		{
 			piecesShader.Enable ();
+			piecesShader.SetLightingPass ();
 
 			mainVAO.Bind ();
 
@@ -513,10 +515,12 @@ namespace Chess
 			mainVAO.Unbind ();
 		}
 		void drawReflexion(){
+			piecesShader.SetColorPass ();
 			changeMVP (orthoMat, Matrix4.Identity);
 			vaoiQuad.DiffuseTexture = reflexionTex;
 			mainVAO.Render (PrimitiveType.TriangleStrip, vaoiQuad);
 			changeMVP (projection, modelview);
+			piecesShader.SetLightingPass ();
 		}
 		#endregion
 		#endregion
