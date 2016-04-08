@@ -48,7 +48,6 @@
     <Compile Include="src\main.cs" />
     <Compile Include="src\ChessBoardWidget.cs" />
     <Compile Include="src\Mat4InstancedShader.cs" />
-    <Compile Include="src\SimpleColoredShader.cs" />
     <Compile Include="src\TextScrollerWidget.cs" />
     <Compile Include="src\VAOChessData.cs" />
     <Compile Include="src\ChessMoves.cs" />

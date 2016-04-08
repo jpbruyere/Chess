@@ -17,7 +17,9 @@ namespace Chess
 		{
 			vertSource = @"
 			#version 330
-			precision highp float;
+			#extension GL_ARB_shader_subroutine : require
+
+			precision mediump float;
 
 			layout (location = 0) in vec3 in_position;
 			layout (location = 1) in vec2 in_tex;
@@ -38,9 +40,13 @@ namespace Chess
 			out vec4 vEyeSpacePos;
 			out vec4 color;
 			
+			subroutine void vertexTech_t ();
+			subroutine uniform vertexTech_t vertexTech;
 
-			void main(void)
-			{				
+			subroutine (vertexTech_t) void uninstancedPos() {
+				gl_Position = Projection * ModelView * vec4(in_position.xyz, 1);
+			}
+			subroutine (vertexTech_t) void full() {
 				texCoord = in_tex;
 				n = vec3(Normal * in_model * vec4(in_normal, 0));
 
@@ -50,13 +56,17 @@ namespace Chess
 				color = in_color;
 				
 				gl_Position = Projection * ModelView * in_model * vec4(pos, 1);
+			}
+			void main(void)
+			{
+				vertexTech();
 			}";
 
 			fragSource = @"
 			#version 330
 			#extension GL_ARB_shader_subroutine : require
 
-			precision highp float;
+			precision mediump float;
 
 			uniform sampler2D tex;
 
@@ -84,8 +94,8 @@ namespace Chess
 			subroutine vec4 computeColor_t ();
 			subroutine uniform computeColor_t computeColor;
 
-			subroutine (computeColor_t) vec4 redColor() {
-				return vec4(1.0,0.0,0.0,1.0);
+			subroutine (computeColor_t) vec4 simpleColor() {
+				return Color;
 			}
 			subroutine (computeColor_t) vec4 blinnPhong(){
 				vec4 diffTex = texture( tex, texCoord) * Color * color;
@@ -129,15 +139,18 @@ namespace Chess
 			GL.BindAttribLocation(pgmId, VertexArrayObject.instanceBufferIndex, "in_model");
 		}
 		int bi1;
-		int colorFunc, redFunc, blinnPhongFunc, texturedFunc;
+		int computeColorSubroutine, simpleColorFunc, blinnPhongFunc, texturedFunc,
+			vertexTeckSubroutine, fullFunc, uninstancedPosFunc;
 		protected override void GetUniformLocations ()
 		{
-			passLoc = GL.GetUniformLocation(pgmId, "pass");
-
-			redFunc = GL.GetSubroutineIndex (pgmId, ShaderType.FragmentShader, "redColor");
+			simpleColorFunc = GL.GetSubroutineIndex (pgmId, ShaderType.FragmentShader, "simpleColor");
 			blinnPhongFunc = GL.GetSubroutineIndex (pgmId, ShaderType.FragmentShader, "blinnPhong");
 			texturedFunc = GL.GetSubroutineIndex (pgmId, ShaderType.FragmentShader, "textured");
-			colorFunc = GL.GetSubroutineUniformLocation (pgmId, ShaderType.FragmentShader, "computeColor");
+			computeColorSubroutine = GL.GetSubroutineUniformLocation (pgmId, ShaderType.FragmentShader, "computeColor");
+
+			fullFunc = GL.GetSubroutineIndex (pgmId, ShaderType.VertexShader, "full");
+			uninstancedPosFunc = GL.GetSubroutineIndex (pgmId, ShaderType.VertexShader, "uninstancedPos");
+			vertexTeckSubroutine = GL.GetSubroutineUniformLocation (pgmId, ShaderType.VertexShader, "vertexTech");
 
 			bi1 = GL.GetUniformBlockIndex (pgmId, "block_data");
 			GL.UniformBlockBinding(pgmId, bi1, 0);
@@ -148,10 +161,16 @@ namespace Chess
 			GL.ActiveTexture (TextureUnit.Texture0);
 			GL.BindTexture(TextureTarget.Texture2D, DiffuseTexture);
 		}
-		public void SetColorPass(){
+		public void SetSimpleTexturedPass(){
+			GL.UniformSubroutines (ShaderType.VertexShader, 1, ref fullFunc);
 			GL.UniformSubroutines (ShaderType.FragmentShader, 1, ref texturedFunc);
 		}
+		public void SetSimpleColorPass(){
+			GL.UniformSubroutines (ShaderType.VertexShader, 1, ref uninstancedPosFunc);
+			GL.UniformSubroutines (ShaderType.FragmentShader, 1, ref simpleColorFunc);
+		}
 		public void SetLightingPass(){
+			GL.UniformSubroutines (ShaderType.VertexShader, 1, ref fullFunc);
 			GL.UniformSubroutines (ShaderType.FragmentShader, 1, ref blinnPhongFunc);
 		}
 	}

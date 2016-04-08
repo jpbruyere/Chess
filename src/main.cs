@@ -405,6 +405,8 @@ namespace Chess
 
 			mainVAO.Unbind ();
 
+			piecesShader.SetSimpleColorPass ();
+			changeShadingColor (new Vector4 (0.2f, 1.0f, 0.2f, 0.5f));
 			renderArrow ();
 
 			GL.StencilMask (0xff);
@@ -434,9 +436,7 @@ namespace Chess
 		}
 		void renderArrow(){
 			if (arrows == null)
-				return;
-			coloredShader.Enable ();
-			changeShadingColor (new Vector4 (0.2f, 1.0f, 0.2f, 0.5f));
+				return;			
 
 			GL.Disable (EnableCap.CullFace);
 			arrows.Render (PrimitiveType.TriangleStrip);
@@ -515,7 +515,7 @@ namespace Chess
 			mainVAO.Unbind ();
 		}
 		void drawReflexion(){
-			piecesShader.SetColorPass ();
+			piecesShader.SetSimpleTexturedPass ();
 			changeMVP (orthoMat, Matrix4.Identity);
 			vaoiQuad.DiffuseTexture = reflexionTex;
 			mainVAO.Render (PrimitiveType.TriangleStrip, vaoiQuad);
@@ -1844,7 +1844,7 @@ namespace Chess
 
 		#region CTOR and Main
 		public MainWin ()
-			: base(1024, 800, 32, 24, 1, 4, "Chess")
+			: base(800, 600, 32, 24, 1, 4, "Chess")
 		{
 			//VSync = VSyncMode.Off;
 		}
