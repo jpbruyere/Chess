@@ -27,7 +27,8 @@ using GGL;
 namespace Chess
 {
 	public class ChessPiece{
-		float x, y, z, xAngle, zAngle;
+		float xAngle, zAngle;
+		Vector3 position;
 		VAOItem<VAOChessData> newMesh;//replacment mesh when promote or unpromote
 		PieceType originalType;
 		PieceType promotion;
@@ -55,41 +56,39 @@ namespace Chess
 		}
 
 		public Vector3 Position {
-			get { return new Vector3 (x, y, z); }
+			get { return position; }
 			set {
-				if (value == Position)
+				if (value == position)
 					return;
-				x = value.X;
-				y = value.Y;
-				z = value.Z;
+				position = value;
 				updatePos ();
 			}
 		}
 
 		public float X {
-			get {return x;}
+			get {return position.X;}
 			set {
-				if (x == value)
+				if (position.X == value)
 					return;
-				x = value;
+				position.X = value;
 				updatePos ();
 			}
 		}
 		public float Y {
-			get {return y;}
+			get {return position.Y;}
 			set {
-				if (y == value)
+				if (position.Y == value)
 					return;
-				y = value;
+				position.Y = value;
 				updatePos ();
 			}
 		}
 		public float Z {
-			get {return z;}
+			get {return position.Z;}
 			set {
-				if (z == value)
+				if (position.Z == value)
 					return;
-				z = value;
+				position.Z = value;
 				updatePos ();
 			}
 		}
@@ -118,9 +117,7 @@ namespace Chess
 			Type = _type;
 			InitX= xPos;
 			InitY= yPos;
-			x = xPos + 0.5f;
-			y = yPos + 0.5f;
-			z = 0f;
+			position = new Vector3(xPos + 0.5f, yPos + 0.5f, 0f);
 			xAngle = 0f;
 			HasMoved = false;
 			Captured = false;
@@ -135,7 +132,7 @@ namespace Chess
 		}
 		public void Reset(bool animate = true){
 			xAngle = 0f;
-			z = 0f;
+			Z = 0f;
 			if (HasMoved) {
 				if (animate)
 					Animation.StartAnimation (new PathAnimation (this, "Position",
@@ -217,7 +214,7 @@ namespace Chess
 //				Matrix4.CreateTranslation(new Vector3(x, y, z));
 			Quaternion q = Quaternion.FromEulerAngles (zAngle, 0f, xAngle);
 			Mesh.InstancedDatas [InstanceIndex].modelMats =
-				Matrix4.CreateFromQuaternion(q) * Matrix4.CreateTranslation(new Vector3(x, y, z));
+				Matrix4.CreateFromQuaternion (q) * Matrix4.CreateTranslation (position);
 			OpenGLSync = false;
 		}
 		void updateColor(){

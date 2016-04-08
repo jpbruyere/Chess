@@ -32,7 +32,7 @@ namespace Chess
 		public struct UBOSharedData
 		{
 			public Vector4 Color;
-			public Matrix4 view;
+			public Matrix4 modelview;
 			public Matrix4 projection;
 			public Matrix4 normal;
 			public Vector4 LightPosition;
@@ -41,6 +41,8 @@ namespace Chess
 		#region  scene matrix and vectors
 		public static Matrix4 modelview;
 		public static Matrix4 reflectedModelview;
+		public static Matrix4 orthoMat//full screen quad rendering
+		= OpenTK.Matrix4.CreateOrthographicOffCenter (-0.5f, 0.5f, -0.5f, 0.5f, 1, -1);
 		public static Matrix4 projection;
 		public static Matrix4 invMVP;
 		public static int[] viewport = new int[4];
@@ -98,6 +100,8 @@ namespace Chess
 		public static VAOItem<VAOChessData> vaoiRook;
 		public static VAOItem<VAOChessData> vaoiQueen;
 		public static VAOItem<VAOChessData> vaoiKing;
+		public static VAOItem<VAOChessData> vaoiQuad;//full screen quad in mainVAO to prevent unbind
+													//while drawing reflexion
 
 		public bool Reflexion {
 			get { return Crow.Configuration.Get<bool> ("Reflexion"); }
@@ -127,7 +131,6 @@ namespace Chess
 			GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
 
 			piecesShader = new Mat4InstancedShader();
-			reflexionShader = new ReflexionShader();
 			coloredShader = new SimpleColoredShader ();
 
 			#region test DynamicShading
@@ -162,7 +165,7 @@ namespace Chess
 		}
 		void updateShadersMatrices(){
 			shaderSharedData.projection = projection;
-			shaderSharedData.view = modelview;
+			shaderSharedData.modelview = modelview;
 			shaderSharedData.normal = modelview.Inverted();
 			shaderSharedData.normal.Transpose ();
 			shaderSharedData.LightPosition = Vector4.Transform(vLight, modelview);
@@ -178,6 +181,14 @@ namespace Chess
 				ref color);
 			GL.BindBuffer (BufferTarget.UniformBuffer, 0);
 
+		}
+		void changeMVP(Matrix4 newProjection, Matrix4 newModelView){
+			GL.BindBuffer (BufferTarget.UniformBuffer, uboShaderSharedData);
+			GL.BufferSubData(BufferTarget.UniformBuffer, (IntPtr)Vector4.SizeInBytes, Vector4.SizeInBytes * 4,
+				ref newModelView);
+			GL.BufferSubData(BufferTarget.UniformBuffer, (IntPtr)(Vector4.SizeInBytes * 5), Vector4.SizeInBytes * 4,
+				ref newProjection);
+			GL.BindBuffer (BufferTarget.UniformBuffer, 0);
 		}
 		void changeModelView(Matrix4 newModelView){
 			GL.BindBuffer (BufferTarget.UniformBuffer, uboShaderSharedData);
@@ -215,6 +226,12 @@ namespace Chess
 			y = 4f,
 			width = 8f,
 			height = 8f;
+			vaoiQuad = (VAOItem<VAOChessData>)mainVAO.Add (Mesh.CreateQuad (0, 0, 0, 1, 1, 1, 1));
+			vaoiQuad.InstancedDatas = new VAOChessData[1];
+			vaoiQuad.InstancedDatas[0].modelMats = Matrix4.Identity;
+			vaoiQuad.InstancedDatas[0].color = new Vector4(1.0f,1.0f,1.0f,0.3f);
+
+			vaoiQuad.UpdateInstancesData ();
 
 			boardPlateVAOItem = (VAOItem<VAOChessData>)mainVAO.Add (new Mesh<MeshData> (
 				new Vector3[] {
@@ -360,20 +377,11 @@ namespace Chess
 				mainVAO.Render (PrimitiveType.Triangles, boardPlateVAOItem);
 
 				//draw reflected items
-				GL.CullFace (CullFaceMode.Front);
-
 				GL.StencilFunc (StencilFunction.Equal, 1, 0xff);
 				GL.StencilMask (0x00);
 
-				mainVAO.Unbind ();
-
 				drawReflexion ();
 
-				piecesShader.Enable ();
-				mainVAO.Bind ();
-				changeShadingColor(new Vector4(1.0f,1.0f,1.0f,1.0f));
-
-				GL.CullFace(CullFaceMode.Back);
 				GL.Disable(EnableCap.StencilTest);
 				GL.DepthMask (true);
 			}else
@@ -458,13 +466,9 @@ namespace Chess
 		#region ReflexionFBO
 
 		int reflexionTex, fboReflexion, depthRenderbuffer;
-		QuadVAO cacheQuad;
-		public static ReflexionShader reflexionShader;
 
 		void disableReflexionFbo()
 		{
-			if (cacheQuad != null)
-				cacheQuad.Dispose ();
 			if (GL.IsTexture (reflexionTex)) {
 				GL.DeleteTexture (reflexionTex);
 				GL.DeleteRenderbuffer (depthRenderbuffer);
@@ -476,11 +480,6 @@ namespace Chess
 			disableReflexionFbo ();
 
 			System.Drawing.Size cz = ClientRectangle.Size;
-
-			cacheQuad = new QuadVAO (0, 0, ClientRectangle.Width, ClientRectangle.Height, 0, 1, 1, -1);
-			reflexionShader.MVP = Matrix4.CreateOrthographicOffCenter 
-				(0, ClientRectangle.Width, 0, ClientRectangle.Height, 0, 1);
-			
 
 			Tetra.Texture.DefaultMagFilter = TextureMagFilter.Nearest;
 			Tetra.Texture.DefaultMinFilter = TextureMinFilter.Nearest;
@@ -502,6 +501,7 @@ namespace Chess
 				TextureTarget.Texture2D, reflexionTex, 0);
 			GL.FramebufferRenderbuffer(FramebufferTarget.Framebuffer, FramebufferAttachment.DepthAttachment, RenderbufferTarget.Renderbuffer, depthRenderbuffer );
 
+			GL.DrawBuffers(1, new DrawBuffersEnum[]{DrawBuffersEnum.ColorAttachment0});
 
 			if (GL.CheckFramebufferStatus(FramebufferTarget.Framebuffer) != FramebufferErrorCode.FramebufferComplete)
 			{
@@ -520,7 +520,6 @@ namespace Chess
 
 			GL.BindFramebuffer(FramebufferTarget.Framebuffer, fboReflexion);
 
-			//GL.DrawBuffers(1, new DrawBuffersEnum[]{DrawBuffersEnum.ColorAttachment0});
 			GL.ClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 			GL.Clear (ClearBufferMask.ColorBufferBit|ClearBufferMask.DepthBufferBit);
 			GL.CullFace(CullFaceMode.Front);
@@ -532,15 +531,11 @@ namespace Chess
 			//GL.DrawBuffer(DrawBufferMode.Back);
 			mainVAO.Unbind ();
 		}
-		void drawReflexion(){						
-			GL.CullFace(CullFaceMode.Front);
-			reflexionShader.Enable ();
-
-			GL.ActiveTexture (TextureUnit.Texture0);
-			GL.BindTexture (TextureTarget.Texture2D, reflexionTex);
-			cacheQuad.Render (PrimitiveType.TriangleStrip);
-			GL.BindTexture (TextureTarget.Texture2D, 0);
-			GL.CullFace(CullFaceMode.Back);
+		void drawReflexion(){
+			changeMVP (orthoMat, Matrix4.Identity);
+			vaoiQuad.DiffuseTexture = reflexionTex;
+			mainVAO.Render (PrimitiveType.TriangleStrip, vaoiQuad);
+			changeMVP (projection, modelview);
 		}
 		#endregion
 		#endregion

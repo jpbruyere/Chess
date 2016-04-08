@@ -37,13 +37,10 @@ namespace Crow
 		public virtual IList Moves {
 			get { return moves; }
 			set {
-				if (moves == value) {
-					RegisterForGraphicUpdate ();
-					RegisterForLayouting (LayoutingType.Height);
-					return;
+				if (moves != value) {
+					moves = value; 
+					NotifyValueChanged ("Moves", moves);
 				}
-				moves = value; 
-				NotifyValueChanged ("Moves", moves);
 				RegisterForLayouting (LayoutingType.Height);
 				RegisterForGraphicUpdate ();
 			}
