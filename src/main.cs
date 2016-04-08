@@ -102,6 +102,9 @@ namespace Chess
 		public static VAOItem<VAOChessData> vaoiKing;
 		public static VAOItem<VAOChessData> vaoiQuad;//full screen quad in mainVAO to prevent unbind
 													//while drawing reflexion
+		Vector4 validPosColor = new Vector4 (0.0f, 0.5f, 0.7f, 0.7f);
+		Vector4 activeColor = new Vector4 (0.2f, 0.2f, 1.0f, 0.6f);
+		Vector4 kingCheckedColor = new Vector4 (1.0f, 0.2f, 0.2f, 0.6f);
 
 		public bool Reflexion {
 			get { return Crow.Configuration.Get<bool> ("Reflexion"); }
@@ -397,17 +400,13 @@ namespace Chess
 			GL.Enable (EnableCap.DepthTest);
 			#endregion
 
-			drawPieces ();
+			mainVAO.Render (PrimitiveType.Triangles, piecesVAOIndexes);
 
 			mainVAO.Unbind ();
 
 			renderArrow ();
 
 			GL.StencilMask (0xff);
-		}
-		void drawPieces(float alpha = 1.0f){
-			changeShadingColor(new Vector4(1f,1f,1f,alpha));
-			mainVAO.Render (PrimitiveType.Triangles, piecesVAOIndexes);
 		}
 
 		#region Arrows
@@ -506,7 +505,7 @@ namespace Chess
 			GL.Clear (ClearBufferMask.ColorBufferBit|ClearBufferMask.DepthBufferBit);
 			GL.CullFace(CullFaceMode.Front);
 			changeModelView (reflectedModelview);
-			drawPieces ();
+			mainVAO.Render (PrimitiveType.Triangles, piecesVAOIndexes);
 			changeModelView (modelview);
 			GL.CullFace(CullFaceMode.Back);
 			GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
@@ -590,7 +589,6 @@ namespace Chess
 		void initInterface(){
 			MouseMove += Mouse_Move;
 			MouseButtonDown += Mouse_ButtonDown;
-			MouseButtonUp += Mouse_ButtonUp;
 			MouseWheelChanged += Mouse_WheelChanged;
 			KeyboardKeyDown += MainWin_KeyboardKeyDown;
 
@@ -1597,9 +1595,7 @@ namespace Chess
 			if (Reflexion)
 				initReflexionFbo ();
 		}
-		Vector4 validPosColor = new Vector4 (0.0f, 0.5f, 0.7f, 0.7f);
-		Vector4 activeColor = new Vector4 (0.2f, 0.2f, 1.0f, 0.6f);
-		Vector4 kingCheckedColor = new Vector4 (1.0f, 0.2f, 0.2f, 0.6f);
+
 		void addCellLight(Vector4 cellColor, Point pos){
 			cellVAOItem.AddInstance (new VAOChessData () { 
 				color = cellColor, 
@@ -1652,8 +1648,8 @@ namespace Chess
 				break;
 			}
 
+			#region cell lighting
 			cellVAOItem.InstancedDatas[0].modelMats = Matrix4.CreateTranslation(0.5f + (float)selection.X, 0.5f + (float)selection.Y, 0);
-
 			if (ValidPositionsForActivePce != null){
 				for (int i = 1; i < cellVAOItem.InstancedDatas.Length; i++)
 					cellVAOItem.RemoveInstance (i);					
@@ -1669,6 +1665,7 @@ namespace Chess
 				addCellLight(kingCheckedColor, CurrentPlayer.King.BoardCell);
 
 			cellVAOItem.UpdateInstancesData ();
+			#endregion
 
 			Animation.ProcessAnimations ();
 
@@ -1770,12 +1767,8 @@ namespace Chess
 				}
 			}
 		}
-		void Mouse_ButtonUp (object sender, OpenTK.Input.MouseButtonEventArgs e)
-		{
-		}
 		void Mouse_Move(object sender, OpenTK.Input.MouseMoveEventArgs e)
 		{
-
 			if (e.XDelta != 0 || e.YDelta != 0)
 			{
 				if (e.Mouse.MiddleButton == OpenTK.Input.ButtonState.Pressed) {
