@@ -153,6 +153,12 @@
     <EmbeddedResource Include="gui\tmpCheckBox.crow" />
     <EmbeddedResource Include="gui\newGame.crow" />
     <EmbeddedResource Include="Textures\board3.png" />
+    <EmbeddedResource Include="Meshes\pawn_1.obj" />
+    <EmbeddedResource Include="Meshes\bishop_1.obj" />
+    <EmbeddedResource Include="Meshes\horse_1.obj" />
+    <EmbeddedResource Include="Meshes\king_1.obj" />
+    <EmbeddedResource Include="Meshes\queen_1.obj" />
+    <EmbeddedResource Include="Meshes\tower_1.obj" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="lib\Crow\Crow.csproj">

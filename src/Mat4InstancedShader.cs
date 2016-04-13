@@ -55,7 +55,7 @@ namespace Chess
 				vEyeSpacePos = ModelView * in_model * vec4(pos, 1);
 				color = in_color;
 				
-				gl_Position = Projection * ModelView * in_model * vec4(pos, 1);
+				gl_Position = Projection * vEyeSpacePos;
 			}
 			void main(void)
 			{

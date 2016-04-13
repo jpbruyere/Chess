@@ -88,7 +88,6 @@ namespace Chess
 		int[] piecesVAOIndexes;
 
 		public static Mat4InstancedShader piecesShader;
-		public static SimpleColoredShader coloredShader;
 
 		public static VertexArrayObject<MeshData, VAOChessData> mainVAO;
 		public static VAOItem<VAOChessData> boardVAOItem;
@@ -134,7 +133,6 @@ namespace Chess
 			GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
 
 			piecesShader = new Mat4InstancedShader();
-			coloredShader = new SimpleColoredShader ();
 
 			#region test DynamicShading
 //			dynShader = new DynamicShader ();
@@ -298,6 +296,12 @@ namespace Chess
 			cellVAOItem.InstancedDatas [0].color = new Vector4 (0.3f, 1.0f, 0.3f, 0.5f);
 			cellVAOItem.UpdateInstancesData ();
 
+			Tetra.Texture.GenerateMipMaps = true;
+			Tetra.Texture.DefaultMinFilter = TextureMinFilter.LinearMipmapLinear;
+			Tetra.Texture.DefaultMagFilter = TextureMagFilter.Linear;
+			Tetra.Texture.DefaultWrapMode = TextureWrapMode.ClampToBorder;
+
+
 			boardVAOItem = (VAOItem<VAOChessData>)mainVAO.Add (meshBoard);
 			boardVAOItem.DiffuseTexture = new GGL.Texture ("#Chess.Textures.marble1.jpg");
 			boardVAOItem.InstancedDatas = new VAOChessData[1];
@@ -345,6 +349,7 @@ namespace Chess
 
 			piecesVAOIndexes = tmp.ToArray ();
 
+			Tetra.Texture.ResetToDefaultLoadingParams ();
 
 			meshPawn = null;
 			meshBishop = null;
@@ -1844,9 +1849,9 @@ namespace Chess
 
 		#region CTOR and Main
 		public MainWin ()
-			: base(800, 600, 32, 24, 1, 4, "Chess")
+			: base(1024, 800, 32, 24, 1, 4, "Chess")
 		{
-			//VSync = VSyncMode.Off;
+			VSync = VSyncMode.Off;
 		}
 
 		[STAThread]
