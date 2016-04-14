@@ -1,7 +1,7 @@
-﻿<Window Font="droid bold, 26" Width="0" Height="0" Margin="200"  Title="Options"
+﻿<Window Font="droid bold, 26" Width="80%" Height="80%" Title="Options"
 	Template="#Chess.gui.tmpWindow.crow">
 	<Container>
-		<VerticalStack Margin="30" Spacing="2">
+		<VerticalStack Margin="10" Spacing="2">
 			<CheckBox Template="#Chess.gui.tmpCheckBox.crow"
 				Caption="Reflexion"
 				Margin="2"
@@ -24,7 +24,7 @@
 				IsChecked="{²AutoPlayHint}"/>
 			<HorizontalStack Height="-1" Spacing="5">
 				<Label Font="droid, 14" Text="Stockfish Level:"/>
-				<Spinner Width="-1" Height="-1"
+				<Spinner Fit="true"
 					Value="{²StockfishLevel}" Minimum="0" Maximum="20">
 					<Template>
 						<Border BorderWidth="1" CornerRadius="3"
@@ -60,7 +60,7 @@
 				</Spinner>
 			</HorizontalStack>
 			<GraphicObject/>
-			<Button Width="150" Style="#Chess.gui.Button.style" HorizontalAlignment="Right" Caption="Close"
+			<Button Width="40%" Style="#Chess.gui.Button.style" HorizontalAlignment="Right" Caption="Close"
 				MouseClick="../../../../../../butQuitPress"/>
 		</VerticalStack>
 	</Container>

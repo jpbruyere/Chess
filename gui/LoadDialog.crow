@@ -1,19 +1,16 @@
 ﻿<?xml version="1.0" encoding="UTF-8" ?>
-<Container>
-	<Border Fit="True"
-			BorderWidth="1" CornerRadius="5" Background="0,4;0,4;0,4;0,8">
-		<VerticalStack Width="400" Height="400" Margin="30">
+<Window Font="droid bold, 40" Width="50%" Height="50%"  Title="Save"
+	Template="#Chess.gui.tmpWindow.crow">
+	<VerticalStack Width="80%" Height="80%" Spacing="5">
 			<Label Font="droid bold, 26" Text="Load"/>
-			<TextBox Font="droid , 16" Text="{../lbSavedGames.SelectedItem}" Width="0" Margin="2"/>
+			<TextBox Font="droid , 16" Text="{../lbSavedGames.SelectedItem}" Width="Stretched" Margin="2"/>
 			<ListBox SelectedIndex="0" Name="lbSavedGames" Data="{SavedGames}"
 				SelectedItemChanged="onSelectedFileChanged"/>
-			<HorizontalStack Fit="true" HorizontalAlignment="Right" Margin="3">
+			<HorizontalStack Width="Fit" Height="20%" HorizontalAlignment="Right" Margin="3">
 				<Button Style="#Chess.gui.Button.style" Caption="Delete" MouseClick="onDeleteFileClick"/>
 				<GraphicObject Width="20"/>
 				<Button Style="#Chess.gui.Button.style" Caption="Load" MouseClick="onLoadOkClick"/>
 				<Button Style="#Chess.gui.Button.style" Caption="Cancel" MouseClick="onLoadCancel"/>
 			</HorizontalStack>
 		</VerticalStack>
-	</Border>
-</Container>
-
+</Window>

@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="UTF-8" ?>
 <Window Font="droid bold, 10" Template="#Chess.gui.tmpWindow.crow"
 		Title="Stockfish Logs"
-		VerticalAlignment="Top"  Width="0" Height="80">
+		VerticalAlignment="Top"  Width="90%" Height="15%">
 		<TextScrollerWidget Focusable="true" Lines="{LogBuffer}" Margin="5"/>
 <!--	<VerticalStack Height="-1" Focusable="true" MouseWheelChanged="onLogsWheel">
 		<Label Text="{log0}" Width="0"/>

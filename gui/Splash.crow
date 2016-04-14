@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0"?>
-<Border Fit="true" BorderWidth="2" CornerRadius="15"
+<Border Width="30%" Height="30%" BorderWidth="2" CornerRadius="15"
 	Background="vgradient|0:Mantis|1:DimGray">
 	<VerticalStack Background="Black" Margin="20">
-		<Image Width="200" Height="100" Path="#Chess.splash.png"/>
-		<Group Height="12" Width="100" >
+		<Image Width="Stretched" Height="90%" Path="#Chess.splash.png"/>
+		<Group Height="10%" Width="Stretched" >
 			<ProgressBar Value="{ProgressValue}" Maximum="{ProgressMax}"/>
 			<TextRun Text="Loading..."/>
 		</Group>
