@@ -894,7 +894,6 @@ namespace Chess
 		int cptWhiteOut = 0;
 		int cptBlackOut = 0;
 
-		volatile bool updateArrows = false;
 		volatile string bestMove;
 
 		public static ChessPlayer[] Players;
@@ -1795,38 +1794,14 @@ namespace Chess
 					vEyeTarget = Vector3.Transform (vEyeTarget, m);
 					UpdateViewMatrix();
 				}
-				Vector3 mv = unprojectMouse (new Vector2 (e.X, e.Y));
-				Vector3 vRay = Vector3.Normalize(mv - vEye);
-				float a = vEye.Z / vRay.Z;
-				mv = vEye - vRay * a;
-				Point newPos = new Point ((int)Math.Truncate (mv.X), (int)Math.Truncate (mv.Y));
+				Vector3 vMouse = glHelper.UnProject(ref projection, ref modelview, viewport, new Vector2 (e.X, e.Y)).Xyz;
+				Vector3 vMouseRay = Vector3.Normalize(vMouse - vEye);
+				float a = vEye.Z / vMouseRay.Z;
+				vMouse = vEye - vMouseRay * a;
+				Point newPos = new Point ((int)Math.Truncate (vMouse.X), (int)Math.Truncate (vMouse.Y));
 				Selection = newPos;
 			}
 
-		}
-
-		Vector3 unprojectMouse(Vector2 mouse){
-			Vector4 vec;
-
-			vec.X = 2.0f * mouse.X / (float)viewport [2] - 1;
-			vec.Y = -(2.0f * mouse.Y / (float)viewport [3] - 1);
-			vec.Z = 0;
-			vec.W = 1.0f;
-
-			Matrix4 viewInv = Matrix4.Invert(modelview);
-			Matrix4 projInv = Matrix4.Invert(projection);
-
-			Vector4.Transform(ref vec, ref projInv, out vec);
-			Vector4.Transform(ref vec, ref viewInv, out vec);
-
-			if (vec.W > float.Epsilon || vec.W < float.Epsilon)
-			{
-				vec.X /= vec.W;
-				vec.Y /= vec.W;
-				vec.Z /= vec.W;
-			}
-
-			return new Vector3(vec);
 		}
 		void Mouse_WheelChanged(object sender, OpenTK.Input.MouseWheelEventArgs e)
 		{
