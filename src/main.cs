@@ -1825,9 +1825,7 @@ namespace Chess
 		#region CTOR and Main
 		public MainWin ()
 			: base(1024, 800, 32, 24, 1, 4, "Chess")
-		{
-			VSync = VSyncMode.Off;
-		}
+		{}
 
 		[STAThread]
 		static void Main ()
