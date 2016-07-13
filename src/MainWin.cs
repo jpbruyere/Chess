@@ -1,3 +1,24 @@
+//
+//  MainWin.cs
+//
+//  Author:
+//       Jean-Philippe Bruyère <jp.bruyere@hotmail.com>
+//
+//  Copyright (c) 2016 jp
+//
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 using System;
 using Crow;
 using OpenTK;
@@ -14,9 +35,9 @@ using Tetra.DynamicShading;
 
 namespace Chess
 {
-	public enum GameState { Init, MeshesLoading, VAOInit, ComputeTangents, BuildBuffers, Play, Checked, Pad, Checkmate};
+	public enum GameState { Init, MeshesLoading, VAOInit, ComputeTangents, BuildBuffers, Play, Checked, Pad, Checkmate };
 	public enum PlayerType { Human, AI };
-	public enum ChessColor { White, Black};
+	public enum ChessColor { White, Black };
 	public enum PieceType { Pawn, Rook, Knight, Bishop, King, Queen };
 
 	class MainWin : OpenTKGameWindow, IBindable
@@ -146,7 +167,6 @@ namespace Chess
 			//ubo.Bind(GBP_UBO0);
 			#endregion
 
-
 			shaderSharedData.Color = new Vector4(1,1,1,1);
 			uboShaderSharedData = GL.GenBuffer ();
 			GL.BindBuffer (BufferTarget.UniformBuffer, uboShaderSharedData);
@@ -159,7 +179,6 @@ namespace Chess
 
 			int b;
 			GL.GetInteger(GetPName.StencilBits, out b);
-
 
 			ErrorCode err = GL.GetError ();
 			Debug.Assert (err == ErrorCode.NoError, "OpenGL Error");
@@ -300,7 +319,6 @@ namespace Chess
 			Tetra.Texture.DefaultMinFilter = TextureMinFilter.LinearMipmapLinear;
 			Tetra.Texture.DefaultMagFilter = TextureMagFilter.Linear;
 			Tetra.Texture.DefaultWrapMode = TextureWrapMode.ClampToBorder;
-
 
 			boardVAOItem = (VAOItem<VAOChessData>)mainVAO.Add (meshBoard);
 			boardVAOItem.DiffuseTexture = new GGL.Texture ("#Chess.Textures.marble1.jpg");
@@ -543,7 +561,6 @@ namespace Chess
 		const string UI_Load = "#Chess.gui.loadDialog.crow";
 		const string UI_Promote = "#Chess.gui.promote.crow";
 
-
 		volatile int progressValue=0;
 		volatile int progressMax=200;
 		public int ProgressValue{
@@ -706,7 +723,7 @@ namespace Chess
 			loadWindow(UI_Log);
 		}
 		void onQuitClick (object sender, MouseButtonEventArgs e){
-			closeGame ();
+			this.Exit();
 		}
 		void onHintClick (object sender, MouseButtonEventArgs e){
 			if (CurrentPlayer.Type == PlayerType.Human)
@@ -799,6 +816,15 @@ namespace Chess
 					return;				
 				Crow.Configuration.Set ("AutoPlayHint", value);
 				NotifyValueChanged ("AutoPlayHint", value);
+			}
+		}
+		public Vector3 Diffuse {
+			get { return Crow.Configuration.Get<Vector3> ("Diffuse"); }
+			set {
+				if (value == Diffuse)
+					return;
+				Crow.Configuration.Set ("Diffuse", value);
+				NotifyValueChanged ("Diffuse", value);
 			}
 		}
 		public List<String> StockfishMoves {
@@ -1046,7 +1072,6 @@ namespace Chess
 				}
 			}
 		}
-
 
 		void addPiece(VAOItem<VAOChessData> vaoi, int idx, int playerIndex, PieceType _type, int col, int line){
 			ChessPiece p = new ChessPiece (vaoi, idx, Players[playerIndex], _type, col, line);
@@ -1556,13 +1581,6 @@ namespace Chess
 				CurrentState = GameState.Checked;
 		}
 
-		void closeGame(){
-			AddLog ("Stockfish temrminating");
-			stockfish.WaitForInputIdle ();
-			stockfish.StandardInput.WriteLine ("quit");
-			stockfish.WaitForExit ();
-			this.Quit (null,null);
-		}
 		#endregion
 
 		#region OTK window overrides
@@ -1685,11 +1703,11 @@ namespace Chess
 			if (Reflexion)
 				updateReflexionFbo ();
 		}
-		protected override void OnClosing (System.ComponentModel.CancelEventArgs e)
-		{
-			closeGame ();
-			base.OnClosing (e);
-		}
+//		protected override void OnClosing (System.ComponentModel.CancelEventArgs e)
+//		{
+//			closeGame ();
+//			base.OnClosing (e);
+//		}
 		#endregion
 
 		#region vLookCalculations
@@ -1761,7 +1779,6 @@ namespace Chess
 					}
 				}
 
-
 				//move
 				if (ValidPositionsForActivePce == null)
 					return;
@@ -1824,7 +1841,7 @@ namespace Chess
 
 		#region CTOR and Main
 		public MainWin ()
-			: base(1024, 800, 32, 24, 1, 4, "Chess")
+			: base(1024, 800, 32, 24, 1, 1, "Chess")
 		{}
 
 		[STAThread]
