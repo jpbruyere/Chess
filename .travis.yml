@@ -1,0 +1,8 @@
+language: csharp
+solution: Chess.sln
+install:
+      - git submodule update --init --recursive
+      - nuget restore Chess.sln
+script:
+      - xbuild /p:Configuration=Release Chess.sln
+
