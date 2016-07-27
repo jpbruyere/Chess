@@ -1,6 +1,3 @@
 [submodule "lib/GGL"]
 	path = lib/GGL
 	url = https://github.com/jpbruyere/GGL.git
-[submodule "lib/Crow"]
-	path = lib/Crow
-	url = https://github.com/jpbruyere/Crow.git

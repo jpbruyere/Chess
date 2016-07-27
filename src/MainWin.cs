@@ -47,6 +47,14 @@ namespace Chess
 		public List<Binding> Bindings {
 			get { return bindings; }
 		}
+		public object DataSource {
+			get {
+				throw new NotImplementedException ();
+			}
+			set {
+				throw new NotImplementedException ();
+			}
+		}
 		#endregion
 
 		[StructLayout(LayoutKind.Sequential)]
@@ -436,7 +444,7 @@ namespace Chess
 		}
 
 		#region Arrows
-		vaoMesh arrows;
+		GGL.vaoMesh arrows;
 		void clearArrows(){
 			if (arrows!=null)
 				arrows.Dispose ();
@@ -1716,7 +1724,7 @@ namespace Chess
 			Rectangle r = this.ClientRectangle;
 			GL.Viewport( r.X, r.Y, r.Width, r.Height);
 			projection = Matrix4.CreatePerspectiveFieldOfView (fovY, r.Width / (float)r.Height, zNear, zFar);
-			vLook = Vector3.Transform (vLookInit,
+			vLook = vLookInit.Transform(
 				Matrix4.CreateRotationX (viewXangle)*
 				Matrix4.CreateRotationZ (viewZangle));
 			vLook.Normalize();
@@ -1808,7 +1816,7 @@ namespace Chess
 					return;
 				}else if (e.Mouse.RightButton == OpenTK.Input.ButtonState.Pressed) {
 					Matrix4 m = Matrix4.CreateTranslation (-e.XDelta*MoveSpeed, e.YDelta*MoveSpeed, 0);
-					vEyeTarget = Vector3.Transform (vEyeTarget, m);
+					vEyeTarget = vEyeTarget.Transform (m);
 					UpdateViewMatrix();
 				}
 				Vector3 vMouse = glHelper.UnProject(ref projection, ref modelview, viewport, new Vector2 (e.X, e.Y)).Xyz;
@@ -1841,7 +1849,7 @@ namespace Chess
 
 		#region CTOR and Main
 		public MainWin ()
-			: base(1024, 800, 32, 24, 1, 1, "Chess")
+			: base(1024, 800, "Chess", 32, 24, 1, 1)
 		{}
 
 		[STAThread]
