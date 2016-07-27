@@ -798,6 +798,20 @@ namespace Chess
 		Queue<string> stockfishCmdQueue = new Queue<string>();
 		List<String> stockfishMoves = new List<string> ();
 
+//		public bool StockfishRunning {
+//			get { return stockfish != null; }
+//		}
+		public string StockfishPath{
+			get { return Crow.Configuration.Get<string> ("StockfishPath"); }
+			set {
+				if (value == StockfishPath)
+					return;
+				Crow.Configuration.Set ("StockfishPath", value);
+				NotifyValueChanged ("StockfishPath", value);
+
+				initStockfish ();
+			}
+		}
 		public int StockfishLevel{
 			get { return Crow.Configuration.Get<int> ("Level"); }
 			set
@@ -842,17 +856,33 @@ namespace Chess
 
 		void initStockfish()
 		{
+			if (!File.Exists (StockfishPath))
+				return;
+
+			if (stockfish != null) {
+				resetBoard (false);
+
+				stockfish.OutputDataReceived -= dataReceived;
+				stockfish.ErrorDataReceived -= dataReceived;
+				stockfish.Exited -= P_Exited;
+
+				stockfish.Kill ();
+			}
+
 			stockfish = new Process ();
 			stockfish.StartInfo.UseShellExecute = false;
 			stockfish.StartInfo.RedirectStandardOutput = true;
 			stockfish.StartInfo.RedirectStandardInput = true;
 			stockfish.StartInfo.RedirectStandardError = true;
 			stockfish.EnableRaisingEvents = true;
-			stockfish.StartInfo.FileName = @"/usr/games/stockfish";
+			stockfish.StartInfo.FileName = StockfishPath;
 			stockfish.OutputDataReceived += dataReceived;
 			stockfish.ErrorDataReceived += dataReceived;
 			stockfish.Exited += P_Exited;
 			stockfish.Start();
+
+			//NotifyValueChanged ("StockfishRunning", true);
+			Interface.CurrentInterface.FindByName ("SFStatus").Background = Color.Mantis;
 
 			stockfish.BeginOutputReadLine ();
 
@@ -1605,8 +1635,6 @@ namespace Chess
 
 			loadWindow (UI_Splash);
 
-			initStockfish ();
-
 			Thread t = new Thread (loadMeshes);
 			t.IsBackground = true;
 			t.Start ();
@@ -1664,10 +1692,13 @@ namespace Chess
 				mainVAO.BuildBuffers ();
 				initBoard ();
 				initInterface ();
+				initStockfish ();
 				CurrentState = GameState.Play;
 				break;
 			case GameState.Play:
 			case GameState.Checked:
+				if (stockfish == null)
+					return;
 				if (string.IsNullOrEmpty (bestMove))
 					break;
 				if (CurrentPlayer.Type == PlayerType.Human) {

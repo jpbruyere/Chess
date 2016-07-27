@@ -41,6 +41,10 @@
 				<Label Font="droid bold, 14" Text="{SelCell}"/>
 			</HorizontalStack>
 		</VerticalStack>
+		<VerticalStack Height="Fit" Width="100" Spacing="5">
+			<Label Font="droid bold, 14" Foreground="Ivory" Text="Stockfish"/>
+			<GraphicObject Name="SFStatus" Width="20" Height="20" CornerRadius="10" Background="DarkRed"/>
+		</VerticalStack>
 		<GraphicObject Width="Stretched"/>
 		<Button Style="#Chess.gui.Button.style" Caption="Hint" MouseClick="onHintClick"/>
 		<Button Style="#Chess.gui.Button.style" Caption="Undo" MouseClick="onUndoClick"/>

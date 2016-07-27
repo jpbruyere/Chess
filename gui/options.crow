@@ -2,6 +2,10 @@
 	Template="#Chess.gui.tmpWindow.crow">
 	<Container>
 		<VerticalStack Margin="10" Spacing="2">
+			<HorizontalStack Margin="5" Height="Fit" Width="Stretched">
+				<Label Foreground="White" Font="droid bold, 12" Text="Stockfish Path :" Width="Fit"/>
+				<TextBox Margin="5" Font="droid, 16" Text="{²StockfishPath}" Width="Stretched"/>
+			</HorizontalStack>
 			<CheckBox Template="#Chess.gui.tmpCheckBox.crow"
 				Caption="Reflexion"
 				Margin="2"
@@ -22,7 +26,7 @@
 				Checked="{Foreground=White}"
 				Unchecked="{Foreground=Black}"
 				IsChecked="{²AutoPlayHint}"/>
-			<HorizontalStack Height="-1" Spacing="5">
+			<HorizontalStack Height="-1" Spacing="5" Margin="2">
 				<Label Font="droid, 14" Text="Stockfish Level:"/>
 				<Spinner Fit="true"
 					Value="{²StockfishLevel}" Minimum="0" Maximum="20">

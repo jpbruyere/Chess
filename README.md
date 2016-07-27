@@ -12,6 +12,12 @@ xbuild  /p:Configuration=Release Chess.sln       # Build
 ```
 The resulting executable will be in **build/Release**.
 
+On the first startup, you need to provide the **stockish** executable path.
+Go to the **options** menu, and enter the full path. As soon as the file is found, a green
+light will inform you that stockfish is running.
+
+On Debian, the path is `/usr/games/stockfish`.
+
 Please report bugs and issues on [GitHub](https://github.com/jpbruyere/Chess/issues)
 
 ####Screen shots :
