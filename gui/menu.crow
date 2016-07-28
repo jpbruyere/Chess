@@ -26,30 +26,32 @@
 				</HorizontalStack>
 			</Border>
 		</Popper>
-		<VerticalStack Height="Fit" Width="120" Spacing="5">
-			<Label Font="droid, 10" Foreground="Ivory" Text="Current Player"/>
-			<Label Font="droid bold, 16" Text="{CurrentPlayer}"/>
-		</VerticalStack>
-		<VerticalStack Height="Fit" Width="120" Spacing="5">
-			<Label Font="droid, 10" Foreground="Ivory" Text="Game State"/>
-			<Label Font="droid bold, 16" Text="{CurrentState}"/>
-		</VerticalStack>
-		<VerticalStack Height="Fit" Width="120" Spacing="5">
-			<Label Font="droid, 10" Foreground="Ivory" Text="Move"/>
-			<HorizontalStack Fit="true">
-				<Label Font="droid bold, 14" Text="{ActCell}"/>
-				<Label Font="droid bold, 14" Text="{SelCell}"/>
-			</HorizontalStack>
-		</VerticalStack>
-		<VerticalStack Height="Fit" Width="100" Spacing="5">
-			<Label Font="droid bold, 14" Foreground="Ivory" Text="Stockfish"/>
-			<GraphicObject Name="SFStatus" Width="20" Height="20" CornerRadius="10" Background="DarkRed"/>
-		</VerticalStack>
+		<HorizontalStack Fit="true" Margin="10" Spacing="20">
+			<VerticalStack Fit="true" Background="Jet" CornerRadius="10">
+				<Label Margin="5" Font="droid, 10" Background="DimGray" Foreground="Ivory" Text="Current Player"/>
+				<Label Margin="5" Font="droid bold, 16" Text="{CurrentPlayer}"/>
+			</VerticalStack>
+			<VerticalStack Fit="true" Background="Jet" CornerRadius="10">
+				<Label Margin="5" Font="droid, 10" Background="SeaGreen" Foreground="Ivory" Text="Game State"/>
+				<Label Margin="5" Font="droid bold, 16" Text="{CurrentState}"/>
+			</VerticalStack>
+			<!--<VerticalStack Fit="true" Background="Jet" CornerRadius="10">
+				<Label Margin="5" Font="droid, 10" Background="SeaGreen" Foreground="Ivory" Text="Move"/>
+				<HorizontalStack Margin="5" Fit="true">
+					<Label Font="droid bold, 14" Text="{ActCell}"/>
+					<Label Font="droid bold, 14" Text="{SelCell}"/>
+				</HorizontalStack>
+			</VerticalStack>-->
+			<VerticalStack Margin="5" Fit="true" Background="Jet" CornerRadius="10">
+				<Label Margin="5" Font="droid, 10" Foreground="Ivory" Text="Stockfish State"/>
+				<GraphicObject Name="SFStatus" Width="10" Height="10" CornerRadius="5" Background="DarkRed"/>
+			</VerticalStack>
+		</HorizontalStack>
 		<GraphicObject Width="Stretched"/>
 		<Button Style="#Chess.gui.Button.style" Caption="Hint" MouseClick="onHintClick"/>
 		<Button Style="#Chess.gui.Button.style" Caption="Undo" MouseClick="onUndoClick"/>
 		<GraphicObject Width="15"/>
 		<Button Style="#Chess.gui.Button.style" Caption="Quit" MouseClick="onQuitClick"/>
-		<GraphicObject Width="15" Height="15"/>
+		<GraphicObject  Width="15" Height="15"/>
 	</HorizontalStack>
 </Border>
