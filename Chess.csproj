@@ -127,7 +127,6 @@
     <EmbeddedResource Include="gui\checkmate.crow" />
     <EmbeddedResource Include="gui\moves.crow" />
     <EmbeddedResource Include="gui\tmpPopper.crow" />
-    <EmbeddedResource Include="gui\Button.style" />
     <EmbeddedResource Include="Textures\board1.png" />
     <EmbeddedResource Include="Textures\wood.jpg" />
     <EmbeddedResource Include="Textures\marble1.jpg" />
@@ -159,6 +158,7 @@
     <EmbeddedResource Include="Meshes\king_1.obj" />
     <EmbeddedResource Include="Meshes\queen_1.obj" />
     <EmbeddedResource Include="Meshes\tower_1.obj" />
+    <EmbeddedResource Include="gui\Chess.style" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="lib\GGL\GGL.csproj">

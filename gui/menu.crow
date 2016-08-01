@@ -1,38 +1,36 @@
 ﻿<?xml version="1.0" encoding="UTF-8" ?>
 <Border Height="10%"  VerticalAlignment="Bottom"
-		BorderWidth="1" CornerRadius="5" Background="0,4;0,4;0,4;0,8">
+		BorderWidth="1" CornerRadius="5" Background="0.4,0.4,0.4,0.8">
 	<HorizontalStack>
 		<GraphicObject Width="15" Height="15"/>
-		<Popper Template="#Chess.gui.tmpPopper.crow"
-			Caption="Files" Width="Fit">
-			<Border Fit="True" Background="0,4;0,4;0,4;0,8" Margin="2">
+		<Popper Template="#Chess.gui.tmpPopper.crow" Caption="Files" Width="Fit">
+			<Border Fit="True" Background="0.4,0.4,0.4,0.8" Margin="2">
 				<HorizontalStack Fit="true" Margin="10">
-					<Button Style="#Chess.gui.Button.style" Caption="New Game" MouseClick="onResetClick" Width="150"/>
-					<Button Style="#Chess.gui.Button.style" Caption="Save" MouseClick="onSaveClick"/>
-					<Button Style="#Chess.gui.Button.style" Caption="Load" MouseClick="onLoadClick"/>
+					<Button Caption="New Game" MouseClick="onResetClick" Width="150"/>
+					<Button Caption="Save" MouseClick="onSaveClick"/>
+					<Button Caption="Load" MouseClick="onLoadClick"/>
 				</HorizontalStack>
 			</Border>
 		</Popper>
-		<Popper Template="#Chess.gui.tmpPopper.crow"
-			Caption="View" Width="Fit">
-			<Border Fit="True" Background="0,4;0,4;0,4;0,8" Margin="2">
+		<Popper Template="#Chess.gui.tmpPopper.crow" Caption="View" Width="Fit">
+			<Border Fit="True" Background="0.4,0.4,0.4,0.8" Margin="2">
 				<HorizontalStack Fit="true" Margin="10">
-					<Button Style="#Chess.gui.Button.style" Font="droid bold, 10" Caption="Mini Board" MouseClick="onViewBoardClick"/>
-					<Button Style="#Chess.gui.Button.style" Caption="Moves" MouseClick="onViewMovesClick"/>
-					<Button Style="#Chess.gui.Button.style" Caption="Stockfish Logs" MouseClick="onViewLogsClick" Width="Fit"/>
-					<Button Style="#Chess.gui.Button.style" Caption="FPS" MouseClick="onViewFpsClick"/>
+					<Button Font="droid bold, 10" Caption="Mini Board" MouseClick="onViewBoardClick"/>
+					<Button Caption="Moves" MouseClick="onViewMovesClick"/>
+					<Button Caption="Stockfish Logs" MouseClick="onViewLogsClick" Width="Fit"/>
+					<Button Caption="FPS" MouseClick="onViewFpsClick"/>
 					<GraphicObject Width="15" Height="15"/>
-					<Button Style="#Chess.gui.Button.style" Caption="Options" MouseClick="onViewOptionsClick"/>
+					<Button Caption="Options" MouseClick="onViewOptionsClick"/>
 				</HorizontalStack>
 			</Border>
 		</Popper>
 		<HorizontalStack Fit="true" Margin="10" Spacing="20">
-			<VerticalStack Fit="true" Background="Jet" CornerRadius="10">
-				<Label Margin="5" Font="droid, 10" Background="DimGray" Foreground="Ivory" Text="Current Player"/>
+			<VerticalStack Style="VSInMenu">
+				<Label Text="Current Player" Style="LabInMenu"/>
 				<Label Margin="5" Font="droid bold, 16" Text="{CurrentPlayer}"/>
 			</VerticalStack>
-			<VerticalStack Fit="true" Background="Jet" CornerRadius="10">
-				<Label Margin="5" Font="droid, 10" Background="SeaGreen" Foreground="Ivory" Text="Game State"/>
+			<VerticalStack Style="VSInMenu">
+				<Label Style="LabInMenu" Text="Game State"/>
 				<Label Margin="5" Font="droid bold, 16" Text="{CurrentState}"/>
 			</VerticalStack>
 			<!--<VerticalStack Fit="true" Background="Jet" CornerRadius="10">
@@ -42,16 +40,16 @@
 					<Label Font="droid bold, 14" Text="{SelCell}"/>
 				</HorizontalStack>
 			</VerticalStack>-->
-			<VerticalStack Margin="5" Fit="true" Background="Jet" CornerRadius="10">
-				<Label Margin="5" Font="droid, 10" Foreground="Ivory" Text="Stockfish State"/>
+			<VerticalStack Margin="5"  Style="VSInMenu">
+				<Label Multiline="true" Text="Stockfish\nState" Style="LabInMenu" TextAlignment="Center"/>
 				<GraphicObject Name="SFStatus" Width="10" Height="10" CornerRadius="5" Background="DarkRed"/>
 			</VerticalStack>
 		</HorizontalStack>
 		<GraphicObject Width="Stretched"/>
-		<Button Style="#Chess.gui.Button.style" Caption="Hint" MouseClick="onHintClick"/>
-		<Button Style="#Chess.gui.Button.style" Caption="Undo" MouseClick="onUndoClick"/>
+		<Button Caption="Hint" MouseClick="onHintClick"/>
+		<Button Caption="Undo" MouseClick="onUndoClick"/>
 		<GraphicObject Width="15"/>
-		<Button Style="#Chess.gui.Button.style" Caption="Quit" MouseClick="onQuitClick"/>
+		<Button Caption="Quit" MouseClick="onQuitClick"/>
 		<GraphicObject  Width="15" Height="15"/>
 	</HorizontalStack>
 </Border>

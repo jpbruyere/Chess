@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0"?>
-<Button Style="#Chess.gui.Button.style" Caption="{../Caption}"
+<Button Caption="{../Caption}"
 	MouseClick="../onMouseClick"
 	MouseLeave="../onMouseLeave"/>
 <!--<Border Background="{../Background}" MinimumSize="50;20" Height="{../HeightPolicy}" Width="{../WidthPolicy}"

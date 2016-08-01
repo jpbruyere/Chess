@@ -3,10 +3,4 @@
 		Title="Stockfish Logs"
 		VerticalAlignment="Top"  Width="90%" Height="15%">
 		<TextScrollerWidget Focusable="true" Lines="{LogBuffer}" Margin="5"/>
-<!--	<VerticalStack Height="-1" Focusable="true" MouseWheelChanged="onLogsWheel">
-		<Label Text="{log0}" Width="0"/>
-		<Label Text="{log1}" Width="0"/>
-		<Label Text="{log2}" Width="0"/>
-		<Label Text="{log3}" Width="0"/>
-	</VerticalStack>-->
 </Window>
