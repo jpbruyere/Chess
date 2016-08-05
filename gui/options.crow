@@ -26,7 +26,7 @@
 				Checked="{Foreground=White}"
 				Unchecked="{Foreground=Black}"
 				IsChecked="{²AutoPlayHint}"/>
-			<HorizontalStack Height="-1" Spacing="5" Margin="2">
+			<HorizontalStack Height="Fit" Spacing="5" Margin="2">
 				<Label Font="droid, 14" Text="Stockfish Level:"/>
 				<Spinner Fit="true"	Value="{²StockfishLevel}" Minimum="0" Maximum="20">
 					<Template>

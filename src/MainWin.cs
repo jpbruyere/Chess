@@ -1788,7 +1788,6 @@ namespace Chess
 		#region Mouse
 		void Mouse_ButtonDown (object sender, OpenTK.Input.MouseButtonEventArgs e)
 		{
-			CursorVisible = true;
 			if (e.Mouse.LeftButton != OpenTK.Input.ButtonState.Pressed)
 				return;
 
