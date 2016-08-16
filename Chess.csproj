@@ -73,7 +73,7 @@
       <HintPath>packages\OpenTK.Next.1.2.2336.6514-pre\lib\net20\OpenTK.dll</HintPath>
     </Reference>
     <Reference Include="Crow">
-      <HintPath>packages\Crow.OpenTK.0.4.6\lib\net45\Crow.dll</HintPath>
+      <HintPath>packages\Crow.OpenTK.0.4.7\lib\net45\Crow.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -98,8 +98,11 @@
     <None Include="Textures\marble.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="OpenTK.dll.config" />
+    <None Include="OpenTK.dll.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="packages.config" />
+    <None Include="Crow.dll.config" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Meshes\" />
