@@ -32,7 +32,6 @@
     <WarningLevel>0</WarningLevel>
   </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-  <Import Project="packages\GtkSharp.3.1.0\build\net45\GtkSharp.targets" Condition="Exists('packages\GtkSharp.3.1.0\build\net45\GtkSharp.targets')" />
   <ItemGroup>
     <Compile Include="src\MovesWidget.cs" />
     <Compile Include="src\MainWin.cs" />
@@ -43,10 +42,10 @@
     <Compile Include="src\ChessMoves.cs" />
     <Compile Include="src\ChessPlayer.cs" />
     <Compile Include="src\ChessPiece.cs" />
-    <Compile Include="packages\Crow.OpenTK.0.4.5\content\OpenGL\Shader.cs" />
-    <Compile Include="packages\Crow.OpenTK.0.4.5\content\OpenGL\Texture.cs" />
-    <Compile Include="packages\Crow.OpenTK.0.4.5\content\OpenGL\vaoMesh.cs" />
-    <Compile Include="packages\Crow.OpenTK.0.4.5\content\OpenTKGameWindow.cs" />
+    <Compile Include="OpenTKGameWindow.cs" />
+    <Compile Include="OpenGL\Shader.cs" />
+    <Compile Include="OpenGL\Texture.cs" />
+    <Compile Include="OpenGL\vaoMesh.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
@@ -54,26 +53,15 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Xml" />
+	<Reference Include="gio-sharp"/>
+	<Reference Include="gdk-sharp"/>
+	<Reference Include="glib-sharp"/>
+	<Reference Include="cairo-sharp"/>
     <Reference Include="OpenTK">
       <HintPath>packages\OpenTK.Next.1.2.2336.6514-pre\lib\net20\OpenTK.dll</HintPath>
     </Reference>
-    <Reference Include="atk-sharp">
-      <HintPath>packages\GtkSharp.3.1.0\lib\net45\atk-sharp.dll</HintPath>
-    </Reference>
-    <Reference Include="cairo-sharp">
-      <HintPath>packages\GtkSharp.3.1.0\lib\net45\cairo-sharp.dll</HintPath>
-    </Reference>
-    <Reference Include="gdk-sharp">
-      <HintPath>packages\GtkSharp.3.1.0\lib\net45\gdk-sharp.dll</HintPath>
-    </Reference>
-    <Reference Include="gio-sharp">
-      <HintPath>packages\GtkSharp.3.1.0\lib\net45\gio-sharp.dll</HintPath>
-    </Reference>
-    <Reference Include="glib-sharp">
-      <HintPath>packages\GtkSharp.3.1.0\lib\net45\glib-sharp.dll</HintPath>
-    </Reference>
     <Reference Include="Crow">
-      <HintPath>packages\Crow.OpenTK.0.4.5\lib\net45\Crow.dll</HintPath>
+      <HintPath>packages\Crow.OpenTK.0.4.8\lib\net45\Crow.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -98,8 +86,11 @@
     <None Include="Textures\marble.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="OpenTK.dll.config" />
+    <None Include="OpenTK.dll.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="packages.config" />
+    <None Include="Crow.dll.config" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Meshes\" />
@@ -127,7 +118,6 @@
     <EmbeddedResource Include="gui\checkmate.crow" />
     <EmbeddedResource Include="gui\moves.crow" />
     <EmbeddedResource Include="gui\tmpPopper.crow" />
-    <EmbeddedResource Include="gui\Button.style" />
     <EmbeddedResource Include="Textures\board1.png" />
     <EmbeddedResource Include="Textures\wood.jpg" />
     <EmbeddedResource Include="Textures\marble1.jpg" />
@@ -159,6 +149,7 @@
     <EmbeddedResource Include="Meshes\king_1.obj" />
     <EmbeddedResource Include="Meshes\queen_1.obj" />
     <EmbeddedResource Include="Meshes\tower_1.obj" />
+    <EmbeddedResource Include="gui\Chess.style" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="lib\GGL\GGL.csproj">

@@ -1,22 +1,19 @@
 ﻿<?xml version="1.0"?>
-<Window Font="droid bold, 10" Title="Open GL" Width="10%" Height="20%"
+<Window Font="droid bold, 10" Title="Open GL" Width="200" Height="Fit"
 	Template="#Chess.gui.tmpWindow.crow"
-	HorizontalAlignment="Right" Top="100">
-	<VerticalStack Width="90%" Height="90%" Spacing="10">
+	HorizontalAlignment="Right" Top="0">
+	<VerticalStack Width="90%" Height="Fit" Spacing="1">
 		<HorizontalStack Height="Fit">
-			<Label Text="Fps:" Width="50%" TextAlignment="Right"/>
-			<Label Text="{fps}" Font="droid , 12" Width="50%"
-				TextAlignment="Center" Background="Teal"/>
+			<Label Text="Fps:" Style="FpsLabel"/>
+			<Label Text="{fps}" Style="FpsDisp"/>
 		</HorizontalStack>
 		<HorizontalStack Height="Fit">
-			<Label Text="Min:" Width="50%" TextAlignment="Right"/>
-			<Label Text="{fpsMin}" Font="droid , 12" Width="50%"
-				TextAlignment="Center" Background="Teal"/>
+			<Label Text="Min:" Style="FpsLabel"/>
+			<Label Text="{fpsMin}" Style="FpsDisp"/>
 		</HorizontalStack>
 		<HorizontalStack Height="Fit">
-			<Label Text="Max:" Width="50%" TextAlignment="Right"/>
-			<Label Text="{fpsMax}" Font="droid , 12" Width="50%"
-				TextAlignment="Center" Background="Teal"/>
+			<Label Text="Max:" Style="FpsLabel"/>
+			<Label Text="{fpsMax}" Style="FpsDisp"/>
 		</HorizontalStack>
 	</VerticalStack>				
 </Window>

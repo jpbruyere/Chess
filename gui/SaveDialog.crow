@@ -6,8 +6,8 @@
 		<TextBox Font="droid , 16" Text="{²FileName}" Width="Stretched" Margin="5"/>
 		<GraphicObject/>
 		<HorizontalStack Width="Fit" Height="20%" HorizontalAlignment="Right">				
-			<Button Style="#Chess.gui.Button.style" Caption="Ok" MouseClick="onSaveOkClick"/>
-			<Button Style="#Chess.gui.Button.style" Caption="Cancel" MouseClick="onSaveCancel"/>
+			<Button Caption="Ok" MouseClick="onSaveOkClick"/>
+			<Button Caption="Cancel" MouseClick="onSaveCancel"/>
 		</HorizontalStack>
 	</VerticalStack>
 </Window>

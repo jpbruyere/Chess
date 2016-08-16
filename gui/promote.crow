@@ -1,16 +1,12 @@
 ﻿<?xml version="1.0" encoding="UTF-8" ?>
 <Container>
 	<Border Fit="True"
-			BorderWidth="1" CornerRadius="5" Background="0,4;0,4;0,4;0,8">
+			BorderWidth="1" CornerRadius="5" Background="0.4,0.4,0.4,0.8">
 		<VerticalStack Fit="True" Margin="30">
-			<Button Style="#Chess.gui.Button.style" Caption="Queen"
-				MouseClick="onPromoteToQueenClick"/>
-			<Button Style="#Chess.gui.Button.style" Caption="Bishop"
-				MouseClick="onPromoteToBishopClick"/>
-			<Button Style="#Chess.gui.Button.style" Caption="Rook"
-				MouseClick="onPromoteToRookClick"/>
-			<Button Style="#Chess.gui.Button.style" Caption="Knight"
-				MouseClick="onPromoteToKnightClick"/>
+			<Button Caption="Queen"	MouseClick="onPromoteToQueenClick"/>
+			<Button Caption="Bishop" MouseClick="onPromoteToBishopClick"/>
+			<Button Caption="Rook" MouseClick="onPromoteToRookClick"/>
+			<Button Caption="Knight" MouseClick="onPromoteToKnightClick"/>
 		</VerticalStack>
 	</Border>
 </Container>

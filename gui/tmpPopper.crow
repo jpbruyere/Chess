@@ -1,7 +1,5 @@
 ﻿<?xml version="1.0"?>
-<Button Style="#Chess.gui.Button.style" Caption="{../Caption}"
-	MouseClick="../onMouseClick"
-	MouseLeave="../onMouseLeave"/>
+<Button Caption="{./Caption}"/>
 <!--<Border Background="{../Background}" MinimumSize="50;20" Height="{../HeightPolicy}" Width="{../WidthPolicy}"
 		Foreground="Transparent" CornerRadius="{../CornerRadius}" BorderWidth="1" 
 	MouseEnter="{Foreground=vgradient|0:White|0,2:Gray|0,9:Gray|1:Black;caption.Foreground=White}"

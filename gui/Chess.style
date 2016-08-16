@@ -1,0 +1,30 @@
+﻿Button {
+	Width = 81;
+	Height = 50;
+	Background = vgradient|0:DimGray|1:Black;
+	Font = droid bold, 14;
+}
+FpsLabel {
+	Width = 50%;
+	Font = droid, 10;
+	Margin = 1;
+	TextAlignment = Center;
+	Background = Jet;
+}
+FpsDisp {
+	Font = droid , 12;
+	Width = 50%;
+	TextAlignment = Center;
+	Background = Teal;
+}
+VSInMenu {
+	Fit = true;
+	Background = Jet;
+	CornerRadius = 10;
+}
+LabInMenu {
+	Margin = 5;
+	Font = droid, 10;
+	Background = DimGray;
+	Foreground = Ivory;
+}

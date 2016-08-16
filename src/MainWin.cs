@@ -882,7 +882,7 @@ namespace Chess
 			stockfish.Start();
 
 			//NotifyValueChanged ("StockfishRunning", true);
-			Interface.CurrentInterface.FindByName ("SFStatus").Background = Color.Mantis;
+			CrowInterface.FindByName ("SFStatus").Background = Color.Mantis;
 
 			stockfish.BeginOutputReadLine ();
 
@@ -1788,7 +1788,6 @@ namespace Chess
 		#region Mouse
 		void Mouse_ButtonDown (object sender, OpenTK.Input.MouseButtonEventArgs e)
 		{
-			CursorVisible = true;
 			if (e.Mouse.LeftButton != OpenTK.Input.ButtonState.Pressed)
 				return;
 

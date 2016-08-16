@@ -26,10 +26,9 @@
 				Checked="{Foreground=White}"
 				Unchecked="{Foreground=Black}"
 				IsChecked="{²AutoPlayHint}"/>
-			<HorizontalStack Height="-1" Spacing="5" Margin="2">
+			<HorizontalStack Height="Fit" Spacing="5" Margin="2">
 				<Label Font="droid, 14" Text="Stockfish Level:"/>
-				<Spinner Fit="true"
-					Value="{²StockfishLevel}" Minimum="0" Maximum="20">
+				<Spinner Fit="true"	Value="{²StockfishLevel}" Minimum="0" Maximum="20">
 					<Template>
 						<Border BorderWidth="1" CornerRadius="3"
 							Height="{../HeightPolicy}" Width="{../WidthPolicy}"
@@ -64,7 +63,7 @@
 				</Spinner>
 			</HorizontalStack>
 			<GraphicObject/>
-			<Button Width="40%" Style="#Chess.gui.Button.style" HorizontalAlignment="Right" Caption="Close"
+			<Button Width="40%" HorizontalAlignment="Right" Caption="Close"
 				MouseClick="../../../../../../butQuitPress"/>
 		</VerticalStack>
 	</Container>
