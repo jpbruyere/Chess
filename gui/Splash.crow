@@ -3,9 +3,9 @@
 	Background="vgradient|0:Mantis|1:DimGray">
 	<VerticalStack Background="Black" Margin="20">
 		<Image Width="Stretched" Height="90%" Path="#Chess.splash.png"/>
-		<Group Height="10%" Width="Stretched" >
-			<ProgressBar Value="{ProgressValue}" Maximum="{ProgressMax}"/>
-			<TextRun Text="Loading..."/>
+		<Group Height="6%" Width="Stretched" >
+			<ProgressBar CornerRadius="5" Value="{ProgressValue}" Maximum="{ProgressMax}"/>
+			<Label Text="Loading..."/>
 		</Group>
 	</VerticalStack>
 </Border>

@@ -85,14 +85,14 @@ namespace Chess
 		}
 		public Vector3 vEyeTarget = new Vector3(4f, 4f, 0f);
 		public Vector3 vEye;
-		public Vector3 vLookInit = Vector3.Normalize(new Vector3(0.0f, -0.7f, 0.7f));
+		public Vector3 vLookInit = Vector3.Normalize(new Vector3(0.0f, -0.5f, 0.5f));
 		public Vector3 vLook;  // Camera vLook Vector
 		public float zFar = 30.0f;
 		public float zNear = 0.1f;
 		public float fovY = (float)Math.PI / 4;
 
-		float eyeDist = 12f;
-		float eyeDistTarget = 12f;
+		float eyeDist = 14f;
+		float eyeDistTarget = 14f;
 		float MoveSpeed = 0.02f;
 		float RotationSpeed = 0.005f;
 		float ZoomSpeed = 2f;
@@ -396,7 +396,7 @@ namespace Chess
 
 			mainVAO.Bind ();
 
-			changeShadingColor(new Vector4(1.0f,1.0f,1.0f,1.0f));
+			changeShadingColor(new Vector4(0.8f,0.8f,0.8f,1.0f));
 
 			mainVAO.Render (PrimitiveType.Triangles, boardVAOItem);
 
@@ -1879,7 +1879,7 @@ namespace Chess
 
 		#region CTOR and Main
 		public MainWin ()
-			: base(1024, 800, "Chess", 32, 24, 1, 1)
+			: base(1024, 800, "Chess", 32, 24, 1, 8)
 		{}
 
 		[STAThread]

@@ -87,8 +87,8 @@ namespace Chess
 
 			const vec3 diffuse = vec3(1.0, 1.0, 1.0);
 			const vec3 ambient = vec3(0.5, 0.5, 0.5);
-			const vec3 specular = vec3(1.0,1.0,1.0);
-			const float shininess =32.0;
+			const vec3 specular = vec3(0.7,0.7,0.7);
+			const float shininess =16.0;
 			const float screenGamma = 1.0;
 
 			subroutine vec4 computeColor_t ();

@@ -222,7 +222,7 @@ namespace Chess
 				Mesh.InstancedDatas [InstanceIndex].color = new Vector4 (1.0f, 1.00f, 1.00f, 1f);
 				ZAngle = 0f;
 			} else {
-				Mesh.InstancedDatas [InstanceIndex].color = new Vector4 (0.16f, 0.16f, 0.16f, 1f);
+				Mesh.InstancedDatas [InstanceIndex].color = new Vector4 (0.36f, 0.36f, 0.36f, 1f);
 				ZAngle = MathHelper.Pi;
 			}
 			OpenGLSync = false;
