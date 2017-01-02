@@ -1,21 +1,19 @@
 ﻿<?xml version="1.0"?>
 <Border BorderWidth="1" Foreground="White" CornerRadius="3"
-	Height="{./HeightPolicy}" Width="{./WidthPolicy}"
 	MouseEnter="./onBorderMouseEnter"
 	MouseLeave="./onBorderMouseLeave"
 	Background="vgradient|0:0.6,0.6,0.6,0.9|1:0.4,0.4,0.4,0.6">
-	<VerticalStack Height="{../../HeightPolicy}" Width="{../../WidthPolicy}">
-		<HorizontalStack Height="Fit" Width="{../../../WidthPolicy}">
-			<Label Margin="2" Font="{../../../../Font}" Text="{../../../../Title}" Width="Stretched"/>
+	<VerticalStack>
+		<HorizontalStack Height="Fit" Background="Teal" Margin="{./Margin}">
+			<Label Margin="2" Font="{./Font}" Text="{./Title}" Width="Stretched"/>
 			<Border HorizontalAlignment="Right" Margin="0" VerticalAlignment="Top"
 				CornerRadius="6" BorderWidth="1" Foreground="Transparent"
-				Height="12" Width="12"
+				Height="16" Width="16"
 				MouseEnter="{Foreground=White}" MouseLeave="{Foreground=Transparent}">
 				<Image Focusable="true" Name="Image" Path="#Crow.Images.Icons.exit2.svg"
-					 MouseClick="../../../../../butQuitPress"/>
+					 MouseClick="./butQuitPress"/>
 			</Border>
 		</HorizontalStack>
-		<Container Name="Content"
-			Height="{../../../HeightPolicy}" Width="{../../../WidthPolicy}"/>
+		<Container Name="Content"/>
 	</VerticalStack>
 </Border>

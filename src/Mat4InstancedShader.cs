@@ -139,18 +139,18 @@ namespace Chess
 			GL.BindAttribLocation(pgmId, VertexArrayObject.instanceBufferIndex, "in_model");
 		}
 		int bi1;
-		int computeColorSubroutine, simpleColorFunc, blinnPhongFunc, texturedFunc,
-			vertexTeckSubroutine, fullFunc, uninstancedPosFunc;
+		int simpleColorFunc, blinnPhongFunc, texturedFunc,
+			fullFunc, uninstancedPosFunc;
 		protected override void GetUniformLocations ()
 		{
 			simpleColorFunc = GL.GetSubroutineIndex (pgmId, ShaderType.FragmentShader, "simpleColor");
 			blinnPhongFunc = GL.GetSubroutineIndex (pgmId, ShaderType.FragmentShader, "blinnPhong");
 			texturedFunc = GL.GetSubroutineIndex (pgmId, ShaderType.FragmentShader, "textured");
-			computeColorSubroutine = GL.GetSubroutineUniformLocation (pgmId, ShaderType.FragmentShader, "computeColor");
+			GL.GetSubroutineUniformLocation (pgmId, ShaderType.FragmentShader, "computeColor");
 
 			fullFunc = GL.GetSubroutineIndex (pgmId, ShaderType.VertexShader, "full");
 			uninstancedPosFunc = GL.GetSubroutineIndex (pgmId, ShaderType.VertexShader, "uninstancedPos");
-			vertexTeckSubroutine = GL.GetSubroutineUniformLocation (pgmId, ShaderType.VertexShader, "vertexTech");
+			GL.GetSubroutineUniformLocation (pgmId, ShaderType.VertexShader, "vertexTech");
 
 			bi1 = GL.GetUniformBlockIndex (pgmId, "block_data");
 			GL.UniformBlockBinding(pgmId, bi1, 0);

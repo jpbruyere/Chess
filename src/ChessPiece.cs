@@ -122,7 +122,7 @@ namespace Chess
 			HasMoved = false;
 			Captured = false;
 
-			updateColor ();
+			UpdateColor ();
 			updatePos ();
 
 			Player.Pieces.Add (this);
@@ -146,7 +146,7 @@ namespace Chess
 			IsPromoted = false;
 			HasMoved = false;
 			Captured = false;
-			updateColor ();
+			UpdateColor ();
 		}
 		public void Promote(char prom, bool preview = false){
 			if (IsPromoted)
@@ -199,7 +199,7 @@ namespace Chess
 				newMesh = null;
 				InstanceIndex = Mesh.AddInstance ();
 				updatePos ();
-				updateColor ();
+				UpdateColor ();
 			}
 			Mesh.UpdateInstancesData ();
 			OpenGLSync = true;
@@ -217,12 +217,12 @@ namespace Chess
 				Matrix4.CreateFromQuaternion (q) * Matrix4.CreateTranslation (position);
 			OpenGLSync = false;
 		}
-		void updateColor(){
+		public void UpdateColor(){
 			if (Player.Color == ChessColor.White) {
-				Mesh.InstancedDatas [InstanceIndex].color = new Vector4 (1.0f, 1.00f, 1.00f, 1f);
+				Mesh.InstancedDatas [InstanceIndex].color = Crow.Configuration.Get<Color> ("WhiteColor").ToVector4();
 				ZAngle = 0f;
 			} else {
-				Mesh.InstancedDatas [InstanceIndex].color = new Vector4 (0.36f, 0.36f, 0.36f, 1f);
+				Mesh.InstancedDatas [InstanceIndex].color = Crow.Configuration.Get<Color> ("BlackColor").ToVector4();
 				ZAngle = MathHelper.Pi;
 			}
 			OpenGLSync = false;
@@ -242,7 +242,7 @@ namespace Chess
 					if (pce.InstanceIndex > InstanceIndex) {
 						pce.InstanceIndex--;
 						bool savedState = pce.OpenGLSync;
-						pce.updateColor ();
+						pce.UpdateColor ();
 						pce.updatePos ();
 						pce.OpenGLSync = savedState; //will be update one for all pce
 					}

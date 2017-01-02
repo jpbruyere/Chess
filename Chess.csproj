@@ -161,6 +161,8 @@
     <EmbeddedResource Include="Meshes\queen_1.obj" />
     <EmbeddedResource Include="Meshes\tower_1.obj" />
     <EmbeddedResource Include="gui\Chess.style" />
+    <EmbeddedResource Include="gui\ColorSelector.crow" />
+    <EmbeddedResource Include="gui\tmpSpinner.crow" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="lib\GGL\GGL.csproj">
