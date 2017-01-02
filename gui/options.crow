@@ -62,6 +62,25 @@
 					</Template>
 				</Spinner>
 			</HorizontalStack>
+			<GroupBox Caption="Graphics" Height="Fit">
+				<VerticalStack>
+<!--					<HorizontalStack>
+						<Label Text="Diffuse:" Width="100"/>
+						<TextBox Text="{²Diffuse}" Width="60"/>
+					</HorizontalStack>-->
+					<HorizontalStack>
+						<Label Text="Shininess:" Width="100" />
+						<Spinner Value="{²Shininess}" Width="60"
+							Minimum="0" Maximum="128" SmallIncrement="1"/>
+					</HorizontalStack>
+					<HorizontalStack>
+						<Label Text="Screen Gamma:" Width="100"/>
+						<Spinner Value="{²ScreenGamma}" Width="60"
+							Minimum="0" Maximum="400" SmallIncrement="10"/>
+						<Label Text="%"/>
+					</HorizontalStack>
+				</VerticalStack>
+			</GroupBox>
 			<GraphicObject/>
 			<Button Width="40%" HorizontalAlignment="Right" Caption="Close"
 				MouseClick="../../../../../../butQuitPress"/>
