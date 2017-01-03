@@ -16,25 +16,45 @@
 					</HorizontalStack>
 				</VerticalStack>
 			</GroupBox>
-			<GroupBox Caption="Colors" Height="Fit">
-				<HorizontalStack>
-					<VerticalStack Width="50%">
-						<Popper Style="ColorSelector" Caption="Color for Whites" Foreground="{WhiteColor}">
-							<ColorPicker Fit="true" SelectedRawColor="{²WhiteColor}"/>
-						</Popper>
-						<Popper Style="ColorSelector" Caption="Color for Blacks" Foreground="{BlackColor}">
-							<ColorPicker Fit="true" SelectedRawColor="{²BlackColor}"/>
-						</Popper>
-					</VerticalStack>
-					<VerticalStack Width="50%">
-						<Popper Style="ColorSelector" Caption="Main Color" Foreground="{MainColor}">
-							<ColorPicker Fit="true" SelectedRawColor="{²MainColor}"/>
-						</Popper>
-						<Popper Style="ColorSelector" Caption="Background Color" Foreground="{BackgroundColor}">
-							<ColorPicker Fit="true" SelectedRawColor="{²BackgroundColor}"/>
-						</Popper>
-					</VerticalStack>
-				</HorizontalStack>
+			<GroupBox Caption="Colors and Lights" Height="Fit">
+				<VerticalStack>
+					<HorizontalStack>
+						<VerticalStack Width="50%">
+							<Popper Style="ColorSelector" Caption="Color for Whites" Foreground="{WhiteColor}">
+								<ColorPicker Fit="true" SelectedRawColor="{²WhiteColor}"/>
+							</Popper>
+							<Popper Style="ColorSelector" Caption="Color for Blacks" Foreground="{BlackColor}">
+								<ColorPicker Fit="true" SelectedRawColor="{²BlackColor}"/>
+							</Popper>
+						</VerticalStack>
+						<VerticalStack Width="50%">
+							<Popper Style="ColorSelector" Caption="Main Color" Foreground="{MainColor}">
+								<ColorPicker Fit="true" SelectedRawColor="{²MainColor}"/>
+							</Popper>
+							<Popper Style="ColorSelector" Caption="Background Color" Foreground="{BackgroundColor}">
+								<ColorPicker Fit="true" SelectedRawColor="{²BackgroundColor}"/>
+							</Popper>
+						</VerticalStack>
+					</HorizontalStack>
+					<HorizontalStack>
+						<Label Text="Light position:"/>
+						<Label Text="X"/>
+						<Spinner Value="{²LightX}"
+							Minimum="-50" Maximum="50" SmallIncrement="1"/>
+						<Label Text="Y"/>
+						<Spinner Value="{²LightY}"
+							Minimum="-50" Maximum="50" SmallIncrement="1"/>
+						<Label Text="Z"/>
+						<Spinner Value="{²LightZ}"
+							Minimum="-50" Maximum="50" SmallIncrement="1"/>
+					</HorizontalStack>
+					<HorizontalStack>
+						<Label Text="Reflexion Intensity"/>
+						<Spinner Value="{²ReflexionIntensity}"
+							Minimum="0" Maximum="100" SmallIncrement="1"/>
+						<Label Text="%"/>
+					</HorizontalStack>
+				</VerticalStack>
 			</GroupBox>
 			<GroupBox Caption="Graphics" Height="Fit">
 				<VerticalStack>

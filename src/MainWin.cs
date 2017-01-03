@@ -101,9 +101,59 @@ namespace Chess
 //		uniform vec3 diffuse = vec3(1.0, 1.0, 1.0);
 //		uniform vec3 ambient = vec3(0.5, 0.5, 0.5);
 //		uniform vec3 specular = vec3(0.7,0.7,0.7);
+		volatile bool shaderMatsAreDirty = true;
 		#endregion
 
 		#region Options
+		public int ReflexionIntensity {
+			get {
+				return Crow.Configuration.Get<int> ("ReflexionIntensity");
+			}
+			set {
+				if (LightX == value)
+					return;
+				Crow.Configuration.Set ("ReflexionIntensity", value);
+				NotifyValueChanged ("ReflexionIntensity", value);
+				vaoiQuad.InstancedDatas[0].color = new Vector4(1.0f,1.0f,1.0f,(float)ReflexionIntensity/100f);
+				vaoiQuad.UpdateInstancesData ();
+			}
+		}
+		public int LightX {
+			get {
+				return Crow.Configuration.Get<int> ("LightX");
+			}
+			set {
+				if (LightX == value)
+					return;
+				Crow.Configuration.Set ("LightX", value);
+				NotifyValueChanged ("LightX", value);
+				shaderMatsAreDirty = true;
+			}
+		}
+		public int LightY {
+			get {
+				return Crow.Configuration.Get<int> ("LightY");
+			}
+			set {
+				if (LightY == value)
+					return;
+				Crow.Configuration.Set ("LightY", value);
+				NotifyValueChanged ("LightY", value);
+				shaderMatsAreDirty = true;
+			}
+		}
+		public int LightZ {
+			get {
+				return Crow.Configuration.Get<int> ("LightZ");
+			}
+			set {
+				if (LightZ == value)
+					return;
+				Crow.Configuration.Set ("LightZ", value);
+				NotifyValueChanged ("LightZ", value);
+				shaderMatsAreDirty = true;
+			}
+		}
 		public Color BackgroundColor {
 			get {
 				return Crow.Configuration.Get<Color> ("BackgroundColor");
@@ -292,12 +342,18 @@ namespace Chess
 			shaderSharedData.modelview = modelview;
 			shaderSharedData.normal = modelview.Inverted();
 			shaderSharedData.normal.Transpose ();
-			shaderSharedData.LightPosition = Vector4.Transform(vLight, modelview);
+//			if (viewZangle == 0)//white game
+				shaderSharedData.LightPosition = Vector4.Transform(
+					new Vector4((float)LightX, (float)LightY, (float)LightZ, 0),	modelview);
+//			else
+//				shaderSharedData.LightPosition = Vector4.Transform(
+//					new Vector4((float)LightX, -(float)LightY, (float)LightZ, 0),	modelview);
 
 			GL.BindBuffer (BufferTarget.UniformBuffer, uboShaderSharedData);
 			GL.BufferData(BufferTarget.UniformBuffer,Marshal.SizeOf(shaderSharedData),
 				ref shaderSharedData, BufferUsageHint.DynamicCopy);
 			GL.BindBuffer (BufferTarget.UniformBuffer, 0);
+			shaderMatsAreDirty = false;
 		}
 		void changeShadingColor(Vector4 color){
 			GL.BindBuffer (BufferTarget.UniformBuffer, uboShaderSharedData);
@@ -358,7 +414,7 @@ namespace Chess
 			vaoiQuad = (VAOItem<VAOChessData>)mainVAO.Add (Mesh.CreateQuad (0, 0, 0, 1, 1, 1, 1));
 			vaoiQuad.InstancedDatas = new VAOChessData[1];
 			vaoiQuad.InstancedDatas[0].modelMats = Matrix4.Identity;
-			vaoiQuad.InstancedDatas[0].color = new Vector4(1.0f,1.0f,1.0f,0.3f);
+			vaoiQuad.InstancedDatas[0].color = new Vector4(1.0f,1.0f,1.0f,(float)ReflexionIntensity/100f);
 
 			vaoiQuad.UpdateInstancesData ();
 
@@ -852,7 +908,6 @@ namespace Chess
 		void onNewWhiteGame (object sender, MouseButtonEventArgs e){
 			closeWindow (UI_NewGame);
 			viewZangle = 0;
-			vLight = new Vector4 (0.5f, 0.5f, -1f, 0f);
 			UpdateViewMatrix ();
 			Players [0].Type = PlayerType.Human;
 			Players [1].Type = PlayerType.AI;
@@ -862,7 +917,6 @@ namespace Chess
 		void onNewBlackGame (object sender, MouseButtonEventArgs e){
 			closeWindow (UI_NewGame);
 			viewZangle = MathHelper.Pi;
-			vLight = new Vector4 (-0.5f, -0.5f, -1f, 0f);
 			UpdateViewMatrix ();
 			Players [0].Type = PlayerType.AI;
 			Players [1].Type = PlayerType.Human;
@@ -1764,6 +1818,8 @@ namespace Chess
 		{
 			base.OnUpdateFrame (e);
 
+			if (shaderMatsAreDirty)
+				updateShadersMatrices ();
 			//stockfish
 			if (stockfishCmdQueue.Count > 0)
 				askStockfishIsReady ();
@@ -1862,7 +1918,7 @@ namespace Chess
 			reflectedModelview =
 				Matrix4.CreateScale (1.0f, 1.0f, -1.0f) * modelview;
 			//Matrix4.CreateTranslation (0.0f, 0.0f, 1.0f) *
-			updateShadersMatrices ();
+			shaderMatsAreDirty = true;
 		}
 		#endregion
 
