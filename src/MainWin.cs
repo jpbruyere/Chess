@@ -977,7 +977,7 @@ namespace Chess
 			stockfish.Start();
 
 			//NotifyValueChanged ("StockfishRunning", true);
-			CrowInterface.FindByName ("SFStatus").Background = Color.Mantis;
+			//CrowInterface.FindByName ("SFStatus").Background = Color.Mantis;
 
 			stockfish.BeginOutputReadLine ();
 

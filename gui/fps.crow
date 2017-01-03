@@ -1,6 +1,5 @@
 ﻿<?xml version="1.0"?>
-<Window Font="droid bold, 10" Title="Open GL" Width="200" Height="Fit"
-	Template="#Chess.gui.tmpWindow.crow"
+<Window Font="droid bold, 10" Title="Open GL" Width="200" Height="150"
 	HorizontalAlignment="Right" Top="0">
 	<VerticalStack Width="90%" Height="Fit" Spacing="1">
 		<HorizontalStack Height="Fit">

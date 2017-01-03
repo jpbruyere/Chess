@@ -1,6 +1,5 @@
 ﻿<?xml version="1.0" encoding="UTF-8" ?>
-<Window Font="droid bold, 40" Width="50%" Height="50%"  Title="Save"
-	Template="#Chess.gui.tmpWindow.crow">
+<Window Font="droid bold, 40" Width="50%" Height="50%" Title="Load">
 	<VerticalStack Width="80%" Height="80%" Spacing="5">
 			<Label Font="droid bold, 26" Text="Load"/>
 			<TextBox Font="droid , 16" Text="{../lbSavedGames.SelectedItem}" Width="Stretched" Margin="2"/>

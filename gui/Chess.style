@@ -4,6 +4,20 @@
 	Background = vgradient|0:DimGray|1:Black;
 	Font = droid bold, 14;
 }
+Window {
+	Template = #Chess.gui.tmpWindow.crow;
+}
+Menu {
+	Background = vgradient|0:0.6,0.6,0.6,0.9|1:0.4,0.4,0.4,0.6;
+}
+ColorPicker {
+	Background = vgradient|0:0.6,0.6,0.6,0.9|1:0.4,0.4,0.4,0.6;
+}
+MenuItem {
+	Margin=2;
+	Font = droid bold, 14;
+
+}
 Spinner {
 	Width=60;
 	Font = droid bold, 14;
