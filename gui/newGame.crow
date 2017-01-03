@@ -20,7 +20,7 @@
 				</Border>
 			</HorizontalStack>
 			<Button Height="20%" Width="40%" Style="#Chess.gui.Button.style" HorizontalAlignment="Right" Caption="Cancel"
-				MouseClick="../../../../../../butQuitPress"/>
+				MouseClick="../../../butQuitPress"/>
 		</VerticalStack>
 	</Container>
 </Window>

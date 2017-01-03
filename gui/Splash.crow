@@ -2,8 +2,8 @@
 <Border Width="30%" Height="30%" BorderWidth="2" CornerRadius="15"
 	Background="vgradient|0:Mantis|1:DimGray">
 	<VerticalStack Background="Black" Margin="20">
-		<Image Width="Stretched" Height="90%" Path="#Chess.splash.png"/>
-		<Group Height="6%" Width="Stretched" >
+		<Image Width="Stretched" Height="88%" Path="#Chess.splash.png"/>
+		<Group Height="10%" Width="Stretched" >
 			<ProgressBar CornerRadius="5" Value="{ProgressValue}" Maximum="{ProgressMax}"/>
 			<Label Text="Loading..."/>
 		</Group>

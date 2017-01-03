@@ -1,0 +1,28 @@
+﻿<?xml version="1.0"?>
+<Border BorderWidth="1" CornerRadius="3" Foreground="Gray" Background="White">
+	<VerticalStack Margin="0" Spacing="2" >
+		<Image
+			Margin="3"
+			MouseEnter="{Background=BlueCrayola}"
+			MouseLeave="{Background=Transparent}"
+			Height="24"
+			MouseRepeat="true"
+			KeepProportions="false"
+			Focusable="true"
+			MouseClick="./onUp"
+			Path="#Crow.Images.Icons.updown.svg" SvgSub="up"/>
+		<Label Font="droid bold, 14" Foreground="DimGray" 									
+			Text="{./Value}" TextAlignment="Right" Margin="1"/>
+		<Image
+			Margin="3"
+			MouseEnter="{Background=BlueCrayola}"
+			MouseLeave="{Background=Transparent}"
+			Height="24"
+			MouseRepeat="true"
+			KeepProportions="false"
+			Focusable="true"
+			MouseClick="./onDown"
+			Path="#Crow.Images.Icons.updown.svg" SvgSub="down"/>
+	</VerticalStack>
+</Border>
+

@@ -1,70 +1,66 @@
-﻿<Window Font="droid bold, 26" Width="80%" Height="80%" Title="Options"
+﻿<?xml version="1.0"?>
+<Window Font="droid bold, 26" Width="80%" Height="80%" Title="Options"
 	Template="#Chess.gui.tmpWindow.crow">
 	<Container>
 		<VerticalStack Margin="10" Spacing="2">
 			<HorizontalStack Margin="5" Height="Fit" Width="Stretched">
-				<Label Foreground="White" Font="droid bold, 12" Text="Stockfish Path :" Width="Fit"/>
-				<TextBox Margin="5" Font="droid, 16" Text="{²StockfishPath}" Width="Stretched"/>
+				<Label Foreground="White" Text="Stockfish Path :" Width="Fit"/>
+				<TextBox Margin="5" Text="{²StockfishPath}" Width="Stretched"/>
 			</HorizontalStack>
-			<CheckBox Template="#Chess.gui.tmpCheckBox.crow"
-				Caption="Reflexion"
-				Margin="2"
-				Foreground="Black"
-				Font="droid bold, 14"
-				MouseEnter="{Background=DimGray}"
-				MouseLeave="{Background=Transparent}"
-				Checked="{Foreground=White}"
-				Unchecked="{Foreground=Black}"
-				IsChecked="{²Reflexion}"/>
-			<CheckBox Template="#Chess.gui.tmpCheckBox.crow"
-				Caption="Autoplay on Hint"
-				Margin="2"
-				Foreground="Black"
-				Font="droid bold, 14"
-				MouseEnter="{Background=DimGray}"
-				MouseLeave="{Background=Transparent}"
-				Checked="{Foreground=White}"
-				Unchecked="{Foreground=Black}"
-				IsChecked="{²AutoPlayHint}"/>
-			<HorizontalStack Height="Fit" Spacing="5" Margin="2">
-				<Label Font="droid, 14" Text="Stockfish Level:"/>
-				<Spinner Fit="true"	Value="{²StockfishLevel}" Minimum="0" Maximum="20">
-					<Template>
-						<Border BorderWidth="1" CornerRadius="3"
-							Height="{../HeightPolicy}" Width="{../WidthPolicy}"
-							Foreground="Gray" Background="White">
-							<VerticalStack Margin="0" Spacing="2" Height="{../../HeightPolicy}" Width="{../../WidthPolicy}">
-								<Image
-									Margin="3"
-									MouseEnter="{Background=BlueCrayola}"
-									MouseLeave="{Background=Transparent}"
-									Width="{../../../WidthPolicy}" Height="32"
-									MouseRepeat="true"
-									KeepProportions="false"
-									Focusable="true"
-									MouseClick="../../../onUp"
-									Path="#Crow.Images.Icons.updown.svg" SvgSub="up"/>
-								<Label Font="droid bold, 14" Foreground="DimGray" 
-									Height="{../../../HeightPolicy}" Width="{../../../WidthPolicy}"
-									Text="{../../../Value}" TextAlignment="Right" Margin="1"/>
-								<Image
-									Margin="3"
-									MouseEnter="{Background=BlueCrayola}"
-									MouseLeave="{Background=Transparent}"
-									Width="{../../../WidthPolicy}" Height="32"
-									MouseRepeat="true"
-									KeepProportions="false"
-									Focusable="true"
-									MouseClick="../../../onDown"
-									Path="#Crow.Images.Icons.updown.svg" SvgSub="down"/>
-								</VerticalStack>
-						</Border>
-					</Template>
-				</Spinner>
-			</HorizontalStack>
+			<GroupBox Caption="Game" Height="Fit">
+				<VerticalStack>
+					<CheckBox Style="BigCheckBox" Caption="Reflexion" IsChecked="{²Reflexion}"/>
+					<CheckBox Style="BigCheckBox" Caption="Autoplay on Hint" IsChecked="{²AutoPlayHint}"/>
+					<HorizontalStack Height="Fit" Spacing="5" Margin="2">
+						<Label Text="Stockfish Level:"/>
+						<Spinner Value="{²StockfishLevel}" Minimum="0" Maximum="20"/>
+					</HorizontalStack>
+				</VerticalStack>
+			</GroupBox>
+			<GroupBox Caption="Graphics" Height="Fit">
+				<HorizontalStack>
+					<VerticalStack Width="50%">
+						<Popper Style="ColorSelector" Caption="Color for Whites" Foreground="{WhiteColor}">
+							<ColorPicker Fit="true" SelectedRawColor="{²WhiteColor}"/>
+						</Popper>
+						<Popper Style="ColorSelector" Caption="Color for Blacks" Foreground="{BlackColor}">
+							<ColorPicker Fit="true" SelectedRawColor="{²BlackColor}"/>
+						</Popper>
+					</VerticalStack>
+					<VerticalStack Width="50%">
+						<Popper Style="ColorSelector" Caption="Main Color" Foreground="{MainColor}">
+							<ColorPicker Fit="true" SelectedRawColor="{²MainColor}"/>
+						</Popper>
+						<Popper Style="ColorSelector" Caption="Background Color" Foreground="{BackgroundColor}">
+							<ColorPicker Fit="true" SelectedRawColor="{²BackgroundColor}"/>
+						</Popper>
+					</VerticalStack>
+				</HorizontalStack>
+			</GroupBox>
+			<GroupBox Caption="Graphics" Height="Fit">
+				<VerticalStack>
+					<HorizontalStack>
+						<Label Text="Samples:" Width="100"/>
+						<Spinner Value="{²Samples}"
+							Minimum="1" Maximum="8" SmallIncrement="1"/>
+						<Label Text=" (restart needed)"/>
+					</HorizontalStack>
+					<HorizontalStack>
+						<Label Text="Shininess:" Width="100" />
+						<Spinner Value="{²Shininess}"
+							Minimum="0" Maximum="128" SmallIncrement="1"/>
+					</HorizontalStack>
+					<HorizontalStack>
+						<Label Text="Screen Gamma:" Width="100"/>
+						<Spinner Value="{²ScreenGamma}"
+							Minimum="0" Maximum="400" SmallIncrement="10"/>
+						<Label Text="%"/>
+					</HorizontalStack>
+				</VerticalStack>
+			</GroupBox>
 			<GraphicObject/>
 			<Button Width="40%" HorizontalAlignment="Right" Caption="Close"
-				MouseClick="../../../../../../butQuitPress"/>
+				MouseClick="../../../butQuitPress"/>
 		</VerticalStack>
 	</Container>
 </Window>
