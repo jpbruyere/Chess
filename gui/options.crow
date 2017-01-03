@@ -1,6 +1,5 @@
 ﻿<?xml version="1.0"?>
-<Window Font="droid bold, 26" Width="80%" Height="80%" Title="Options"
-	Template="#Chess.gui.tmpWindow.crow">
+<Window Font="droid bold, 22" Width="50%" Height="70%" Title="Options">
 	<Container>
 		<VerticalStack Margin="10" Spacing="2">
 			<HorizontalStack Margin="5" Height="Fit" Width="Stretched">
@@ -17,7 +16,7 @@
 					</HorizontalStack>
 				</VerticalStack>
 			</GroupBox>
-			<GroupBox Caption="Graphics" Height="Fit">
+			<GroupBox Caption="Colors" Height="Fit">
 				<HorizontalStack>
 					<VerticalStack Width="50%">
 						<Popper Style="ColorSelector" Caption="Color for Whites" Foreground="{WhiteColor}">
