@@ -386,19 +386,19 @@ namespace Chess
 		{
 			CurrentState = GameState.MeshesLoading;
 
-			meshPawn = OBJMeshLoader.Load ("#Chess.Meshes.pawn.obj");
+			meshPawn = Mesh<MeshData>.LoadBinary ("#Chess.Meshes.pawn.bin");
 			ProgressValue+=20;
-			meshBishop = OBJMeshLoader.Load ("#Chess.Meshes.bishop.obj");
+			meshBishop = Mesh<MeshData>.LoadBinary ("#Chess.Meshes.bishop.bin");
 			ProgressValue+=20;
-			meshHorse = OBJMeshLoader.Load ("#Chess.Meshes.horse.obj");
+			meshHorse = Mesh<MeshData>.LoadBinary ("#Chess.Meshes.horse.bin");
 			ProgressValue+=20;
-			meshTower = OBJMeshLoader.Load ("#Chess.Meshes.tower.obj");
+			meshTower = Mesh<MeshData>.LoadBinary ("#Chess.Meshes.tower.bin");
 			ProgressValue+=20;
-			meshQueen = OBJMeshLoader.Load ("#Chess.Meshes.queen.obj");
+			meshQueen = Mesh<MeshData>.LoadBinary ("#Chess.Meshes.queen.bin");
 			ProgressValue+=20;
-			meshKing = OBJMeshLoader.Load ("#Chess.Meshes.king.obj");
+			meshKing = Mesh<MeshData>.LoadBinary ("#Chess.Meshes.king.bin");
 			ProgressValue+=20;
-			meshBoard = OBJMeshLoader.Load ("#Chess.Meshes.board.obj");
+			meshBoard = Mesh<MeshData>.LoadBinary ("#Chess.Meshes.board.bin");
 			ProgressValue+=20;
 
 			CurrentState = GameState.VAOInit;
