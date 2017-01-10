@@ -30,15 +30,14 @@ namespace Chess
 	public class ChessPiece{
 		float xAngle, zAngle;
 		Vector3 position;
-		InstancedModel<VAOChessData> newMesh;//replacment mesh when promote or unpromote
+		InstancedChessModel newMesh;//replacment mesh when promote or unpromote
 		PieceType originalType;
 		PieceType promotion;
 
-		public InstancedModel<VAOChessData> Mesh;
+		public InstancedChessModel Mesh;
 		public int InstanceIndex;
 		public ChessPlayer Player;
 		public bool IsPromoted;
-		public bool OpenGLSync = false;
 
 		public PieceType Type {
 			get { return IsPromoted ? promotion : originalType; }
@@ -111,7 +110,7 @@ namespace Chess
 				updatePos ();
 			}
 		}
-		public ChessPiece(InstancedModel<VAOChessData> vaoi, int idx, ChessPlayer _player , PieceType _type, int xPos, int yPos){
+		public ChessPiece(InstancedChessModel vaoi, int idx, ChessPlayer _player , PieceType _type, int xPos, int yPos){
 			Mesh = vaoi;
 			InstanceIndex = idx;
 			Player = _player;
@@ -179,7 +178,6 @@ namespace Chess
 				newMesh = null;
 				return;
 			}
-			OpenGLSync = false;
 		}
 		public void Unpromote(){
 			if (!IsPromoted)
@@ -188,22 +186,17 @@ namespace Chess
 			if (Mesh == MainWin.vaoiPawn)
 				return;
 			newMesh = MainWin.vaoiPawn;
-			OpenGLSync = false;
 		}
 
 		public void SyncGL(){
-			if (OpenGLSync)
-				return;
 			if (newMesh != null) {
 				removePieceInstance ();
 				Mesh = newMesh;
 				newMesh = null;
-				InstanceIndex = Mesh.Instances.AddInstance ();
+				InstanceIndex = Mesh.AddInstance ();
 				updatePos ();
 				UpdateColor ();
 			}
-			Mesh.Instances.UpdateVBO ();
-			OpenGLSync = true;
 		}
 		void updatePos(){
 //			Mesh.Datas [InstanceIndex].modelMats =
@@ -214,42 +207,36 @@ namespace Chess
 //				Matrix4.CreateRotationZ(xAngle/2f) *
 //				Matrix4.CreateTranslation(new Vector3(x, y, z));
 			Quaternion q = Quaternion.FromEulerAngles (zAngle, 0f, xAngle);
-			Mesh.Datas [InstanceIndex].modelMats =
-				Matrix4.CreateFromQuaternion (q) * Matrix4.CreateTranslation (position);
-			OpenGLSync = false;
+			Mesh.SetModelMat (InstanceIndex, Matrix4.CreateFromQuaternion (q) * Matrix4.CreateTranslation (position));
 		}
 		public void UpdateColor(){
 			if (Player.Color == ChessColor.White) {
-				Mesh.Datas [InstanceIndex].color = Crow.Configuration.Get<Color> ("WhiteColor").ToVector4();
+				Mesh.SetColor (InstanceIndex, Crow.Configuration.Get<Color> ("WhiteColor").ToVector4());
 				ZAngle = 0f;
 			} else {
-				Mesh.Datas [InstanceIndex].color = Crow.Configuration.Get<Color> ("BlackColor").ToVector4();
+				Mesh.SetColor (InstanceIndex, Crow.Configuration.Get<Color> ("BlackColor").ToVector4());
 				ZAngle = MathHelper.Pi;
-			}
-			OpenGLSync = false;
+			}			
 		}
 		void removePieceInstance()
 		{
-			Mesh.Instances.RemoveInstance (InstanceIndex);
+			Mesh.RemoveInstance (InstanceIndex);
 
 			if (InstanceIndex == Mesh.Datas.Length)
 				return;
 
 			//reindex pce instances
-			foreach (ChessPlayer pl in MainWin.Players) {
-				foreach (ChessPiece pce in pl.Pieces) {
+			foreach (ChessPlayer player in MainWin.Players) {
+				foreach (ChessPiece pce in player.Pieces) {
 					if (pce == this || pce.Mesh != Mesh)
 						continue;
 					if (pce.InstanceIndex > InstanceIndex) {
 						pce.InstanceIndex--;
-						bool savedState = pce.OpenGLSync;
 						pce.UpdateColor ();
 						pce.updatePos ();
-						pce.OpenGLSync = savedState; //will be update one for all pce
 					}
 				}
 			}
-			Mesh.Instances.UpdateVBO();
 		}
 
 	}

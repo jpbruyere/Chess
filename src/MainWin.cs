@@ -46,7 +46,54 @@ namespace Chess
 			return new Vector4 (f [0], f [1], f [2], f [3]);
 		}
 	}
+	public class InstancedChessModel : InstancedModel<VAOChessData> {
+		public InstancedChessModel(MeshPointer pointer) : base(pointer) {}
 
+		public void SetModelMat (int index, Matrix4 modelMat){
+			Instances.InstancedDatas[index].modelMats = modelMat;
+			SyncVBO = true;
+		}
+		public void SetColor (int index, Vector4 color){
+			Instances.InstancedDatas[index].color = color;
+			SyncVBO = true;
+		}
+		public void Set (int index, Matrix4 modelMat, Vector4 color){
+			Instances.InstancedDatas[index].modelMats = modelMat;
+			Instances.InstancedDatas[index].color = color;
+			SyncVBO = true;
+		}
+		public void Set (Matrix4 modelMat, Vector4 color){
+			if (Instances == null)
+				Instances = new InstancesVBO<VAOChessData> (new VAOChessData[1]);
+			Instances.InstancedDatas[0].modelMats = modelMat;
+			Instances.InstancedDatas[0].color = color;
+			SyncVBO = true;
+		}
+		public int AddInstance (){
+			if (Instances == null)
+				Instances = new InstancesVBO<VAOChessData> (new VAOChessData[1]);
+			int idx = Instances.AddInstance ();
+			SyncVBO = true;
+			return idx;
+		}
+		public void AddInstance (Matrix4 modelMat, Vector4 color){
+			if (Instances == null)
+				Instances = new InstancesVBO<VAOChessData> (new VAOChessData[1]);
+			Instances.AddInstance (new VAOChessData (modelMat, color));
+			SyncVBO = true;
+		}
+		public void RemoveInstance (int index){
+			Instances.RemoveInstance (index);
+			SyncVBO = true;
+		}
+
+		public void UpdateBuffer(){
+			if (!SyncVBO)
+				return;
+			Instances.UpdateVBO();
+			SyncVBO = false;
+		}
+	}
 	class MainWin : OpenTKGameWindow
 	{
 		[StructLayout(LayoutKind.Sequential)]
@@ -114,8 +161,7 @@ namespace Chess
 					return;
 				Crow.Configuration.Set ("ReflexionIntensity", value);
 				NotifyValueChanged ("ReflexionIntensity", value);
-				vaoiQuad.Datas[0].color = new Vector4(1.0f,1.0f,1.0f,(float)ReflexionIntensity/100f);
-				vaoiQuad.Instances.UpdateVBO ();
+				vaoiQuad.SetColor (0, new Vector4 (1.0f, 1.0f, 1.0f, (float)ReflexionIntensity / 100f));
 			}
 		}
 		public int LightX {
@@ -256,16 +302,16 @@ namespace Chess
 		public static Mat4InstancedShader piecesShader;
 
 		public static InstancedVAO<MeshData, VAOChessData> mainVAO;
-		public static InstancedModel<VAOChessData> boardVAOItem;
-		public static InstancedModel<VAOChessData> boardPlateVAOItem;
-		public static InstancedModel<VAOChessData> cellVAOItem;
-		public static InstancedModel<VAOChessData> vaoiPawn;
-		public static InstancedModel<VAOChessData> vaoiBishop;
-		public static InstancedModel<VAOChessData> vaoiKnight;
-		public static InstancedModel<VAOChessData> vaoiRook;
-		public static InstancedModel<VAOChessData> vaoiQueen;
-		public static InstancedModel<VAOChessData> vaoiKing;
-		public static InstancedModel<VAOChessData> vaoiQuad;//full screen quad in mainVAO to prevent unbind
+		public static InstancedChessModel boardVAOItem;
+		public static InstancedChessModel boardPlateVAOItem;
+		public static InstancedChessModel cellVAOItem;
+		public static InstancedChessModel vaoiPawn;
+		public static InstancedChessModel vaoiBishop;
+		public static InstancedChessModel vaoiKnight;
+		public static InstancedChessModel vaoiRook;
+		public static InstancedChessModel vaoiQueen;
+		public static InstancedChessModel vaoiKing;
+		public static InstancedChessModel vaoiQuad;//full screen quad in mainVAO to prevent unbind
 													//while drawing reflexion
 
 		public bool Reflexion {
@@ -379,21 +425,21 @@ namespace Chess
 		{
 			CurrentState = GameState.MeshesLoading;
 			meshes = new MeshesGroup<MeshData>();
-			vaoiPawn = new InstancedModel<VAOChessData> (meshes.Add (Mesh<MeshData>.Load ("#Chess.Meshes.pawn.bin")));
+			vaoiPawn = new InstancedChessModel (meshes.Add (Mesh<MeshData>.Load ("#Chess.Meshes.pawn.bin")));
 			ProgressValue+=20;
-			vaoiBishop = new InstancedModel<VAOChessData> (meshes.Add (Mesh<MeshData>.Load ("#Chess.Meshes.bishop.bin")));
+			vaoiBishop = new InstancedChessModel (meshes.Add (Mesh<MeshData>.Load ("#Chess.Meshes.bishop.bin")));
 			ProgressValue+=20;
-			vaoiKnight = new InstancedModel<VAOChessData> (meshes.Add (Mesh<MeshData>.Load ("#Chess.Meshes.horse.bin")));
+			vaoiKnight = new InstancedChessModel (meshes.Add (Mesh<MeshData>.Load ("#Chess.Meshes.horse.bin")));
 			ProgressValue+=20;
-			vaoiRook = new InstancedModel<VAOChessData> (meshes.Add (Mesh<MeshData>.Load ("#Chess.Meshes.tower.bin")));
+			vaoiRook = new InstancedChessModel (meshes.Add (Mesh<MeshData>.Load ("#Chess.Meshes.tower.bin")));
 			ProgressValue+=20;
-			vaoiQueen = new InstancedModel<VAOChessData> (meshes.Add (Mesh<MeshData>.Load ("#Chess.Meshes.queen.bin")));
+			vaoiQueen = new InstancedChessModel (meshes.Add (Mesh<MeshData>.Load ("#Chess.Meshes.queen.bin")));
 			ProgressValue+=20;
-			vaoiKing = new InstancedModel<VAOChessData> (meshes.Add (Mesh<MeshData>.Load ("#Chess.Meshes.king.bin")));
+			vaoiKing = new InstancedChessModel (meshes.Add (Mesh<MeshData>.Load ("#Chess.Meshes.king.bin")));
 			ProgressValue+=20;
-			boardVAOItem = new InstancedModel<VAOChessData> (meshes.Add (Mesh<MeshData>.Load ("#Chess.Meshes.board.bin")));
+			boardVAOItem = new InstancedChessModel (meshes.Add (Mesh<MeshData>.Load ("#Chess.Meshes.board.bin")));
 			ProgressValue+=20;
-			vaoiQuad = new InstancedModel<VAOChessData> (meshes.Add (Mesh<MeshData>.CreateQuad (0, 0, 0, 1, 1, 1, 1)));
+			vaoiQuad = new InstancedChessModel (meshes.Add (Mesh<MeshData>.CreateQuad (0, 0, 0, 1, 1, 1, 1)));
 
 			float
 			x = 4f,
@@ -401,7 +447,7 @@ namespace Chess
 			width = 8f,
 			height = 8f;
 
-			boardPlateVAOItem = new InstancedModel<VAOChessData> (meshes.Add (new Mesh<MeshData> (
+			boardPlateVAOItem = new InstancedChessModel (meshes.Add (new Mesh<MeshData> (
 				new Vector3[] {
 					new Vector3 (x - width / 2f, y + height / 2f, 0f),
 					new Vector3 (x - width / 2f, y - height / 2f, 0f),
@@ -428,7 +474,7 @@ namespace Chess
 			width = 1.0f;
 			height = 1.0f;
 
-			cellVAOItem = new InstancedModel<VAOChessData> (meshes.Add (new Mesh<MeshData> (
+			cellVAOItem = new InstancedChessModel (meshes.Add (new Mesh<MeshData> (
 				new Vector3[] {
 					new Vector3 (x - width / 2f, y + height / 2f, 0f),
 					new Vector3 (x - width / 2f, y - height / 2f, 0f),
@@ -456,22 +502,13 @@ namespace Chess
 			
 			mainVAO = new InstancedVAO<MeshData, VAOChessData> (meshes);
 
-			vaoiQuad.Instances = new InstancesVBO<VAOChessData> (new VAOChessData[1]);
-			vaoiQuad.Datas[0].modelMats = Matrix4.Identity;
-			vaoiQuad.Datas[0].color = new Vector4(1.0f,1.0f,1.0f,(float)ReflexionIntensity/100f);
-			vaoiQuad.Instances.UpdateVBO();
+			vaoiQuad.Set (Matrix4.Identity, new Vector4 (1.0f, 1.0f, 1.0f, (float)ReflexionIntensity / 100f));
 
 			boardPlateVAOItem.Diffuse = new GGL.Texture ("#Chess.Textures.board3.png");
-			boardPlateVAOItem.Instances = new InstancesVBO<VAOChessData> (new VAOChessData[1]);
-			boardPlateVAOItem.Datas[0].modelMats = Matrix4.Identity;
-			boardPlateVAOItem.Datas[0].color = new Vector4(0.5f,0.5f,0.5f,1f);
-			boardPlateVAOItem.Instances.UpdateVBO();
+			boardPlateVAOItem.Set (Matrix4.Identity, new Vector4(0.7f,0.7f,0.7f,1f));
 
 			cellVAOItem.Diffuse = new GGL.Texture ("Textures/marble.jpg");
-			cellVAOItem.Instances = new InstancesVBO<VAOChessData> (new VAOChessData[1]);
-			cellVAOItem.Datas[0].modelMats = Matrix4.CreateTranslation (new Vector3 (4.5f, 4.5f, 0f));
-			cellVAOItem.Datas [0].color = new Vector4 (0.3f, 1.0f, 0.3f, 0.5f);
-			cellVAOItem.Instances.UpdateVBO ();
+			cellVAOItem.Set (Matrix4.CreateTranslation (new Vector3 (4.5f, 4.5f, 0f)), new Vector4 (0.3f, 1.0f, 0.3f, 0.5f));
 
 			Tetra.Texture.GenerateMipMaps = true;
 			Tetra.Texture.DefaultMinFilter = TextureMinFilter.LinearMipmapLinear;
@@ -479,12 +516,7 @@ namespace Chess
 			Tetra.Texture.DefaultWrapMode = TextureWrapMode.ClampToBorder;
 
 			boardVAOItem.Diffuse = new GGL.Texture ("#Chess.Textures.marble1.jpg");
-			boardVAOItem.Instances = new InstancesVBO<VAOChessData> (new VAOChessData[1]);
-			boardVAOItem.Datas [0].modelMats = Matrix4.CreateTranslation (4f, 4f, -0.20f);
-			boardVAOItem.Datas[0].color = new Vector4(0.4f,0.4f,0.42f,1f);
-			boardVAOItem.Instances.UpdateVBO ();
-
-			List<int> tmp = new List<int> ();
+			boardVAOItem.Set (Matrix4.CreateTranslation (4f, 4f, -0.20f), new Vector4(0.4f,0.4f,0.42f,1f));
 
 			vaoiPawn.Diffuse = new GGL.Texture ("Textures/pawn_backed.png");
 			vaoiPawn.Instances = new InstancesVBO<VAOChessData> (new VAOChessData[16]);
@@ -579,7 +611,8 @@ namespace Chess
 			draw (vaoiQueen);
 			draw (vaoiKing);
 		}
-		void draw(InstancedModel<VAOChessData> model){
+		void draw(InstancedChessModel model){
+			model.UpdateBuffer();
 			GL.BindTexture (TextureTarget.Texture2D, model.Diffuse);
 			mainVAO.Render (BeginMode.Triangles, model.VAOPointer, model.Instances);
 		}
@@ -1243,7 +1276,7 @@ namespace Chess
 			}
 		}
 
-		void addPiece(InstancedModel<VAOChessData> vaoi, int idx, int playerIndex, PieceType _type, int col, int line){
+		void addPiece(InstancedChessModel vaoi, int idx, int playerIndex, PieceType _type, int col, int line){
 			ChessPiece p = new ChessPiece (vaoi, idx, Players[playerIndex], _type, col, line);
 			Board [col, line] = p;
 		}
@@ -1792,10 +1825,7 @@ namespace Chess
 		}
 
 		void addCellLight(Vector4 cellColor, Point pos){
-			cellVAOItem.Instances.AddInstance (new VAOChessData () {
-				color = cellColor,
-				modelMats = Matrix4.CreateTranslation (0.5f + (float)pos.X, 0.5f + (float)pos.Y, 0)
-			});
+			cellVAOItem.AddInstance (Matrix4.CreateTranslation (0.5f + (float)pos.X, 0.5f + (float)pos.Y, 0), cellColor);
 		}
 		protected override void OnUpdateFrame (FrameEventArgs e)
 		{
@@ -1848,22 +1878,20 @@ namespace Chess
 			}
 
 			#region cell lighting
-			cellVAOItem.Datas[0].modelMats = Matrix4.CreateTranslation(0.5f + (float)selection.X, 0.5f + (float)selection.Y, 0);
+			cellVAOItem.SetModelMat (0, Matrix4.CreateTranslation(0.5f + (float)selection.X, 0.5f + (float)selection.Y, 0));
 			if (ValidPositionsForActivePce != null){
 				for (int i = 1; i < cellVAOItem.Datas.Length; i++)
-					cellVAOItem.Instances.RemoveInstance (i);
+					cellVAOItem.RemoveInstance (i);
 				foreach (Point vm in ValidPositionsForActivePce)
 					addCellLight (validPosColor, vm);
 			}else
 				for (int i = 1; i < cellVAOItem.Datas.Length; i++)
-					cellVAOItem.Instances.RemoveInstance (i);
+					cellVAOItem.RemoveInstance (i);
 			if (active >= 0)
 				addCellLight (activeColor, Active);
 
 			if (CurrentState > GameState.Play)
 				addCellLight(kingCheckedColor, CurrentPlayer.King.BoardCell);
-
-			cellVAOItem.Instances.UpdateVBO ();
 			#endregion
 
 			Animation.ProcessAnimations ();

@@ -48,6 +48,7 @@ namespace Crow
 		public MovesWidget ():base()
 		{			
 		}
+		const double mg = 2.0;
 		protected override int measureRawSize (LayoutingType lt)
 		{
 			using (ImageSurface img = new ImageSurface (Format.Argb32, 10, 10)) {
@@ -64,7 +65,7 @@ namespace Crow
 					if (lt == LayoutingType.Width)
 						return (int)(gr.FontExtents.MaxXAdvance * 5);
 					else
-						return (int)gr.FontExtents.Height * moves.Count;					
+						return (int)(gr.FontExtents.Height + 2.0*mg )* moves.Count;					
 				}
 			}
 		}
@@ -84,15 +85,30 @@ namespace Crow
 
 			Foreground.SetAsSource (gr);
 
-			double y = ClientRectangle.Y;
-			double x = ClientRectangle.X;
+			Rectangle cb = ClientRectangle;
+			double y = cb.Y;
+			double x = cb.X;
 
 			for (int i = moves.Count - 1; i >= 0; i--) {
-				gr.MoveTo (x, y + fe.Ascent);
+				Cairo.TextExtents te = gr.TextExtents (moves [i].ToString());
+				if (i % 2 == 0)
+					gr.SetSourceRGB (1, 1, 1);
+				else
+					gr.SetSourceRGB (0.3, 0.3, 0.3);
+				GGL.Rectangle<Double> rt = new GGL.Rectangle<Double> (x, y, cb.Width, fe.Height + 2.0 * mg);
+				gr.Rectangle (rt.X, rt.Y, rt.Width, rt.Height);
+				gr.Fill ();
+				if (i % 2 == 0)
+					gr.SetSourceRGB (0.3, 0.3, 0.3);
+				else
+					gr.SetSourceRGB (1, 1, 1);
+				
+				gr.MoveTo (x+cb.Width / 2 - te.Width / 2, y + mg + fe.Ascent);
 				gr.ShowText (moves[i] as string);
-				y += fe.Height;
+				y += fe.Height + 2.0 * mg;
+				gr.Fill ();
 			}
-			gr.Fill ();
+
 
 			const int scrBarWidth = 1;
 			if (scr == null)

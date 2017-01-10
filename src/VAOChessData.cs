@@ -29,6 +29,11 @@ namespace Chess
 	{
 		public Matrix4 modelMats;
 		public Vector4 color;
+
+		public VAOChessData(Matrix4 _model, Vector4 _color){
+			modelMats = _model;
+			color = _color;
+		}
 	}
 }
 
