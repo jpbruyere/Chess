@@ -86,8 +86,8 @@ namespace Chess
 			out vec4 out_frag_color;
 
 			uniform vec3 diffuse = vec3(1.0, 1.0, 1.0);
-			uniform vec3 ambient = vec3(0.4, 0.4, 0.4);
-			uniform vec3 specular = vec3(0.8,0.8,0.8);
+			uniform vec3 ambient = vec3(0.3, 0.3, 0.3);
+			uniform vec3 specular = vec3(1.0,1.0,1.0);
 			uniform float shininess =16.0;
 			uniform float screenGamma = 1.0;
 

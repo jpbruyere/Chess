@@ -2,7 +2,7 @@
 	Width = 81;
 	Height = 50;
 	Background = vgradient|0:DimGray|1:Black;
-	Font = droid bold, 14;
+	Font = droid bold, 12;
 }
 Window {
 	Template = #Chess.gui.tmpWindow.crow;
@@ -14,13 +14,12 @@ ColorPicker {
 	Background = vgradient|0:0.6,0.6,0.6,0.9|1:0.4,0.4,0.4,0.6;
 }
 MenuItem {
-	Margin=2;
-	Font = droid bold, 14;
-
+	Margin=1;
+	Font = droid bold, 11;
 }
 Spinner {
 	Width=60;
-	Font = droid bold, 14;
+	Font = droid bold, 10;
 }
 FpsLabel {
 	Width = 50%;
@@ -49,9 +48,9 @@ LabInMenu {
 }
 ColorSelector {
 	Template=#Chess.gui.ColorSelector.crow;
-	Margin=2;
+	Margin=1;
 	Background = vgradient|0:DimGray|1:Black;
-	Font=droid bold, 14;
+	Font=droid bold, 10;
 	MouseEnter={Background=vgradient|0:Gray|1:Onyx;};
 	MouseLeave={Background=vgradient|0:DimGray|1:Black};
 	Width=90%;
@@ -59,9 +58,9 @@ ColorSelector {
 }
 BigCheckBox {
 	Template=#Chess.gui.tmpCheckBox.crow;
-	Margin=2;
+	Margin=1;
 	Foreground=Black;
-	Font=droid bold, 14;
+	Font=droid bold, 10;
 	MouseEnter={Background=DimGray};
 	MouseLeave={Background=Transparent};
 	Checked={Foreground=White};

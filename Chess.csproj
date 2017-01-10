@@ -78,27 +78,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Textures\pawn_backed.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Textures\queen_backed.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Textures\bishop_backed.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Textures\tower_backed.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Textures\king_backed.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Textures\horse_backed.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Textures\marble.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Include="OpenTK.dll.config" />
     <None Include="packages.config" />
     <None Include="Crow.dll.config" />
@@ -129,12 +108,8 @@
     <EmbeddedResource Include="gui\checkmate.crow" />
     <EmbeddedResource Include="gui\moves.crow" />
     <EmbeddedResource Include="gui\tmpPopper.crow" />
-    <EmbeddedResource Include="Textures\board1.png" />
-    <EmbeddedResource Include="Textures\wood.jpg" />
-    <EmbeddedResource Include="Textures\marble1.jpg" />
     <EmbeddedResource Include="gui\tmpCheckBox.crow" />
     <EmbeddedResource Include="gui\newGame.crow" />
-    <EmbeddedResource Include="Textures\board3.png" />
     <EmbeddedResource Include="gui\Chess.style" />
     <EmbeddedResource Include="gui\ColorSelector.crow" />
     <EmbeddedResource Include="gui\tmpSpinner.crow" />
@@ -149,6 +124,18 @@
     <EmbeddedResource Include="Meshes\king.bin" />
     <EmbeddedResource Include="Meshes\horse.bin" />
     <EmbeddedResource Include="default.config" />
+    <EmbeddedResource Include="Textures\board3-512.dds">
+      <LogicalName>Chess.Textures.board3.dds</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Textures\marble.dds" />
+    <EmbeddedResource Include="Textures\marble1.dds" />
+    <EmbeddedResource Include="Textures\bishop_backed.dds" />
+    <EmbeddedResource Include="Textures\pawn_backed.dds" />
+    <EmbeddedResource Include="Textures\tower_backed.dds" />
+    <EmbeddedResource Include="Textures\queen_backed.dds" />
+    <EmbeddedResource Include="Textures\king_backed.dds" />
+    <EmbeddedResource Include="Textures\horse_backed.dds" />
+    <EmbeddedResource Include="gui\about.crow" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="lib\GGL\GGL.csproj">

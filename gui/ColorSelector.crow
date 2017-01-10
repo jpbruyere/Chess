@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0"?>
 <Border CornerRadius="3" Background="{./Background}" BorderWidth="1" Foreground="White" Height="Fit">
 	<HorizontalStack Margin="4" Spacing="1" Height="Fit">
-		<GraphicObject CornerRadius="5" Width="30" Height="20" Background="{./Foreground}"/>				
-		<Label Margin="4" Text="{./Caption}" Font="{./Font}"/>
+		<GraphicObject CornerRadius="5" Width="20" Height="14" Background="{./Foreground}"/>				
+		<Label Margin="2" Text="{./Caption}" Font="{./Font}"/>
 	</HorizontalStack>
 </Border>

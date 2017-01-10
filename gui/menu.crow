@@ -14,7 +14,7 @@
 		<MenuItem Caption="Options" MouseClick="onViewOptionsClick"/>
 	</MenuItem>
 	<MenuItem Caption="Help">
-		<MenuItem Caption="About"/>
+		<MenuItem Caption="About" Execute="onViewAbout"/>
 		<MenuItem Caption="Help"/>
 	</MenuItem>
 	<MenuItem Caption="Hint" MouseClick="onHintClick"/>

@@ -32,6 +32,7 @@ using System.Linq;
 using Tetra;
 using System.IO;
 using Tetra.DynamicShading;
+using System.Reflection;
 
 namespace Chess
 {
@@ -130,8 +131,8 @@ namespace Chess
 		public float zNear = 0.1f;
 		public float fovY = (float)Math.PI / 4;
 
-		float eyeDist = 10f;
-		float eyeDistTarget = 10f;
+		float eyeDist = 12f;
+		float eyeDistTarget = 12f;
 		float MoveSpeed = 0.02f;
 		float RotationSpeed = 0.005f;
 		float ZoomSpeed = 2f;
@@ -200,6 +201,8 @@ namespace Chess
 				shaderMatsAreDirty = true;
 			}
 		}
+		float[] mainColor;
+		float[] clearColor;
 		public Color BackgroundColor {
 			get {
 				return Crow.Configuration.Get<Color> ("BackgroundColor");
@@ -208,6 +211,7 @@ namespace Chess
 				if (BackgroundColor == value)
 					return;
 				Crow.Configuration.Set ("BackgroundColor", value);
+				clearColor = value.floatArray;
 				NotifyValueChanged ("BackgroundColor", value);
 			}
 		}
@@ -219,6 +223,7 @@ namespace Chess
 				if (MainColor == value)
 					return;
 				Crow.Configuration.Set ("MainColor", value);
+				mainColor = value.floatArray;
 				NotifyValueChanged ("MainColor", value);
 			}
 		}
@@ -253,9 +258,8 @@ namespace Chess
 			set {
 				if (Shininess == value)
 					return;
-				piecesShader.Enable ();
-				GL.Uniform1(GL.GetUniformLocation(piecesShader.pgmId, "shininess"), value);
 				Crow.Configuration.Set ("Shininess", value);
+				shaderUniformsAreDirty = true;
 				NotifyValueChanged ("Shininess", value);
 			}
 		}
@@ -273,9 +277,8 @@ namespace Chess
 			set {
 				if (ScreenGamma == value)
 					return;
-				piecesShader.Enable ();
-				GL.Uniform1(GL.GetUniformLocation(piecesShader.pgmId, "screenGamma"), value/100.0f);
 				Crow.Configuration.Set ("ScreenGamma", value);
+				shaderUniformsAreDirty = true;
 				NotifyValueChanged ("ScreenGamma", value);
 			}
 		}
@@ -332,6 +335,9 @@ namespace Chess
 		const int GBP_UBO0 = 0;
 		void initOpenGL()
 		{
+			mainColor = Crow.Configuration.Get<Color> ("MainColor").floatArray;
+			clearColor = Crow.Configuration.Get<Color> ("BackgroundColor").floatArray;
+
 			Debug.WriteLine("MaxVertexAttribs: " + GL.GetInteger(GetPName.MaxVertexAttribs));
 			GL.Enable (EnableCap.CullFace);
 			GL.CullFace (CullFaceMode.Back);
@@ -343,10 +349,9 @@ namespace Chess
 			GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
 
 			piecesShader = new Mat4InstancedShader();
-
 			piecesShader.Enable ();
-			GL.Uniform1(GL.GetUniformLocation(piecesShader.pgmId, "shininess"), Shininess);
-			GL.Uniform1(GL.GetUniformLocation(piecesShader.pgmId, "screenGamma"), ScreenGamma/100.0f);
+
+			updateShaderUniforms ();
 
 			#region test DynamicShading
 //			dynShader = new DynamicShader ();
@@ -375,6 +380,12 @@ namespace Chess
 
 			ErrorCode err = GL.GetError ();
 			Debug.Assert (err == ErrorCode.NoError, "OpenGL Error");
+		}
+		bool shaderUniformsAreDirty = false;
+		void updateShaderUniforms(){
+			GL.Uniform1(GL.GetUniformLocation(piecesShader.pgmId, "shininess"), Shininess);
+			GL.Uniform1(GL.GetUniformLocation(piecesShader.pgmId, "screenGamma"), ScreenGamma/100.0f);
+			shaderUniformsAreDirty = false;
 		}
 		void updateShadersMatrices(){
 			shaderSharedData.projection = projection;
@@ -499,47 +510,49 @@ namespace Chess
 			CurrentState = GameState.VAOInit;
 		}
 		void createMainVAO(){
-			
+
 			mainVAO = new InstancedVAO<MeshData, VAOChessData> (meshes);
 
 			vaoiQuad.Set (Matrix4.Identity, new Vector4 (1.0f, 1.0f, 1.0f, (float)ReflexionIntensity / 100f));
 
-			boardPlateVAOItem.Diffuse = new GGL.Texture ("#Chess.Textures.board3.png");
+			Tetra.Texture.DefaultWrapMode = TextureWrapMode.Repeat;
+			boardPlateVAOItem.Diffuse = Tetra.Texture.Load ("#Chess.Textures.board3.dds");
 			boardPlateVAOItem.Set (Matrix4.Identity, new Vector4(0.7f,0.7f,0.7f,1f));
+			Tetra.Texture.DefaultWrapMode = TextureWrapMode.ClampToEdge;
 
-			cellVAOItem.Diffuse = new GGL.Texture ("Textures/marble.jpg");
+			cellVAOItem.Diffuse = Tetra.Texture.Load ("#Chess.Textures.marble.dds");
 			cellVAOItem.Set (Matrix4.CreateTranslation (new Vector3 (4.5f, 4.5f, 0f)), new Vector4 (0.3f, 1.0f, 0.3f, 0.5f));
+
+			boardVAOItem.Diffuse = Tetra.Texture.Load ("#Chess.Textures.marble1.dds");
+			boardVAOItem.Set (Matrix4.CreateTranslation (4f, 4f, -0.20f), new Vector4(0.4f,0.4f,0.42f,1f));
 
 			Tetra.Texture.GenerateMipMaps = true;
 			Tetra.Texture.DefaultMinFilter = TextureMinFilter.LinearMipmapLinear;
 			Tetra.Texture.DefaultMagFilter = TextureMagFilter.Linear;
 			Tetra.Texture.DefaultWrapMode = TextureWrapMode.ClampToBorder;
 
-			boardVAOItem.Diffuse = new GGL.Texture ("#Chess.Textures.marble1.jpg");
-			boardVAOItem.Set (Matrix4.CreateTranslation (4f, 4f, -0.20f), new Vector4(0.4f,0.4f,0.42f,1f));
-
-			vaoiPawn.Diffuse = new GGL.Texture ("Textures/pawn_backed.png");
+			vaoiPawn.Diffuse = Tetra.Texture.Load ("#Chess.Textures.pawn_backed.dds");
 			vaoiPawn.Instances = new InstancesVBO<VAOChessData> (new VAOChessData[16]);
 			ProgressValue++;
 
-			vaoiBishop.Diffuse = new GGL.Texture ("Textures/bishop_backed.png");
+			vaoiBishop.Diffuse = Tetra.Texture.Load ("#Chess.Textures.bishop_backed.dds");
 			vaoiBishop.Instances = new InstancesVBO<VAOChessData> (new VAOChessData[4]);
 			ProgressValue++;
 
-			vaoiKnight.Diffuse = new GGL.Texture ("Textures/horse_backed.png");
+			vaoiKnight.Diffuse = Tetra.Texture.Load ("#Chess.Textures.horse_backed.dds");
 			vaoiKnight.Instances = new InstancesVBO<VAOChessData> (new VAOChessData[4]);
 			ProgressValue++;
 
-			vaoiRook.Diffuse = new GGL.Texture ("Textures/tower_backed.png");
+			vaoiRook.Diffuse = Tetra.Texture.Load ("#Chess.Textures.tower_backed.dds");
 			vaoiRook.Instances = new InstancesVBO<VAOChessData> (new VAOChessData[4]);
 			ProgressValue++;
 
-			vaoiQueen.Diffuse = new GGL.Texture ("Textures/queen_backed.png");
+			vaoiQueen.Diffuse = Tetra.Texture.Load ("#Chess.Textures.queen_backed.dds");
 			vaoiQueen.Instances = new InstancesVBO<VAOChessData> (new VAOChessData[2]);
 			ProgressValue++;
 
 
-			vaoiKing.Diffuse = new GGL.Texture ("Textures/king_backed.png");
+			vaoiKing.Diffuse = Tetra.Texture.Load ("#Chess.Textures.king_backed.dds");
 			vaoiKing.Instances = new InstancesVBO<VAOChessData> (new VAOChessData[2]);
 			ProgressValue++;
 
@@ -553,11 +566,13 @@ namespace Chess
 		void draw()
 		{
 			piecesShader.Enable ();
+			if (shaderUniformsAreDirty)
+				updateShaderUniforms ();
 			piecesShader.SetLightingPass ();
 
 			mainVAO.Bind ();
 
-			changeShadingColor(MainColor.floatArray);
+			changeShadingColor(mainColor);
 
 			draw (boardVAOItem);
 
@@ -611,10 +626,10 @@ namespace Chess
 			draw (vaoiQueen);
 			draw (vaoiKing);
 		}
-		void draw(InstancedChessModel model){
+		void draw(InstancedChessModel model, BeginMode beginMode = BeginMode.Triangles){
 			model.UpdateBuffer();
 			GL.BindTexture (TextureTarget.Texture2D, model.Diffuse);
-			mainVAO.Render (BeginMode.Triangles, model.VAOPointer, model.Instances);
+			mainVAO.Render (beginMode, model.VAOPointer, model.Instances);
 		}
 		#region Arrows
 		GGL.vaoMesh arrows;
@@ -715,14 +730,13 @@ namespace Chess
 			changeModelView (modelview);
 			GL.CullFace(CullFaceMode.Back);
 			GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
-			//GL.DrawBuffer(DrawBufferMode.Back);
 			mainVAO.Unbind ();
 		}
 		void drawReflexion(){
 			piecesShader.SetSimpleTexturedPass ();
 			changeMVP (orthoMat, Matrix4.Identity);
 			vaoiQuad.Diffuse = reflexionTex;
-			draw (vaoiQuad);
+			draw (vaoiQuad, BeginMode.TriangleStrip);
 			changeMVP (projection, modelview);
 			piecesShader.SetLightingPass ();
 		}
@@ -738,6 +752,7 @@ namespace Chess
 		const string UI_Log = "#Chess.gui.log.crow";
 		const string UI_Moves = "#Chess.gui.moves.crow";
 		const string UI_Splash = "#Chess.gui.Splash.crow";
+		const string UI_About = "#Chess.gui.about.crow";
 		const string UI_Save = "#Chess.gui.saveDialog.crow";
 		const string UI_Load = "#Chess.gui.loadDialog.crow";
 		const string UI_Promote = "#Chess.gui.promote.crow";
@@ -961,6 +976,13 @@ namespace Chess
 		}
 		void deletePromoteDialog(){
 			closeWindow (UI_Promote);
+		}
+		void onViewAbout(object sender, EventArgs e){
+			loadWindow (UI_About);
+			AssemblyName infos = System.Reflection.Assembly.GetEntryAssembly ().GetName();
+			NotifyValueChanged ("Name",  infos.Name);
+			NotifyValueChanged ("Version", infos.Version.ToString());
+			NotifyValueChanged ("Culture", infos.CultureName.ToString());
 		}
 		#endregion
 
@@ -1806,8 +1828,7 @@ namespace Chess
 		}
 		public override void GLClear ()
 		{
-			Vector4 c = BackgroundColor.ToVector4 ();
-			GL.ClearColor (c [0], c [1], c [2], c [3]);
+			GL.ClearColor (clearColor [0], clearColor [1], clearColor [2], clearColor [3]);
 			GL.Clear (ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit | ClearBufferMask.StencilBufferBit);
 		}
 		public override void OnRender (FrameEventArgs e)
@@ -2007,8 +2028,10 @@ namespace Chess
 				}else if (e.Mouse.LeftButton == OpenTK.Input.ButtonState.Pressed) {
 					return;
 				}else if (e.Mouse.RightButton == OpenTK.Input.ButtonState.Pressed) {
-					Matrix4 m = Matrix4.CreateTranslation (-e.XDelta*MoveSpeed, e.YDelta*MoveSpeed, 0);
-					vEyeTarget = vEyeTarget.Transform (m);
+					Vector2 v2Look = vLook.Xy.Normalized ();
+					Vector2 disp = v2Look.PerpendicularLeft * e.XDelta * MoveSpeed +
+					               v2Look * e.YDelta * MoveSpeed;
+					vEyeTarget -= new Vector3 (disp.X, disp.Y, 0);
 					UpdateViewMatrix();
 				}
 				Vector3 vMouse = glHelper.UnProject(ref projection, ref modelview, viewport, new Vector2 (e.X, e.Y)).Xyz;
@@ -2034,14 +2057,13 @@ namespace Chess
 			else if (eyeDistTarget > zFar-6)
 				eyeDistTarget = zFar-6;
 
-			//EyeDist = eyeDistTarget;
 			Animation.StartAnimation(new Animation<float> (this, "EyeDist", eyeDistTarget, (eyeDistTarget - eyeDist) * 0.1f));
 		}
 		#endregion
 
 		#region CTOR and Main
 		public MainWin ()
-			: base(1024, 800, "Chess", 32, 24, 1, Crow.Configuration.Get<int> ("Samples"))
+			: base(700, 600, "Chess", 32, 24, 1, Crow.Configuration.Get<int> ("Samples"))
 		{}
 
 		[STAThread]
