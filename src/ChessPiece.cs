@@ -23,17 +23,18 @@ using OpenTK;
 using Crow;
 using Tetra;
 using GGL;
+using Tetra.DynamicShading;
 
 namespace Chess
 {
 	public class ChessPiece{
 		float xAngle, zAngle;
 		Vector3 position;
-		VAOItem<VAOChessData> newMesh;//replacment mesh when promote or unpromote
+		InstancedModel<VAOChessData> newMesh;//replacment mesh when promote or unpromote
 		PieceType originalType;
 		PieceType promotion;
 
-		public VAOItem<VAOChessData> Mesh;
+		public InstancedModel<VAOChessData> Mesh;
 		public int InstanceIndex;
 		public ChessPlayer Player;
 		public bool IsPromoted;
@@ -110,7 +111,7 @@ namespace Chess
 				updatePos ();
 			}
 		}
-		public ChessPiece(VAOItem<VAOChessData> vaoi, int idx, ChessPlayer _player , PieceType _type, int xPos, int yPos){
+		public ChessPiece(InstancedModel<VAOChessData> vaoi, int idx, ChessPlayer _player , PieceType _type, int xPos, int yPos){
 			Mesh = vaoi;
 			InstanceIndex = idx;
 			Player = _player;
@@ -197,11 +198,11 @@ namespace Chess
 				removePieceInstance ();
 				Mesh = newMesh;
 				newMesh = null;
-				InstanceIndex = Mesh.AddInstance ();
+				InstanceIndex = Mesh.Instances.AddInstance ();
 				updatePos ();
 				UpdateColor ();
 			}
-			Mesh.UpdateInstancesData ();
+			Mesh.Instances.UpdateVBO ();
 			OpenGLSync = true;
 		}
 		void updatePos(){
@@ -213,25 +214,25 @@ namespace Chess
 //				Matrix4.CreateRotationZ(xAngle/2f) *
 //				Matrix4.CreateTranslation(new Vector3(x, y, z));
 			Quaternion q = Quaternion.FromEulerAngles (zAngle, 0f, xAngle);
-			Mesh.InstancedDatas [InstanceIndex].modelMats =
+			Mesh.Datas [InstanceIndex].modelMats =
 				Matrix4.CreateFromQuaternion (q) * Matrix4.CreateTranslation (position);
 			OpenGLSync = false;
 		}
 		public void UpdateColor(){
 			if (Player.Color == ChessColor.White) {
-				Mesh.InstancedDatas [InstanceIndex].color = Crow.Configuration.Get<Color> ("WhiteColor").ToVector4();
+				Mesh.Datas [InstanceIndex].color = Crow.Configuration.Get<Color> ("WhiteColor").ToVector4();
 				ZAngle = 0f;
 			} else {
-				Mesh.InstancedDatas [InstanceIndex].color = Crow.Configuration.Get<Color> ("BlackColor").ToVector4();
+				Mesh.Datas [InstanceIndex].color = Crow.Configuration.Get<Color> ("BlackColor").ToVector4();
 				ZAngle = MathHelper.Pi;
 			}
 			OpenGLSync = false;
 		}
 		void removePieceInstance()
 		{
-			Mesh.RemoveInstance (InstanceIndex);
+			Mesh.Instances.RemoveInstance (InstanceIndex);
 
-			if (InstanceIndex == Mesh.InstancedDatas.Length)
+			if (InstanceIndex == Mesh.Datas.Length)
 				return;
 
 			//reindex pce instances
@@ -248,7 +249,7 @@ namespace Chess
 					}
 				}
 			}
-			Mesh.UpdateInstancesData();
+			Mesh.Instances.UpdateVBO();
 		}
 
 	}
