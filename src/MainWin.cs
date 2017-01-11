@@ -516,15 +516,18 @@ namespace Chess
 			vaoiQuad.Set (Matrix4.Identity, new Vector4 (1.0f, 1.0f, 1.0f, (float)ReflexionIntensity / 100f));
 
 			Tetra.Texture.DefaultWrapMode = TextureWrapMode.Repeat;
+
 			boardPlateVAOItem.Diffuse = Tetra.Texture.Load ("#Chess.Textures.board3.dds");
 			boardPlateVAOItem.Set (Matrix4.Identity, new Vector4(0.7f,0.7f,0.7f,1f));
+
+			boardVAOItem.Diffuse = Tetra.Texture.Load ("#Chess.Textures.marble1.dds");
+			boardVAOItem.Set (Matrix4.CreateTranslation (4f, 4f, -0.15f), new Vector4(0.4f,0.4f,0.42f,1f));
+
 			Tetra.Texture.DefaultWrapMode = TextureWrapMode.ClampToEdge;
 
 			cellVAOItem.Diffuse = Tetra.Texture.Load ("#Chess.Textures.marble.dds");
 			cellVAOItem.Set (Matrix4.CreateTranslation (new Vector3 (4.5f, 4.5f, 0f)), new Vector4 (0.3f, 1.0f, 0.3f, 0.5f));
 
-			boardVAOItem.Diffuse = Tetra.Texture.Load ("#Chess.Textures.marble1.dds");
-			boardVAOItem.Set (Matrix4.CreateTranslation (4f, 4f, -0.20f), new Vector4(0.4f,0.4f,0.42f,1f));
 
 			Tetra.Texture.GenerateMipMaps = true;
 			Tetra.Texture.DefaultMinFilter = TextureMinFilter.LinearMipmapLinear;
