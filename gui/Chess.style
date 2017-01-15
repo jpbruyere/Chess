@@ -2,20 +2,22 @@
 	Width = 81;
 	Height = 50;
 	Background = vgradient|0:DimGray|1:Black;
-	Font = droid bold, 12;
+	Font = droid bold, 20;
 }
 Window {
 	Template = #Chess.gui.tmpWindow.crow;
 }
-Menu {
-	Background = vgradient|0:0.6,0.6,0.6,0.9|1:0.4,0.4,0.4,0.6;
-}
 ColorPicker {
 	Background = vgradient|0:0.6,0.6,0.6,0.9|1:0.4,0.4,0.4,0.6;
 }
+Menu {
+	Margin=0;
+	Background = Transparent;
+}
 MenuItem {
-	Margin=1;
-	Font = droid bold, 11;
+	Margin=0;
+	Foreground = White;
+	Font = droid bold, 14;
 }
 Spinner {
 	Width=60;

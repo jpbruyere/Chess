@@ -42,9 +42,6 @@
     <Compile Include="src\ChessMoves.cs" />
     <Compile Include="src\ChessPlayer.cs" />
     <Compile Include="src\ChessPiece.cs" />
-    <Compile Include="lib\Crow\Tests\OpenTKGameWindow.cs">
-      <Link>src\OpenTKGameWindow.cs</Link>
-    </Compile>
     <Compile Include="lib\Crow\Tests\OpenGL\Shader.cs">
       <Link>src\Shader.cs</Link>
     </Compile>
@@ -53,6 +50,15 @@
     </Compile>
     <Compile Include="lib\Crow\Tests\OpenGL\vaoMesh.cs">
       <Link>src\vaoMesh.cs</Link>
+    </Compile>
+    <Compile Include="lib\Crow\Tests\CrowWindow.cs">
+      <Link>src\CrowWindow.cs</Link>
+    </Compile>
+    <Compile Include="lib\Crow\Tests\InterfaceControler.cs">
+      <Link>src\InterfaceControler.cs</Link>
+    </Compile>
+    <Compile Include="lib\Crow\Tests\OpenGL\Extensions.cs">
+      <Link>src\Extensions.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup>
@@ -136,6 +142,9 @@
     <EmbeddedResource Include="Textures\king_backed.dds" />
     <EmbeddedResource Include="Textures\horse_backed.dds" />
     <EmbeddedResource Include="gui\about.crow" />
+    <EmbeddedResource Include="gui\Menu.template">
+      <LogicalName>Crow.Menu.template</LogicalName>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="lib\GGL\GGL.csproj">

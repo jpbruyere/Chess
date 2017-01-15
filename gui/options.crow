@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0"?>
-<Window Font="droid bold, 22" Width="50%" Height="70%" Title="Options">
+<Window Font="droid bold, 22" Width="100%" Height="100%" Title="Options">
 	<Container>
 		<VerticalStack Margin="10" Spacing="2">
 			<HorizontalStack Margin="5" Height="Fit" Width="Stretched">

@@ -13,11 +13,11 @@
 				Background="{./Background}">
 			<Label Text="{./Caption}"
 				Foreground="{./Foreground}"
-				Margin="3" HorizontalAlignment="Left"
+				Margin="1" HorizontalAlignment="Left"
 				Font="{./Font}"	/>
 		</Border>
 	</Template>
 	<Border Foreground="DimGray" Fit="true">
-			<VerticalStack Name="ItemsContainer" Margin="2" Fit="true" Background="vgradient|0:0.6,0.6,0.6,0.9|1:0.4,0.4,0.4,0.6"/>
+			<VerticalStack Name="ItemsContainer" Margin="0" Fit="true" Background="vgradient|0:0.6,0.6,0.6,0.9|1:0.4,0.4,0.4,0.6"/>
 	</Border>
 </Popper>

@@ -41,12 +41,6 @@ namespace Chess
 	public enum ChessColor { White, Black };
 	public enum PieceType { Pawn, Rook, Knight, Bishop, King, Queen };
 
-	public static class Extensions {
-		public static Vector4 ToVector4(this Color c){
-			float[] f = c.floatArray;
-			return new Vector4 (f [0], f [1], f [2], f [3]);
-		}
-	}
 	public class InstancedChessModel : InstancedModel<VAOChessData> {
 		public InstancedChessModel(MeshPointer pointer) : base(pointer) {}
 
@@ -95,7 +89,7 @@ namespace Chess
 			SyncVBO = false;
 		}
 	}
-	class MainWin : OpenTKGameWindow
+	class MainWin : CrowWindow
 	{
 		[StructLayout(LayoutKind.Sequential)]
 		public struct UBOSharedData
@@ -747,6 +741,8 @@ namespace Chess
 		#endregion
 
 		#region Interface
+		ProjectiveIFaceControler iface3d;
+
 		const string UI_Menu = "#Chess.gui.menu.crow";
 		const string UI_NewGame = "#Chess.gui.newGame.crow";
 		const string UI_Options = "#Chess.gui.options.crow";
@@ -797,10 +793,10 @@ namespace Chess
 
 		void loadWindow(string path){
 			try {
-				GraphicObject g = CrowInterface.FindByName (path);
+				GraphicObject g = FindByName (path);
 				if (g != null)
 					return;
-				g = CrowInterface.LoadInterface (path);
+				g = Load (path);
 				g.Name = path;
 				g.DataSource = this;
 			} catch (Exception ex) {
@@ -808,9 +804,9 @@ namespace Chess
 			}
 		}
 		void closeWindow (string path){
-			GraphicObject g = CrowInterface.FindByName (path);
+			GraphicObject g = FindByName (path);
 			if (g != null)
-				CrowInterface.DeleteWidget (g);
+				iface3d.CrowInterface.DeleteWidget (g);
 		}
 
 		void initInterface(){
@@ -1282,9 +1278,9 @@ namespace Chess
 		}
 		void resetBoard(bool animate = true){
 			CurrentState = GameState.Play;
-			GraphicObject g = CrowInterface.FindByName ("mateWin");
+			GraphicObject g = FindByName ("mateWin");
 			if (g != null)
-				CrowInterface.DeleteWidget (g);
+				ifaceControl[0].CrowInterface.DeleteWidget (g);
 			CurrentPlayerIndex = 0;
 			cptWhiteOut = 0;
 			cptBlackOut = 0;
@@ -1798,7 +1794,7 @@ namespace Chess
 					CurrentState = GameState.Pad;
 				else {
 					CurrentState = GameState.Checkmate;
-					GraphicObject g = CrowInterface.LoadInterface ("#Chess.gui.checkmate.crow");
+					GraphicObject g = Load ("#Chess.gui.checkmate.crow");
 					g.DataSource = this;
 					Animation.StartAnimation (new AngleAnimation (CurrentPlayer.King, "XAngle", MathHelper.Pi * 0.53f));
 					Animation.StartAnimation (new AngleAnimation (CurrentPlayer.King, "ZAngle", CurrentPlayer.King.ZAngle - MathHelper.Pi, 0.2f));
@@ -1814,6 +1810,11 @@ namespace Chess
 		#region OTK window overrides
 		protected override void OnLoad (EventArgs e)
 		{
+			iface3d = Add3DInterface (512, 512, 
+				Matrix4.CreateScale (8f) 
+				* Matrix4.CreateRotationX (MathHelper.PiOver2)
+				* Matrix4.CreateTranslation (new Vector3 (4f,-0.23f,3.7f)));
+			
 			Players = new ChessPlayer[2] {
 				new ChessPlayer () { Color = ChessColor.White, Type = PlayerType.Human },
 				new ChessPlayer () { Color = ChessColor.Black, Type = PlayerType.AI }
@@ -1953,6 +1954,8 @@ namespace Chess
 				Matrix4.CreateScale (1.0f, 1.0f, -1.0f) * modelview;
 			//Matrix4.CreateTranslation (0.0f, 0.0f, 1.0f) *
 			shaderMatsAreDirty = true;
+
+			iface3d.UpdateView (projection, modelview, viewport, vEye);
 		}
 		#endregion
 
