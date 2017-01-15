@@ -24,7 +24,6 @@ using Crow;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using System.Diagnostics;
-using GGL;
 using System.Runtime.InteropServices;
 using System.Collections.Generic;
 using System.Threading;
@@ -645,7 +644,7 @@ namespace Chess
 
 			Point pStart = getChessCell(move.Substring(0,2));
 			Point pEnd = getChessCell(move.Substring(2,2));
-			arrows = new Arrow3d (
+			arrows = new GGL.Arrow3d (
 				new Vector3 ((float)pStart.X + 0.5f, (float)pStart.Y + 0.5f, 0),
 				new Vector3 ((float)pEnd.X + 0.5f, (float)pEnd.Y + 0.5f, 0),
 				Vector3.UnitZ);
@@ -890,8 +889,8 @@ namespace Chess
 			foreach (ChessPlayer p in Players) {
 				foreach (ChessPiece pce in p.Pieces) {
 					if (oldPositions [i] != pce.Position) {
-						Animation.StartAnimation (new PathAnimation (pce, "Position",
-							new BezierPath (
+						GGL.Animation.StartAnimation (new GGL.PathAnimation (pce, "Position",
+							new GGL.BezierPath (
 								oldPositions [i],
 								pce.Position, Vector3.UnitZ)));
 					}
@@ -1628,8 +1627,8 @@ namespace Chess
 			p.HasMoved = true;
 
 			if (animate)
-				Animation.StartAnimation (new PathAnimation (p, "Position",
-					new BezierPath (
+				GGL.Animation.StartAnimation (new GGL.PathAnimation (p, "Position",
+					new GGL.BezierPath (
 						p.Position,
 						capturePos, Vector3.UnitZ)));
 			else
@@ -1670,8 +1669,8 @@ namespace Chess
 
 			Vector3 targetPosition = new Vector3 (pEnd.X + 0.5f, pEnd.Y + 0.5f, 0f);
 			if (animate) {
-				Animation.StartAnimation (new PathAnimation (p, "Position",
-					new BezierPath (
+				GGL.Animation.StartAnimation (new GGL.PathAnimation (p, "Position",
+					new GGL.BezierPath (
 						p.Position,
 						targetPosition, Vector3.UnitZ)),
 					0, move_AnimationFinished);
@@ -1701,8 +1700,8 @@ namespace Chess
 
 						targetPosition = new Vector3 (pEnd.X + 0.5f, pEnd.Y + 0.5f, 0f);
 						if (animate)
-							Animation.StartAnimation (new PathAnimation (p, "Position",
-								new BezierPath (
+							GGL.Animation.StartAnimation (new GGL.PathAnimation (p, "Position",
+								new GGL.BezierPath (
 									p.Position,
 									targetPosition, Vector3.UnitZ * 2f)));
 						else
@@ -1734,8 +1733,8 @@ namespace Chess
 
 			p.Position = new Vector3(pCurPos.X + 0.5f, pCurPos.Y + 0.5f, 0f);
 
-			Animation.StartAnimation (new PathAnimation (p, "Position",
-				new BezierPath (
+			GGL.Animation.StartAnimation (new GGL.PathAnimation (p, "Position",
+				new GGL.BezierPath (
 					p.Position,
 					new Vector3(pPreviousPos.X + 0.5f, pPreviousPos.Y + 0.5f, 0f), Vector3.UnitZ)));
 
@@ -1748,8 +1747,8 @@ namespace Chess
 			Vector3 pCapLastPos = pCaptured.Position;
 			pCaptured.Position = getCurrentCapturePosition (pCaptured);
 
-			Animation.StartAnimation (new PathAnimation (pCaptured, "Position",
-				new BezierPath (
+			GGL.Animation.StartAnimation (new GGL.PathAnimation (pCaptured, "Position",
+				new GGL.BezierPath (
 					pCaptured.Position,
 					pCapLastPos, Vector3.UnitZ)));
 
@@ -1782,7 +1781,7 @@ namespace Chess
 				sendToStockfish("go");
 		}
 
-		void move_AnimationFinished (Animation a)
+		void move_AnimationFinished (GGL.Animation a)
 		{
 			waitAnimationFinished = false;
 
@@ -1796,8 +1795,8 @@ namespace Chess
 					CurrentState = GameState.Checkmate;
 					GraphicObject g = Load ("#Chess.gui.checkmate.crow");
 					g.DataSource = this;
-					Animation.StartAnimation (new AngleAnimation (CurrentPlayer.King, "XAngle", MathHelper.Pi * 0.53f));
-					Animation.StartAnimation (new AngleAnimation (CurrentPlayer.King, "ZAngle", CurrentPlayer.King.ZAngle - MathHelper.Pi, 0.2f));
+					GGL.Animation.StartAnimation (new GGL.AngleAnimation (CurrentPlayer.King, "XAngle", MathHelper.Pi * 0.53f));
+					GGL.Animation.StartAnimation (new GGL.AngleAnimation (CurrentPlayer.King, "ZAngle", CurrentPlayer.King.ZAngle - MathHelper.Pi, 0.2f));
 				}
 			}else if (kingIsSafe)
 				CurrentState = GameState.Play;
@@ -1919,7 +1918,7 @@ namespace Chess
 				addCellLight(kingCheckedColor, CurrentPlayer.King.BoardCell);
 			#endregion
 
-			Animation.ProcessAnimations ();
+			GGL.Animation.ProcessAnimations ();
 
 			foreach (ChessPlayer p in Players) {
 				foreach (ChessPiece pce in p.Pieces) {
@@ -2040,7 +2039,7 @@ namespace Chess
 					vEyeTarget -= new Vector3 (disp.X, disp.Y, 0);
 					UpdateViewMatrix();
 				}
-				Vector3 vMouse = glHelper.UnProject(ref projection, ref modelview, viewport, new Vector2 (e.X, e.Y)).Xyz;
+				Vector3 vMouse = GGL.glHelper.UnProject(ref projection, ref modelview, viewport, new Vector2 (e.X, e.Y)).Xyz;
 				Vector3 vMouseRay = Vector3.Normalize(vMouse - vEye);
 				float a = vEye.Z / vMouseRay.Z;
 				vMouse = vEye - vMouseRay * a;
@@ -2063,7 +2062,7 @@ namespace Chess
 			else if (eyeDistTarget > zFar-6)
 				eyeDistTarget = zFar-6;
 
-			Animation.StartAnimation(new Animation<float> (this, "EyeDist", eyeDistTarget, (eyeDistTarget - eyeDist) * 0.1f));
+			GGL.Animation.StartAnimation(new GGL.Animation<float> (this, "EyeDist", eyeDistTarget, (eyeDistTarget - eyeDist) * 0.1f));
 		}
 		#endregion
 
