@@ -56,6 +56,46 @@ namespace Chess
 			Instances.InstancedDatas[index].color = color;
 			SyncVBO = true;
 		}
+		public void Set (Matrix4 modelMat, Vector4 diffuse, Vector4 ambient, Vector4 specular){
+			if (Instances == null)
+				Instances = new InstancesVBO<VAOChessData> (new VAOChessData[1]);
+			Instances.InstancedDatas[0].modelMats = modelMat;
+			Instances.InstancedDatas[0].color = diffuse;
+			Instances.InstancedDatas[0].ambient = ambient;
+			Instances.InstancedDatas[0].specular = specular;
+			SyncVBO = true;
+		}
+		public void Set (int index, Matrix4 modelMat, Vector4 diffuse, Vector4 ambient, Vector4 specular){			
+			Instances.InstancedDatas[index].modelMats = modelMat;
+			Instances.InstancedDatas[index].color = diffuse;
+			Instances.InstancedDatas[index].ambient = ambient;
+			Instances.InstancedDatas[index].specular = specular;
+			SyncVBO = true;
+		}
+		public void SetMaterial (int index, Vector4 diffuse, Vector4 ambient, Vector4 specular){			
+			Instances.InstancedDatas[index].color = diffuse;
+			Instances.InstancedDatas[index].ambient = ambient;
+			Instances.InstancedDatas[index].specular = specular;
+			SyncVBO = true;
+		}
+		public void SetMaterial (int index, Material mat){
+			if (mat==null)
+				return;
+			Instances.InstancedDatas[index].color = mat.Diffuse.ToVector4();
+			Instances.InstancedDatas[index].ambient = mat.Ambient.ToVector4();
+			Instances.InstancedDatas[index].specular = mat.Specular.ToVector4();
+			Instances.InstancedDatas [index].specular.W = (float)mat.Shininess;
+			SyncVBO = true;
+		}
+		public void Set (Matrix4 modelMat, Material mat){
+			if (Instances == null)
+				Instances = new InstancesVBO<VAOChessData> (new VAOChessData[1]);
+			if (mat==null)
+				return;
+			Instances.InstancedDatas[0].modelMats = modelMat;
+			SetMaterial (0, mat);
+			SyncVBO = true;
+		}
 		public void Set (Matrix4 modelMat, Vector4 color){
 			if (Instances == null)
 				Instances = new InstancesVBO<VAOChessData> (new VAOChessData[1]);
@@ -233,6 +273,11 @@ namespace Chess
 					pce.UpdateColor ();
 			}
 		}
+		public Material WhiteMaterial {	get { return Crow.Configuration.Get<Material> ("WhiteMaterial"); }}
+		public Material BlackMaterial {	get { return Crow.Configuration.Get<Material> ("BlackMaterial"); }}
+		public Material BoardMaterial {	get { return Crow.Configuration.Get<Material> ("BoardMaterial"); }}
+		public Material PlateMaterial {	get { return Crow.Configuration.Get<Material> ("PlateMaterial"); }}
+
 		public Color BlackColor {
 			get {
 				return Crow.Configuration.Get<Color> ("BlackColor");
@@ -427,19 +472,22 @@ namespace Chess
 
 		void loadMeshes()
 		{
+			string meshesPath = "#Chess.Meshes.classic.";
+			string meshesExt = ".bin";
+
 			CurrentState = GameState.MeshesLoading;
 			meshes = new MeshesGroup<MeshData>();
-			vaoiPawn = new InstancedChessModel (meshes.Add (Mesh<MeshData>.Load ("#Chess.Meshes.pawn.bin")));
+			vaoiPawn = new InstancedChessModel (meshes.Add (Mesh<MeshData>.Load (meshesPath + "p" + meshesExt)));
 			ProgressValue+=20;
-			vaoiBishop = new InstancedChessModel (meshes.Add (Mesh<MeshData>.Load ("#Chess.Meshes.bishop.bin")));
+			vaoiBishop = new InstancedChessModel (meshes.Add (Mesh<MeshData>.Load (meshesPath + "b" + meshesExt)));
 			ProgressValue+=20;
-			vaoiKnight = new InstancedChessModel (meshes.Add (Mesh<MeshData>.Load ("#Chess.Meshes.horse.bin")));
+			vaoiKnight = new InstancedChessModel (meshes.Add (Mesh<MeshData>.Load (meshesPath + "h" + meshesExt)));
 			ProgressValue+=20;
-			vaoiRook = new InstancedChessModel (meshes.Add (Mesh<MeshData>.Load ("#Chess.Meshes.tower.bin")));
+			vaoiRook = new InstancedChessModel (meshes.Add (Mesh<MeshData>.Load (meshesPath + "r" + meshesExt)));
 			ProgressValue+=20;
-			vaoiQueen = new InstancedChessModel (meshes.Add (Mesh<MeshData>.Load ("#Chess.Meshes.queen.bin")));
+			vaoiQueen = new InstancedChessModel (meshes.Add (Mesh<MeshData>.Load (meshesPath + "q" + meshesExt)));
 			ProgressValue+=20;
-			vaoiKing = new InstancedChessModel (meshes.Add (Mesh<MeshData>.Load ("#Chess.Meshes.king.bin")));
+			vaoiKing = new InstancedChessModel (meshes.Add (Mesh<MeshData>.Load (meshesPath + "k" + meshesExt)));
 			ProgressValue+=20;
 			boardVAOItem = new InstancedChessModel (meshes.Add (Mesh<MeshData>.Load ("#Chess.Meshes.board.bin")));
 			ProgressValue+=20;
@@ -503,6 +551,8 @@ namespace Chess
 			CurrentState = GameState.VAOInit;
 		}
 		void createMainVAO(){
+			string texturesPath = "#Chess.Textures.classic.";
+			string texturesExt = ".dds";
 
 			mainVAO = new InstancedVAO<MeshData, VAOChessData> (meshes);
 
@@ -511,10 +561,10 @@ namespace Chess
 			Tetra.Texture.DefaultWrapMode = TextureWrapMode.Repeat;
 
 			boardPlateVAOItem.Diffuse = Tetra.Texture.Load ("#Chess.Textures.board3.dds");
-			boardPlateVAOItem.Set (Matrix4.Identity, new Vector4(0.7f,0.7f,0.7f,1f));
+			boardPlateVAOItem.Set (Matrix4.Identity, PlateMaterial);
 
 			boardVAOItem.Diffuse = Tetra.Texture.Load ("#Chess.Textures.marble1.dds");
-			boardVAOItem.Set (Matrix4.CreateTranslation (4f, 4f, -0.15f), new Vector4(0.4f,0.4f,0.42f,1f));
+			boardVAOItem.Set (Matrix4.CreateTranslation (4f, 4f, -0.15f), BoardMaterial);
 
 			Tetra.Texture.DefaultWrapMode = TextureWrapMode.ClampToEdge;
 
@@ -525,30 +575,30 @@ namespace Chess
 			Tetra.Texture.GenerateMipMaps = true;
 			Tetra.Texture.DefaultMinFilter = TextureMinFilter.LinearMipmapLinear;
 			Tetra.Texture.DefaultMagFilter = TextureMagFilter.Linear;
-			Tetra.Texture.DefaultWrapMode = TextureWrapMode.ClampToBorder;
+			Tetra.Texture.DefaultWrapMode = TextureWrapMode.ClampToEdge;
 
-			vaoiPawn.Diffuse = Tetra.Texture.Load ("#Chess.Textures.pawn_backed.dds");
+			vaoiPawn.Diffuse = Tetra.Texture.Load (texturesPath + "p" + texturesExt);
 			vaoiPawn.Instances = new InstancesVBO<VAOChessData> (new VAOChessData[16]);
 			ProgressValue++;
 
-			vaoiBishop.Diffuse = Tetra.Texture.Load ("#Chess.Textures.bishop_backed.dds");
+			vaoiBishop.Diffuse = Tetra.Texture.Load (texturesPath + "b" + texturesExt);
 			vaoiBishop.Instances = new InstancesVBO<VAOChessData> (new VAOChessData[4]);
 			ProgressValue++;
 
-			vaoiKnight.Diffuse = Tetra.Texture.Load ("#Chess.Textures.horse_backed.dds");
+			vaoiKnight.Diffuse = Tetra.Texture.Load (texturesPath + "h" + texturesExt);
 			vaoiKnight.Instances = new InstancesVBO<VAOChessData> (new VAOChessData[4]);
 			ProgressValue++;
 
-			vaoiRook.Diffuse = Tetra.Texture.Load ("#Chess.Textures.tower_backed.dds");
+			vaoiRook.Diffuse = Tetra.Texture.Load (texturesPath + "r" + texturesExt);
 			vaoiRook.Instances = new InstancesVBO<VAOChessData> (new VAOChessData[4]);
 			ProgressValue++;
 
-			vaoiQueen.Diffuse = Tetra.Texture.Load ("#Chess.Textures.queen_backed.dds");
+			vaoiQueen.Diffuse = Tetra.Texture.Load (texturesPath + "q" + texturesExt);
 			vaoiQueen.Instances = new InstancesVBO<VAOChessData> (new VAOChessData[2]);
 			ProgressValue++;
 
 
-			vaoiKing.Diffuse = Tetra.Texture.Load ("#Chess.Textures.king_backed.dds");
+			vaoiKing.Diffuse = Tetra.Texture.Load (texturesPath + "k" + texturesExt);
 			vaoiKing.Instances = new InstancesVBO<VAOChessData> (new VAOChessData[2]);
 			ProgressValue++;
 
@@ -817,6 +867,27 @@ namespace Chess
 			loadWindow (UI_Menu);
 
 			closeWindow (UI_Splash);
+
+			WhiteMaterial.ValueChanged += delegate(object sender, ValueChangeEventArgs e) {
+				Crow.Configuration.Set ("WhiteMaterial", sender as Material);
+				foreach (ChessPiece pce in Players[0].Pieces)
+					pce.UpdateColor ();								
+			};
+			BlackMaterial.ValueChanged += delegate(object sender, ValueChangeEventArgs e) {
+				Crow.Configuration.Set ("BlackMaterial", sender as Material);
+				foreach (ChessPiece pce in Players[1].Pieces)
+					pce.UpdateColor ();								
+			};
+			BoardMaterial.ValueChanged += delegate(object sender, ValueChangeEventArgs e) {
+				Material m = sender as Material;
+				Crow.Configuration.Set ("BoardMaterial", m);
+				boardVAOItem.SetMaterial(0, m);
+			};
+			PlateMaterial.ValueChanged += delegate(object sender, ValueChangeEventArgs e) {
+				Material m = sender as Material;
+				Crow.Configuration.Set ("PlateMaterial", m);
+				boardPlateVAOItem.SetMaterial(0, m);
+			};
 		}
 
 		#region LOGS

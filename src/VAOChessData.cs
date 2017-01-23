@@ -29,10 +29,14 @@ namespace Chess
 	{
 		public Matrix4 modelMats;
 		public Vector4 color;
+		public Vector4 ambient;
+		public Vector4 specular;
 
 		public VAOChessData(Matrix4 _model, Vector4 _color){
 			modelMats = _model;
 			color = _color;
+			ambient = new Vector4 (0.0f, 0.0f, 0.0f, 1);
+			specular = new Vector4 (0, 0, 0, 1);
 		}
 	}
 }

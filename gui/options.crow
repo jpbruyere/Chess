@@ -3,38 +3,88 @@
 	<Container>
 		<VerticalStack Margin="10" Spacing="2">
 			<HorizontalStack Margin="5" Height="Fit" Width="Stretched">
-				<Label Foreground="White" Text="Stockfish Path :" Width="Fit"/>
-				<TextBox Margin="5" Text="{²StockfishPath}" Width="Stretched"/>
+				<Label Text="Stockfish Path :" Width="Fit"/>
+				<TextBox Text="{²StockfishPath}" Width="Stretched"/>
 			</HorizontalStack>
 			<GroupBox Caption="Game" Height="Fit">
 				<VerticalStack>
-					<CheckBox Style="BigCheckBox" Caption="Reflexion" IsChecked="{²Reflexion}"/>
-					<CheckBox Style="BigCheckBox" Caption="Autoplay on Hint" IsChecked="{²AutoPlayHint}"/>
+					<CheckBox Caption="Reflexion" IsChecked="{²Reflexion}"/>
+					<CheckBox Caption="Autoplay on Hint" IsChecked="{²AutoPlayHint}"/>
 					<HorizontalStack Height="Fit" Spacing="5" Margin="2">
 						<Label Text="Stockfish Level:"/>
 						<Spinner Value="{²StockfishLevel}" Minimum="0" Maximum="20"/>
 					</HorizontalStack>
 				</VerticalStack>
 			</GroupBox>
-			<GroupBox Caption="Colors and Lights" Height="Fit">
+			<GroupBox Caption="Materials" Height="Fit">
 				<VerticalStack>
 					<HorizontalStack>
-						<VerticalStack Width="50%">
-							<Popper Style="ColorSelector" Caption="Color for Whites" Foreground="{WhiteColor}">
-								<ColorPicker Fit="true" SelectedRawColor="{²WhiteColor}"/>
-							</Popper>
-							<Popper Style="ColorSelector" Caption="Color for Blacks" Foreground="{BlackColor}">
-								<ColorPicker Fit="true" SelectedRawColor="{²BlackColor}"/>
-							</Popper>
+						<VerticalStack>
+							<RadioButton Style="MaterialSel" Caption="White" Checked="{../../vs.DataSource=.DataSource.WhiteMaterial}"/>
+							<RadioButton Style="MaterialSel" Caption="Black" Checked="{../../vs.DataSource=.DataSource.BlackMaterial}"/>
+							<RadioButton Style="MaterialSel" Caption="Plate" Checked="{../../vs.DataSource=.DataSource.PlateMaterial}"/>
+							<RadioButton Style="MaterialSel" Caption="Border" Checked="{../../vs.DataSource=.DataSource.BoardMaterial}"/>
 						</VerticalStack>
-						<VerticalStack Width="50%">
-							<Popper Style="ColorSelector" Caption="Main Color" Foreground="{MainColor}">
+						<VerticalStack Name="vs" Margin="2">
+							<RadioButton Style="MaterialButton" Caption="Diffuse" Foreground="{²Diffuse}" Checked="{../../cs.DataSource=this}"/>
+							<RadioButton Style="MaterialButton" Caption="Ambient" Foreground="{²Ambient}" Checked="{../../cs.DataSource=this}"/>
+							<RadioButton Style="MaterialButton" Caption="Specular" Foreground="{²Specular}" Checked="{../../cs.DataSource=this}"/>
+							<GroupBox Caption="Shininess" CornerRadius="2" Background="{./Background}" Foreground="Gray"
+								MouseEnter="{Foreground=White}" Height="Fit" Width="100"
+								MouseLeave="{Foreground=DimGray}">
+								<Spinner Minimum="0" Maximum="64.0" SmallIncrement="0.1" Value="{²Shininess}"/>
+							</GroupBox>
+						</VerticalStack>
+						<ColorPicker Name="cs" Fit="true" SelectedColor="{²Foreground}"  Background="Transparent">
+							<Template>
+								<HorizontalStack Spacing="5" Background="{./Background}" Foreground="{./Foreground}">
+									<VerticalStack>
+										<SaturationValueSelector S="{²./S}" V="{²./V}" Focusable="true" Name="colorSelector" Margin="0"
+											Foreground="{../hueSelector.HueColor}"
+											Width="120" Height="120" Background="DimGray"/>
+										<HueSelector Hue="{²./H}" Focusable="true" Name="hueSelector" Margin="0" Width="120" Height="12" Background="DimGray"/>
+									</VerticalStack>
+									<VerticalStack Height="Stretched">
+										<HorizontalStack Height="Fit">
+											<Label Text="Red:" Width="40"/>
+											<Spinner Style="ColorSpinner" Value="{²./R}" Width="60"  />
+										</HorizontalStack>
+										<HorizontalStack Height="Fit">
+											<Label Text="Green:" Width="40"/>
+											<Spinner Style="ColorSpinner" Value="{²./G}" Width="60"  />
+										</HorizontalStack>
+										<HorizontalStack Height="Fit">
+											<Label Text="Blue:" Width="40"/>
+											<Spinner Style="ColorSpinner" Value="{²./B}" Width="60"  />
+										</HorizontalStack>
+										<HorizontalStack Height="Fit">
+											<Label Text="Alpha:" Width="40"/>
+											<Spinner Style="ColorSpinner" Value="{²./A}" Width="60"  />
+										</HorizontalStack>
+										<HorizontalStack Height="Fit">
+											<Label Text="Hue:" Width="40"/>
+											<Spinner Style="HSVSpinner" Value="{²./H}" Width="60"  />
+										</HorizontalStack>
+										<HorizontalStack Height="Fit">
+											<Label Text="Sat:" Width="40"/>
+											<Spinner Style="HSVSpinner" Value="{²./S}" Width="60"  />
+										</HorizontalStack>
+										<HorizontalStack Height="Fit">
+											<Label Text="Val:" Width="40"/>
+											<Spinner Style="HSVSpinner" Value="{²./V}" Width="60"  />
+										</HorizontalStack>
+									</VerticalStack>
+								</HorizontalStack>		
+							</Template>
+						</ColorPicker>
+					</HorizontalStack>
+					<HorizontalStack>
+							<Popper Style="ColorSelector" Caption="Main Color" Foreground="{MainColor}" Width="45%">
 								<ColorPicker Fit="true" SelectedRawColor="{²MainColor}"/>
 							</Popper>
-							<Popper Style="ColorSelector" Caption="Background Color" Foreground="{BackgroundColor}">
+							<Popper Style="ColorSelector" Caption="Background Color" Foreground="{BackgroundColor}" Width="45%">
 								<ColorPicker Fit="true" SelectedRawColor="{²BackgroundColor}"/>
 							</Popper>
-						</VerticalStack>
 					</HorizontalStack>
 					<HorizontalStack>
 						<Label Text="Light position:"/>

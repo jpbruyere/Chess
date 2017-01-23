@@ -26,6 +26,8 @@ namespace Chess
 			layout (location = 2) in vec3 in_normal;
 			layout (location = 4) in mat4 in_model;
 			layout (location = 8) in vec4 in_color;
+			layout (location = 9) in vec4 in_amb;
+			layout (location = 10) in vec4 in_spec;
 
 			layout (std140) uniform block_data{
 				vec4 Color;
@@ -36,10 +38,13 @@ namespace Chess
 			};
 
 			out vec2 texCoord;
-			out vec3 n;			
-			out vec4 vEyeSpacePos;
-			out vec4 color;
-			
+			out vec3 n;
+			out vec3 vLight;
+			out vec3 vEye;
+			out vec4 diffuse;
+			out vec4 ambient;
+			out vec4 specular;
+
 			subroutine void vertexTech_t ();
 			subroutine uniform vertexTech_t vertexTech;
 
@@ -48,13 +53,23 @@ namespace Chess
 			}
 			subroutine (vertexTech_t) void full() {
 				texCoord = in_tex;
+
+				diffuse = in_color;
+				ambient = in_amb;
+				specular = in_spec;
+
 				n = vec3(Normal * in_model * vec4(in_normal, 0));
 
 				vec3 pos = in_position.xyz;
+				vec4 vEyeSpacePos = ModelView * in_model * vec4(pos, 1);
 
-				vEyeSpacePos = ModelView * in_model * vec4(pos, 1);
-				color = in_color;
-				
+				vEye = normalize(vEyeSpacePos.xyz);
+
+				if (lightPos.w == 0.0)
+					vLight = normalize(lightPos.xyz);
+				else
+					vLight = normalize(lightPos.xyz - vEyeSpacePos.xyz);
+
 				gl_Position = Projection * vEyeSpacePos;
 			}
 			void main(void)
@@ -78,16 +93,16 @@ namespace Chess
 				vec4 lightPos;
 			};
 
-			in vec2 texCoord;			
-			in vec4 vEyeSpacePos;
+			in vec2 texCoord;
+			in vec3 vLight;
+			in vec3 vEye;
 			in vec3 n;
-			in vec4 color;
-			
+			in vec4 diffuse;
+			in vec4 ambient;
+			in vec4 specular;
+
 			out vec4 out_frag_color;
 
-			uniform vec3 diffuse = vec3(1.0, 1.0, 1.0);
-			uniform vec3 ambient = vec3(0.3, 0.3, 0.3);
-			uniform vec3 specular = vec3(1.0,1.0,1.0);
 			uniform float shininess =16.0;
 			uniform float screenGamma = 1.0;
 
@@ -98,28 +113,27 @@ namespace Chess
 				return Color;
 			}
 			subroutine (computeColor_t) vec4 blinnPhong(){
-				vec4 diffTex = texture( tex, texCoord) * Color * color;
+				vec4 diffTex = texture( tex, texCoord) * diffuse * Color;
 				if (diffTex.a == 0.0)
 					discard;
-				vec3 vLight;
-				vec3 vEye = normalize(-vEyeSpacePos.xyz);
 
-				if (lightPos.w == 0.0)
-					vLight = normalize(-lightPos.xyz);
-				else
-					vLight = normalize(lightPos.xyz - vEyeSpacePos.xyz);
+				float nl = dot(n,vLight);
+				diffTex.rgb = ambient.rgb + diffTex.rgb * clamp(nl, 0.0, 1.0);
+				if (nl > 0.0) {
+					//blinn phong
+					vec3 halfDir = normalize(vLight - vEye);
+					float specAngle = clamp(dot(halfDir, n), 0.0, 1.0);
+					//phong
+					//vec3 r = reflect (vLight, n);
+					//vec3 Ispec = specular * clamp(dot(-vEye, r), 0.0, 1.0);
+					diffTex.rgb += specular.rgb * pow(specAngle, specular.a);
+				}
 
-				//blinn phong
-				vec3 halfDir = normalize(vLight + vEye);
-				float specAngle = max(dot(halfDir, n), 0.0);
-				vec3 Ispec = specular * pow(specAngle, shininess);
-				vec3 Idiff = diffuse * max(dot(n,vLight), 0.0);
-
-				diffTex.rgb = diffTex.rgb * (ambient + Idiff) + Ispec;
 				return vec4(pow(diffTex.rgb, vec3(1.0/screenGamma)), diffTex.a);
+				return diffTex;
 			}
 			subroutine (computeColor_t) vec4 textured(){
-				vec4 diffTex = texture( tex, texCoord) * Color * color;
+				vec4 diffTex = texture( tex, texCoord) * Color * diffuse;
 				if (diffTex.a == 0.0)
 					discard;
 				return diffTex;
@@ -137,6 +151,9 @@ namespace Chess
 
 			GL.BindAttribLocation(pgmId, 2, "in_normal");
 			GL.BindAttribLocation(pgmId, VertexArrayObject.instanceBufferIndex, "in_model");
+			GL.BindAttribLocation(pgmId, VertexArrayObject.instanceBufferIndex+4, "in_color");
+			GL.BindAttribLocation(pgmId, VertexArrayObject.instanceBufferIndex+5, "in_amb");
+			GL.BindAttribLocation(pgmId, VertexArrayObject.instanceBufferIndex+6, "in_spec");
 		}
 		int bi1;
 		int simpleColorFunc, blinnPhongFunc, texturedFunc,
@@ -154,7 +171,7 @@ namespace Chess
 
 			bi1 = GL.GetUniformBlockIndex (pgmId, "block_data");
 			GL.UniformBlockBinding(pgmId, bi1, 0);
-		}	
+		}
 		public override void Enable ()
 		{
 			GL.UseProgram (pgmId);

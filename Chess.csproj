@@ -60,6 +60,7 @@
     <Compile Include="lib\Crow\Tests\OpenGL\Extensions.cs">
       <Link>src\Extensions.cs</Link>
     </Compile>
+    <Compile Include="src\Material.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
@@ -93,6 +94,8 @@
     <Folder Include="Textures\" />
     <Folder Include="gui\" />
     <Folder Include="src\" />
+    <Folder Include="Meshes\classic\" />
+    <Folder Include="Textures\classic\" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="gui\fps.crow" />
@@ -122,29 +125,31 @@
     <EmbeddedResource Include="gui\MenuItem.template">
       <LogicalName>Crow.MenuItem.template</LogicalName>
     </EmbeddedResource>
-    <EmbeddedResource Include="Meshes\pawn.bin" />
-    <EmbeddedResource Include="Meshes\bishop.bin" />
     <EmbeddedResource Include="Meshes\board.bin" />
-    <EmbeddedResource Include="Meshes\tower.bin" />
-    <EmbeddedResource Include="Meshes\queen.bin" />
-    <EmbeddedResource Include="Meshes\king.bin" />
-    <EmbeddedResource Include="Meshes\horse.bin" />
     <EmbeddedResource Include="default.config" />
     <EmbeddedResource Include="Textures\board3-512.dds">
       <LogicalName>Chess.Textures.board3.dds</LogicalName>
     </EmbeddedResource>
     <EmbeddedResource Include="Textures\marble.dds" />
     <EmbeddedResource Include="Textures\marble1.dds" />
-    <EmbeddedResource Include="Textures\bishop_backed.dds" />
-    <EmbeddedResource Include="Textures\pawn_backed.dds" />
-    <EmbeddedResource Include="Textures\tower_backed.dds" />
-    <EmbeddedResource Include="Textures\queen_backed.dds" />
-    <EmbeddedResource Include="Textures\king_backed.dds" />
-    <EmbeddedResource Include="Textures\horse_backed.dds" />
     <EmbeddedResource Include="gui\about.crow" />
     <EmbeddedResource Include="gui\Menu.template">
       <LogicalName>Crow.Menu.template</LogicalName>
     </EmbeddedResource>
+    <EmbeddedResource Include="gui\MaterialButton.template" />
+    <EmbeddedResource Include="Meshes\classic\b.bin" />
+    <EmbeddedResource Include="Meshes\classic\h.bin" />
+    <EmbeddedResource Include="Meshes\classic\k.bin" />
+    <EmbeddedResource Include="Meshes\classic\p.bin" />
+    <EmbeddedResource Include="Meshes\classic\q.bin" />
+    <EmbeddedResource Include="Meshes\classic\r.bin" />
+    <EmbeddedResource Include="Textures\classic\b.dds" />
+    <EmbeddedResource Include="Textures\classic\h.dds" />
+    <EmbeddedResource Include="Textures\classic\k.dds" />
+    <EmbeddedResource Include="Textures\classic\p.dds" />
+    <EmbeddedResource Include="Textures\classic\q.dds" />
+    <EmbeddedResource Include="Textures\classic\r.dds" />
+    <EmbeddedResource Include="gui\MaterialSel.template" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="lib\GGL\GGL.csproj">

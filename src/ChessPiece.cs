@@ -211,10 +211,10 @@ namespace Chess
 		}
 		public void UpdateColor(){
 			if (Player.Color == ChessColor.White) {
-				Mesh.SetColor (InstanceIndex, Crow.Configuration.Get<Color> ("WhiteColor").ToVector4());
+				Mesh.SetMaterial (InstanceIndex, Crow.Configuration.Get<Material> ("WhiteMaterial"));
 				ZAngle = 0f;
 			} else {
-				Mesh.SetColor (InstanceIndex, Crow.Configuration.Get<Color> ("BlackColor").ToVector4());
+				Mesh.SetMaterial (InstanceIndex, Crow.Configuration.Get<Material> ("BlackMaterial"));
 				ZAngle = MathHelper.Pi;
 			}			
 		}

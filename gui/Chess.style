@@ -73,3 +73,18 @@ BigSpinner {
 	Width=Fit;
 	Height=Fit;
 }
+MaterialButton {
+	Template=#Chess.gui.MaterialButton.template;
+	Height=Fit;
+	Width=100;
+	Checked={Background=BlueCrayola};
+	Unchecked={Background=Transparent};
+}
+MaterialSel {
+	Template=#Chess.gui.MaterialSel.template;
+	Height=Fit;
+	Width=100;
+	Font=droid bold, 14;
+	Checked={Background=BlueCrayola};
+	Unchecked={Background=Transparent};
+}

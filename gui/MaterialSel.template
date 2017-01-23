@@ -1,0 +1,6 @@
+﻿<?xml version="1.0"?>
+<Border CornerRadius="2" BorderWidth="1" Background="{./Background}" Foreground="Gray"
+	MouseEnter="{Foreground=White}"
+	MouseLeave="{Foreground=Gray}">
+	<Label Margin="2" Text="{./Caption}" Font="{./Font}"/>
+</Border>
