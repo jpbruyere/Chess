@@ -19,7 +19,7 @@ namespace Chess
 			#version 330
 			#extension GL_ARB_shader_subroutine : require
 
-			precision mediump float;
+			precision lowp float;
 
 			layout (location = 0) in vec3 in_position;
 			layout (location = 1) in vec2 in_tex;
@@ -36,10 +36,11 @@ namespace Chess
 			};
 
 			out vec2 texCoord;
-			out vec3 n;			
-			out vec4 vEyeSpacePos;
-			out vec4 color;
-			
+			out vec3 n;
+			out vec3 vLight;
+			out vec3 vEye;
+			out vec4 diffuse;
+
 			subroutine void vertexTech_t ();
 			subroutine uniform vertexTech_t vertexTech;
 
@@ -48,13 +49,21 @@ namespace Chess
 			}
 			subroutine (vertexTech_t) void full() {
 				texCoord = in_tex;
+
+				diffuse = in_color;
+
 				n = vec3(Normal * in_model * vec4(in_normal, 0));
 
 				vec3 pos = in_position.xyz;
+				vec4 vEyeSpacePos = ModelView * in_model * vec4(pos, 1);
 
-				vEyeSpacePos = ModelView * in_model * vec4(pos, 1);
-				color = in_color;
-				
+				vEye = normalize(vEyeSpacePos.xyz);
+
+				if (lightPos.w == 0.0)
+					vLight = normalize(lightPos.xyz);
+				else
+					vLight = normalize(lightPos.xyz - vEyeSpacePos.xyz);
+
 				gl_Position = Projection * vEyeSpacePos;
 			}
 			void main(void)
@@ -66,7 +75,7 @@ namespace Chess
 			#version 330
 			#extension GL_ARB_shader_subroutine : require
 
-			precision mediump float;
+			precision lowp float;
 
 			uniform sampler2D tex;
 
@@ -78,16 +87,16 @@ namespace Chess
 				vec4 lightPos;
 			};
 
-			in vec2 texCoord;			
-			in vec4 vEyeSpacePos;
+			in vec2 texCoord;
+			in vec3 vLight;
+			in vec3 vEye;
 			in vec3 n;
-			in vec4 color;
-			
+			in vec4 diffuse;
+						
 			out vec4 out_frag_color;
 
-			uniform vec3 diffuse = vec3(1.0, 1.0, 1.0);
-			uniform vec3 ambient = vec3(0.3, 0.3, 0.3);
-			uniform vec3 specular = vec3(1.0,1.0,1.0);
+			uniform vec3 ambient = vec3(0.1, 0.1, 0.1);
+			uniform vec3 specular = vec3(0.8,0.8,0.8);			
 			uniform float shininess =16.0;
 			uniform float screenGamma = 1.0;
 
@@ -98,28 +107,27 @@ namespace Chess
 				return Color;
 			}
 			subroutine (computeColor_t) vec4 blinnPhong(){
-				vec4 diffTex = texture( tex, texCoord) * Color * color;
+				vec4 diffTex = texture( tex, texCoord) * diffuse * Color;
 				if (diffTex.a == 0.0)
 					discard;
-				vec3 vLight;
-				vec3 vEye = normalize(-vEyeSpacePos.xyz);
 
-				if (lightPos.w == 0.0)
-					vLight = normalize(-lightPos.xyz);
-				else
-					vLight = normalize(lightPos.xyz - vEyeSpacePos.xyz);
+				float nl = dot(n,vLight);
+				diffTex.rgb = ambient.rgb + diffTex.rgb * clamp(nl, 0.0, 1.0);
+				if (nl > 0.0) {
+					//blinn phong
+					vec3 halfDir = normalize(vLight - vEye);
+					float specAngle = clamp(dot(halfDir, n), 0.0, 1.0);
+					//phong
+					//vec3 r = reflect (vLight, n);
+					//vec3 Ispec = specular * clamp(dot(-vEye, r), 0.0, 1.0);
+					diffTex.rgb += specular.rgb * pow(specAngle, shininess);
+				}
 
-				//blinn phong
-				vec3 halfDir = normalize(vLight + vEye);
-				float specAngle = max(dot(halfDir, n), 0.0);
-				vec3 Ispec = specular * pow(specAngle, shininess);
-				vec3 Idiff = diffuse * max(dot(n,vLight), 0.0);
-
-				diffTex.rgb = diffTex.rgb * (ambient + Idiff) + Ispec;
 				return vec4(pow(diffTex.rgb, vec3(1.0/screenGamma)), diffTex.a);
+				return diffTex;
 			}
 			subroutine (computeColor_t) vec4 textured(){
-				vec4 diffTex = texture( tex, texCoord) * Color * color;
+				vec4 diffTex = texture( tex, texCoord) * Color * diffuse;
 				if (diffTex.a == 0.0)
 					discard;
 				return diffTex;
@@ -137,6 +145,9 @@ namespace Chess
 
 			GL.BindAttribLocation(pgmId, 2, "in_normal");
 			GL.BindAttribLocation(pgmId, VertexArrayObject.instanceBufferIndex, "in_model");
+			GL.BindAttribLocation(pgmId, VertexArrayObject.instanceBufferIndex+4, "in_color");
+			GL.BindAttribLocation(pgmId, VertexArrayObject.instanceBufferIndex+5, "in_amb");
+			GL.BindAttribLocation(pgmId, VertexArrayObject.instanceBufferIndex+6, "in_spec");
 		}
 		int bi1;
 		int simpleColorFunc, blinnPhongFunc, texturedFunc,
@@ -154,7 +165,7 @@ namespace Chess
 
 			bi1 = GL.GetUniformBlockIndex (pgmId, "block_data");
 			GL.UniformBlockBinding(pgmId, bi1, 0);
-		}	
+		}
 		public override void Enable ()
 		{
 			GL.UseProgram (pgmId);
