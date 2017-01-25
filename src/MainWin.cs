@@ -24,7 +24,6 @@ using Crow;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using System.Diagnostics;
-using GGL;
 using System.Runtime.InteropServices;
 using System.Collections.Generic;
 using System.Threading;
@@ -41,12 +40,6 @@ namespace Chess
 	public enum ChessColor { White, Black };
 	public enum PieceType { Pawn, Rook, Knight, Bishop, King, Queen };
 
-	public static class Extensions {
-		public static Vector4 ToVector4(this Color c){
-			float[] f = c.floatArray;
-			return new Vector4 (f [0], f [1], f [2], f [3]);
-		}
-	}
 	public class InstancedChessModel : InstancedModel<VAOChessData> {
 		public InstancedChessModel(MeshPointer pointer) : base(pointer) {}
 
@@ -95,7 +88,7 @@ namespace Chess
 			SyncVBO = false;
 		}
 	}
-	class MainWin : OpenTKGameWindow
+	class MainWin : CrowWindow
 	{
 		[StructLayout(LayoutKind.Sequential)]
 		public struct UBOSharedData
@@ -434,19 +427,22 @@ namespace Chess
 
 		void loadMeshes()
 		{
+			string meshesPath = "#Chess.Meshes.classic.";
+			string meshesExt = ".bin";
+
 			CurrentState = GameState.MeshesLoading;
 			meshes = new MeshesGroup<MeshData>();
-			vaoiPawn = new InstancedChessModel (meshes.Add (Mesh<MeshData>.Load ("#Chess.Meshes.pawn.bin")));
+			vaoiPawn = new InstancedChessModel (meshes.Add (Mesh<MeshData>.Load (meshesPath + "p" + meshesExt)));
 			ProgressValue+=20;
-			vaoiBishop = new InstancedChessModel (meshes.Add (Mesh<MeshData>.Load ("#Chess.Meshes.bishop.bin")));
+			vaoiBishop = new InstancedChessModel (meshes.Add (Mesh<MeshData>.Load (meshesPath + "b" + meshesExt)));
 			ProgressValue+=20;
-			vaoiKnight = new InstancedChessModel (meshes.Add (Mesh<MeshData>.Load ("#Chess.Meshes.horse.bin")));
+			vaoiKnight = new InstancedChessModel (meshes.Add (Mesh<MeshData>.Load (meshesPath + "h" + meshesExt)));
 			ProgressValue+=20;
-			vaoiRook = new InstancedChessModel (meshes.Add (Mesh<MeshData>.Load ("#Chess.Meshes.tower.bin")));
+			vaoiRook = new InstancedChessModel (meshes.Add (Mesh<MeshData>.Load (meshesPath + "r" + meshesExt)));
 			ProgressValue+=20;
-			vaoiQueen = new InstancedChessModel (meshes.Add (Mesh<MeshData>.Load ("#Chess.Meshes.queen.bin")));
+			vaoiQueen = new InstancedChessModel (meshes.Add (Mesh<MeshData>.Load (meshesPath + "q" + meshesExt)));
 			ProgressValue+=20;
-			vaoiKing = new InstancedChessModel (meshes.Add (Mesh<MeshData>.Load ("#Chess.Meshes.king.bin")));
+			vaoiKing = new InstancedChessModel (meshes.Add (Mesh<MeshData>.Load (meshesPath + "k" + meshesExt)));
 			ProgressValue+=20;
 			boardVAOItem = new InstancedChessModel (meshes.Add (Mesh<MeshData>.Load ("#Chess.Meshes.board.bin")));
 			ProgressValue+=20;
@@ -510,6 +506,8 @@ namespace Chess
 			CurrentState = GameState.VAOInit;
 		}
 		void createMainVAO(){
+			string texturesPath = "#Chess.Textures.classic.";
+			string texturesExt = ".dds";
 
 			mainVAO = new InstancedVAO<MeshData, VAOChessData> (meshes);
 
@@ -532,30 +530,30 @@ namespace Chess
 			Tetra.Texture.GenerateMipMaps = true;
 			Tetra.Texture.DefaultMinFilter = TextureMinFilter.LinearMipmapLinear;
 			Tetra.Texture.DefaultMagFilter = TextureMagFilter.Linear;
-			Tetra.Texture.DefaultWrapMode = TextureWrapMode.ClampToBorder;
+			Tetra.Texture.DefaultWrapMode = TextureWrapMode.ClampToEdge;
 
-			vaoiPawn.Diffuse = Tetra.Texture.Load ("#Chess.Textures.pawn_backed.dds");
+			vaoiPawn.Diffuse = Tetra.Texture.Load (texturesPath + "p" + texturesExt);
 			vaoiPawn.Instances = new InstancesVBO<VAOChessData> (new VAOChessData[16]);
 			ProgressValue++;
 
-			vaoiBishop.Diffuse = Tetra.Texture.Load ("#Chess.Textures.bishop_backed.dds");
+			vaoiBishop.Diffuse = Tetra.Texture.Load (texturesPath + "b" + texturesExt);
 			vaoiBishop.Instances = new InstancesVBO<VAOChessData> (new VAOChessData[4]);
 			ProgressValue++;
 
-			vaoiKnight.Diffuse = Tetra.Texture.Load ("#Chess.Textures.horse_backed.dds");
+			vaoiKnight.Diffuse = Tetra.Texture.Load (texturesPath + "h" + texturesExt);
 			vaoiKnight.Instances = new InstancesVBO<VAOChessData> (new VAOChessData[4]);
 			ProgressValue++;
 
-			vaoiRook.Diffuse = Tetra.Texture.Load ("#Chess.Textures.tower_backed.dds");
+			vaoiRook.Diffuse = Tetra.Texture.Load (texturesPath + "r" + texturesExt);
 			vaoiRook.Instances = new InstancesVBO<VAOChessData> (new VAOChessData[4]);
 			ProgressValue++;
 
-			vaoiQueen.Diffuse = Tetra.Texture.Load ("#Chess.Textures.queen_backed.dds");
+			vaoiQueen.Diffuse = Tetra.Texture.Load (texturesPath + "q" + texturesExt);
 			vaoiQueen.Instances = new InstancesVBO<VAOChessData> (new VAOChessData[2]);
 			ProgressValue++;
 
 
-			vaoiKing.Diffuse = Tetra.Texture.Load ("#Chess.Textures.king_backed.dds");
+			vaoiKing.Diffuse = Tetra.Texture.Load (texturesPath + "k" + texturesExt);
 			vaoiKing.Instances = new InstancesVBO<VAOChessData> (new VAOChessData[2]);
 			ProgressValue++;
 
@@ -651,7 +649,7 @@ namespace Chess
 
 			Point pStart = getChessCell(move.Substring(0,2));
 			Point pEnd = getChessCell(move.Substring(2,2));
-			arrows = new Arrow3d (
+			arrows = new GGL.Arrow3d (
 				new Vector3 ((float)pStart.X + 0.5f, (float)pStart.Y + 0.5f, 0),
 				new Vector3 ((float)pEnd.X + 0.5f, (float)pEnd.Y + 0.5f, 0),
 				Vector3.UnitZ);
@@ -780,7 +778,7 @@ namespace Chess
 				NotifyValueChanged("ProgressMax", progressMax);
 			}
 		}
-		string fileName = "savedgame.chess";
+		string fileName = "game.chess";
 
 		public string FileName {
 			get { return fileName; }
@@ -797,10 +795,10 @@ namespace Chess
 
 		void loadWindow(string path){
 			try {
-				GraphicObject g = CrowInterface.FindByName (path);
+				GraphicObject g = FindByName (path);
 				if (g != null)
 					return;
-				g = CrowInterface.LoadInterface (path);
+				g = Load (path);
 				g.Name = path;
 				g.DataSource = this;
 			} catch (Exception ex) {
@@ -808,9 +806,9 @@ namespace Chess
 			}
 		}
 		void closeWindow (string path){
-			GraphicObject g = CrowInterface.FindByName (path);
+			GraphicObject g = FindByName (path);
 			if (g != null)
-				CrowInterface.DeleteWidget (g);
+				ifaceControl [0].CrowInterface.DeleteWidget (g);
 		}
 
 		void initInterface(){
@@ -894,8 +892,8 @@ namespace Chess
 			foreach (ChessPlayer p in Players) {
 				foreach (ChessPiece pce in p.Pieces) {
 					if (oldPositions [i] != pce.Position) {
-						Animation.StartAnimation (new PathAnimation (pce, "Position",
-							new BezierPath (
+						GGL.Animation.StartAnimation (new GGL.PathAnimation (pce, "Position",
+							new GGL.BezierPath (
 								oldPositions [i],
 								pce.Position, Vector3.UnitZ)));
 					}
@@ -931,7 +929,8 @@ namespace Chess
 				sendToStockfish("go");
 		}
 		void onUndoClick (object sender, MouseButtonEventArgs e){
-			undoLastMove ();
+			if (currentState != GameState.Checkmate && currentState != GameState.Pad)//undo ai move
+				undoLastMove ();
 			undoLastMove ();
 		}
 		void onResetClick (object sender, MouseButtonEventArgs e){
@@ -1282,9 +1281,9 @@ namespace Chess
 		}
 		void resetBoard(bool animate = true){
 			CurrentState = GameState.Play;
-			GraphicObject g = CrowInterface.FindByName ("mateWin");
+			GraphicObject g = FindByName ("mateWin");
 			if (g != null)
-				CrowInterface.DeleteWidget (g);
+				ifaceControl[0].CrowInterface.DeleteWidget (g);
 			CurrentPlayerIndex = 0;
 			cptWhiteOut = 0;
 			cptBlackOut = 0;
@@ -1632,8 +1631,8 @@ namespace Chess
 			p.HasMoved = true;
 
 			if (animate)
-				Animation.StartAnimation (new PathAnimation (p, "Position",
-					new BezierPath (
+				GGL.Animation.StartAnimation (new GGL.PathAnimation (p, "Position",
+					new GGL.BezierPath (
 						p.Position,
 						capturePos, Vector3.UnitZ)));
 			else
@@ -1674,8 +1673,8 @@ namespace Chess
 
 			Vector3 targetPosition = new Vector3 (pEnd.X + 0.5f, pEnd.Y + 0.5f, 0f);
 			if (animate) {
-				Animation.StartAnimation (new PathAnimation (p, "Position",
-					new BezierPath (
+				GGL.Animation.StartAnimation (new GGL.PathAnimation (p, "Position",
+					new GGL.BezierPath (
 						p.Position,
 						targetPosition, Vector3.UnitZ)),
 					0, move_AnimationFinished);
@@ -1705,8 +1704,8 @@ namespace Chess
 
 						targetPosition = new Vector3 (pEnd.X + 0.5f, pEnd.Y + 0.5f, 0f);
 						if (animate)
-							Animation.StartAnimation (new PathAnimation (p, "Position",
-								new BezierPath (
+							GGL.Animation.StartAnimation (new GGL.PathAnimation (p, "Position",
+								new GGL.BezierPath (
 									p.Position,
 									targetPosition, Vector3.UnitZ * 2f)));
 						else
@@ -1738,8 +1737,8 @@ namespace Chess
 
 			p.Position = new Vector3(pCurPos.X + 0.5f, pCurPos.Y + 0.5f, 0f);
 
-			Animation.StartAnimation (new PathAnimation (p, "Position",
-				new BezierPath (
+			GGL.Animation.StartAnimation (new GGL.PathAnimation (p, "Position",
+				new GGL.BezierPath (
 					p.Position,
 					new Vector3(pPreviousPos.X + 0.5f, pPreviousPos.Y + 0.5f, 0f), Vector3.UnitZ)));
 
@@ -1752,8 +1751,8 @@ namespace Chess
 			Vector3 pCapLastPos = pCaptured.Position;
 			pCaptured.Position = getCurrentCapturePosition (pCaptured);
 
-			Animation.StartAnimation (new PathAnimation (pCaptured, "Position",
-				new BezierPath (
+			GGL.Animation.StartAnimation (new GGL.PathAnimation (pCaptured, "Position",
+				new GGL.BezierPath (
 					pCaptured.Position,
 					pCapLastPos, Vector3.UnitZ)));
 
@@ -1786,7 +1785,7 @@ namespace Chess
 				sendToStockfish("go");
 		}
 
-		void move_AnimationFinished (Animation a)
+		void move_AnimationFinished (GGL.Animation a)
 		{
 			waitAnimationFinished = false;
 
@@ -1798,10 +1797,11 @@ namespace Chess
 					CurrentState = GameState.Pad;
 				else {
 					CurrentState = GameState.Checkmate;
-					GraphicObject g = CrowInterface.LoadInterface ("#Chess.gui.checkmate.crow");
+					GraphicObject g = Load ("#Chess.gui.checkmate.crow");
 					g.DataSource = this;
-					Animation.StartAnimation (new AngleAnimation (CurrentPlayer.King, "XAngle", MathHelper.Pi * 0.53f));
-					Animation.StartAnimation (new AngleAnimation (CurrentPlayer.King, "ZAngle", CurrentPlayer.King.ZAngle - MathHelper.Pi, 0.2f));
+					GGL.Animation.StartAnimation (new GGL.FloatAnimation (CurrentPlayer.King, "Z", 0.4f, 0.04f));
+					GGL.Animation.StartAnimation (new GGL.AngleAnimation (CurrentPlayer.King, "XAngle", MathHelper.Pi * 0.55f, 0.09f));
+					GGL.Animation.StartAnimation (new GGL.AngleAnimation (CurrentPlayer.King, "ZAngle", CurrentPlayer.King.ZAngle + 0.3f, 0.5f));
 				}
 			}else if (kingIsSafe)
 				CurrentState = GameState.Play;
@@ -1918,7 +1918,7 @@ namespace Chess
 				addCellLight(kingCheckedColor, CurrentPlayer.King.BoardCell);
 			#endregion
 
-			Animation.ProcessAnimations ();
+			GGL.Animation.ProcessAnimations ();
 
 			foreach (ChessPlayer p in Players) {
 				foreach (ChessPiece pce in p.Pieces) {
@@ -2037,7 +2037,7 @@ namespace Chess
 					vEyeTarget -= new Vector3 (disp.X, disp.Y, 0);
 					UpdateViewMatrix();
 				}
-				Vector3 vMouse = glHelper.UnProject(ref projection, ref modelview, viewport, new Vector2 (e.X, e.Y)).Xyz;
+				Vector3 vMouse = GGL.glHelper.UnProject(ref projection, ref modelview, viewport, new Vector2 (e.X, e.Y)).Xyz;
 				Vector3 vMouseRay = Vector3.Normalize(vMouse - vEye);
 				float a = vEye.Z / vMouseRay.Z;
 				vMouse = vEye - vMouseRay * a;
@@ -2060,7 +2060,7 @@ namespace Chess
 			else if (eyeDistTarget > zFar-6)
 				eyeDistTarget = zFar-6;
 
-			Animation.StartAnimation(new Animation<float> (this, "EyeDist", eyeDistTarget, (eyeDistTarget - eyeDist) * 0.1f));
+			GGL.Animation.StartAnimation(new GGL.Animation<float> (this, "EyeDist", eyeDistTarget, (eyeDistTarget - eyeDist) * 0.1f));
 		}
 		#endregion
 

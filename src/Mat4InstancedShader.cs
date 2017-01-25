@@ -26,6 +26,8 @@ namespace Chess
 			layout (location = 2) in vec3 in_normal;
 			layout (location = 4) in mat4 in_model;
 			layout (location = 8) in vec4 in_color;
+			layout (location = 9) in vec4 in_amb;
+			layout (location = 10) in vec4 in_spec;
 
 			layout (std140) uniform block_data{
 				vec4 Color;
@@ -146,8 +148,6 @@ namespace Chess
 			GL.BindAttribLocation(pgmId, 2, "in_normal");
 			GL.BindAttribLocation(pgmId, VertexArrayObject.instanceBufferIndex, "in_model");
 			GL.BindAttribLocation(pgmId, VertexArrayObject.instanceBufferIndex+4, "in_color");
-			GL.BindAttribLocation(pgmId, VertexArrayObject.instanceBufferIndex+5, "in_amb");
-			GL.BindAttribLocation(pgmId, VertexArrayObject.instanceBufferIndex+6, "in_spec");
 		}
 		int bi1;
 		int simpleColorFunc, blinnPhongFunc, texturedFunc,
