@@ -112,15 +112,15 @@ namespace Chess
 				vec4 diffTex = texture( tex, texCoord) * diffuse * Color;
 				if (diffTex.a == 0.0)
 					discard;
-
-				float nl = dot(n,vLight);
+				vec3 N = normalize(n);
+				float nl = dot(N,vLight);
 				diffTex.rgb = ambient.rgb + diffTex.rgb * clamp(nl, 0.0, 1.0);
 				if (nl > 0.0) {
 					//blinn phong
 					vec3 halfDir = normalize(vLight - vEye);
-					float specAngle = clamp(dot(halfDir, n), 0.0, 1.0);
+					float specAngle = clamp(dot(halfDir, N), 0.0, 1.0);
 					//phong
-					//vec3 r = reflect (vLight, n);
+					//vec3 r = reflect (vLight, N);
 					//vec3 Ispec = specular * clamp(dot(-vEye, r), 0.0, 1.0);
 					diffTex.rgb += specular.rgb * pow(specAngle, shininess);
 				}

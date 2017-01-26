@@ -135,9 +135,9 @@ namespace Chess
 		//public Vector4 vLight = Vector4.Normalize(new Vector4 (0.1f, 0.1f, -0.8f, 0f));
 		Vector4 arrowColor = new Vector4 (0.2f, 1.0f, 0.2f, 0.5f);
 
-		Vector4 validPosColor = new Vector4 (0.0f, 0.5f, 0.7f, 0.7f);
-		Vector4 activeColor = new Vector4 (0.2f, 0.2f, 1.0f, 0.6f);
-		Vector4 kingCheckedColor = new Vector4 (1.0f, 0.2f, 0.2f, 0.6f);
+		Vector4 validPosColor = new Vector4 (0.0f, 0.5f, 0.7f, 0.5f);
+		Vector4 activeColor = new Vector4 (0.2f, 0.2f, 1.0f, 0.5f);
+		Vector4 kingCheckedColor = new Vector4 (1.0f, 0.1f, 0.1f, 0.8f);
 
 //		uniform vec3 diffuse = vec3(1.0, 1.0, 1.0);
 //		uniform vec3 ambient = vec3(0.5, 0.5, 0.5);
@@ -328,6 +328,7 @@ namespace Chess
 		const int GBP_UBO0 = 0;
 		void initOpenGL()
 		{
+			Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
 			mainColor = Crow.Configuration.Get<Color> ("MainColor").floatArray;
 			clearColor = Crow.Configuration.Get<Color> ("BackgroundColor").floatArray;
 
@@ -427,7 +428,7 @@ namespace Chess
 
 		void loadMeshes()
 		{
-			string meshesPath = "#Chess.Meshes.classic.";
+			string meshesPath = @"Datas/simple/";
 			string meshesExt = ".bin";
 
 			CurrentState = GameState.MeshesLoading;
@@ -444,7 +445,7 @@ namespace Chess
 			ProgressValue+=20;
 			vaoiKing = new InstancedChessModel (meshes.Add (Mesh<MeshData>.Load (meshesPath + "k" + meshesExt)));
 			ProgressValue+=20;
-			boardVAOItem = new InstancedChessModel (meshes.Add (Mesh<MeshData>.Load ("#Chess.Meshes.board.bin")));
+			boardVAOItem = new InstancedChessModel (meshes.Add (Mesh<MeshData>.Load (@"Datas/board.bin")));
 			ProgressValue+=20;
 			vaoiQuad = new InstancedChessModel (meshes.Add (Mesh<MeshData>.CreateQuad (0, 0, 0, 1, 1, 1, 1)));
 
@@ -506,7 +507,7 @@ namespace Chess
 			CurrentState = GameState.VAOInit;
 		}
 		void createMainVAO(){
-			string texturesPath = "#Chess.Textures.classic.";
+			string texturesPath = @"Datas/simple/";
 			string texturesExt = ".dds";
 
 			mainVAO = new InstancedVAO<MeshData, VAOChessData> (meshes);
@@ -515,15 +516,15 @@ namespace Chess
 
 			Tetra.Texture.DefaultWrapMode = TextureWrapMode.Repeat;
 
-			boardPlateVAOItem.Diffuse = Tetra.Texture.Load ("#Chess.Textures.board3.dds");
-			boardPlateVAOItem.Set (Matrix4.Identity, new Vector4(0.7f,0.7f,0.7f,1f));
+			boardPlateVAOItem.Diffuse = Tetra.Texture.Load (@"Datas/board3.dds");
+			boardPlateVAOItem.Set (Matrix4.Identity, new Vector4(0.7f,0.7f,0.7f,1.0f));
 
-			boardVAOItem.Diffuse = Tetra.Texture.Load ("#Chess.Textures.marble1.dds");
-			boardVAOItem.Set (Matrix4.CreateTranslation (4f, 4f, -0.15f), new Vector4(0.4f,0.4f,0.42f,1f));
+			boardVAOItem.Diffuse = Tetra.Texture.Load (@"Datas/marble1.dds");
+			boardVAOItem.Set (Matrix4.CreateTranslation (4f, 4f, -0.15f), new Vector4(0.4f,0.4f,0.42f,1.0f));
 
 			Tetra.Texture.DefaultWrapMode = TextureWrapMode.ClampToEdge;
 
-			cellVAOItem.Diffuse = Tetra.Texture.Load ("#Chess.Textures.marble.dds");
+			cellVAOItem.Diffuse = Tetra.Texture.Load (@"Datas/marble.dds");
 			cellVAOItem.Set (Matrix4.CreateTranslation (new Vector3 (4.5f, 4.5f, 0f)), new Vector4 (0.3f, 1.0f, 0.3f, 0.5f));
 
 
@@ -2073,6 +2074,7 @@ namespace Chess
 		static void Main ()
 		{
 			using (MainWin win = new MainWin( )) {
+				win.VSync = VSyncMode.Off;
 				win.Run (30.0);
 			}
 		}

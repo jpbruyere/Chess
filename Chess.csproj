@@ -87,14 +87,95 @@
     <None Include="OpenTK.dll.config" />
     <None Include="packages.config" />
     <None Include="Crow.dll.config" />
+    <None Include="Datas\marble.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Datas\marble1.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Datas\simple\b.bin">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Datas\simple\h.bin">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Datas\simple\k.bin">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Datas\simple\p.bin">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Datas\simple\q.bin">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Datas\simple\r.bin">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Datas\simple\b.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Datas\simple\h.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Datas\simple\k.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Datas\simple\p.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Datas\simple\q.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Datas\simple\r.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Datas\classic\b.bin">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Datas\classic\h.bin">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Datas\classic\k.bin">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Datas\classic\p.bin">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Datas\classic\q.bin">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Datas\classic\r.bin">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Datas\classic\b.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Datas\classic\h.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Datas\classic\k.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Datas\classic\p.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Datas\classic\q.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Datas\classic\r.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Datas\board.bin">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Datas\board3.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Meshes\" />
-    <Folder Include="Textures\" />
     <Folder Include="gui\" />
     <Folder Include="src\" />
-    <Folder Include="Meshes\classic\" />
-    <Folder Include="Textures\classic\" />
+    <Folder Include="Datas\" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="gui\fps.crow" />
@@ -124,26 +205,8 @@
     <EmbeddedResource Include="gui\MenuItem.template">
       <LogicalName>Crow.MenuItem.template</LogicalName>
     </EmbeddedResource>
-    <EmbeddedResource Include="Meshes\board.bin" />
     <EmbeddedResource Include="default.config" />
-    <EmbeddedResource Include="Textures\board3-512.dds">
-      <LogicalName>Chess.Textures.board3.dds</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Textures\marble.dds" />
-    <EmbeddedResource Include="Textures\marble1.dds" />
     <EmbeddedResource Include="gui\about.crow" />
-    <EmbeddedResource Include="Meshes\classic\b.bin" />
-    <EmbeddedResource Include="Meshes\classic\h.bin" />
-    <EmbeddedResource Include="Meshes\classic\k.bin" />
-    <EmbeddedResource Include="Meshes\classic\p.bin" />
-    <EmbeddedResource Include="Meshes\classic\q.bin" />
-    <EmbeddedResource Include="Meshes\classic\r.bin" />
-    <EmbeddedResource Include="Textures\classic\b.dds" />
-    <EmbeddedResource Include="Textures\classic\h.dds" />
-    <EmbeddedResource Include="Textures\classic\k.dds" />
-    <EmbeddedResource Include="Textures\classic\p.dds" />
-    <EmbeddedResource Include="Textures\classic\q.dds" />
-    <EmbeddedResource Include="Textures\classic\r.dds" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="lib\GGL\GGL.csproj">
