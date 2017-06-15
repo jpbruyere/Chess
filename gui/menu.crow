@@ -1,24 +1,24 @@
 ﻿<?xml version="1.0" encoding="UTF-8" ?>
 <Menu>
-	<MenuItem Caption="File">
-		<MenuItem Caption="New" MouseClick="onResetClick"/>
-		<MenuItem Caption="Open" MouseClick="onLoadClick"/>
-		<MenuItem Caption="Save" MouseClick="onSaveClick"/>
-		<MenuItem Caption="Quit" MouseClick="onQuitClick"/>
+	<MenuItem Caption="File" Width="Fit" PopWidth="150">
+		<MenuItem Command="{CMDNew}"/>
+		<MenuItem Command="{CMDOpen}"/>
+		<MenuItem Command="{CMDSave}"/>
+		<MenuItem Command="{CMDQuit}"/>
 	</MenuItem>
-	<MenuItem Caption="View">
-		<MenuItem Caption="Mini Board" MouseClick="onViewBoardClick"/>
-		<MenuItem Caption="Moves Log" MouseClick="onViewMovesClick"/>
-		<MenuItem Caption="Stockfish Logs" MouseClick="onViewLogsClick"/>
-		<MenuItem Caption="Graphic Perfs" MouseClick="onViewFpsClick"/>
-		<MenuItem Caption="Options" MouseClick="onViewOptionsClick"/>
+	<MenuItem Caption="View" Fit="true" PopWidth="200">
+		<MenuItem Caption="Mini Board" Command="{CMDViewMiniBoard}"/>
+		<MenuItem Caption="Moves Log" Command="{CMDViewMoveLog}"/>
+		<MenuItem Caption="Stockfish Logs" Command="{CMDViewStockfishLogs}"/>
+		<MenuItem Caption="Graphic Perfs" Command="{CMDViewGPerfs}"/>
+		<MenuItem Caption="Options" Command="{CMDViewOptions}"/>
 	</MenuItem>
-	<MenuItem Caption="Help">
-		<MenuItem Caption="About" Execute="onViewAbout"/>
+	<MenuItem Caption="Help" Fit="true" PopWidth="150">
+		<MenuItem Caption="About" Command="{CMDViewAbout}"/>
 		<MenuItem Caption="Help"/>
 	</MenuItem>
-	<MenuItem Caption="Hint" MouseClick="onHintClick"/>
-	<MenuItem Caption="Undo" MouseClick="onUndoClick"/>
+	<MenuItem Caption="Hint" MouseClick="onHintClick" Fit="true"/>
+	<MenuItem Caption="Undo" MouseClick="onUndoClick" Fit="true"/>
 	<GraphicObject Width="50"/>
 	<VerticalStack Margin="3" Fit="true" CornerRadius="3" Background="Onyx">
 		<Label Font="droid, 12" Text="Current Player:"/>

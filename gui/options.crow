@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0"?>
-<Window Font="droid bold, 22" Width="50%" Height="70%" Title="Options">
+<Window Font="droid bold, 22" Width="50%" Height="70%" Caption="Options">
 	<Container>
 		<VerticalStack Margin="10" Spacing="2">
 			<HorizontalStack Margin="5" Height="Fit" Width="Stretched">
@@ -20,12 +20,10 @@
 				<VerticalStack>
 					<HorizontalStack>
 						<VerticalStack Width="50%">
-							<Popper Style="ColorSelector" Caption="Color for Whites" Foreground="{WhiteColor}">
-								<ColorPicker Fit="true" SelectedRawColor="{²WhiteColor}"/>
-							</Popper>
-							<Popper Style="ColorSelector" Caption="Color for Blacks" Foreground="{BlackColor}">
-								<ColorPicker Fit="true" SelectedRawColor="{²BlackColor}"/>
-							</Popper>
+							<Popper Style="ColorSelector" Caption="Color for Whites" Foreground="{²WhiteColor}"
+								Content="{sharedColorPicker}" />
+							<Popper Style="ColorSelector" Caption="Color for Blacks" Foreground="{²BlackColor}"
+								Content="{sharedColorPicker}" />							
 						</VerticalStack>
 						<VerticalStack Width="50%">
 							<Popper Style="ColorSelector" Caption="Main Color" Foreground="{MainColor}">

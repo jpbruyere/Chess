@@ -212,9 +212,13 @@ namespace Chess
 		public void UpdateColor(){
 			if (Player.Color == ChessColor.White) {
 				Mesh.SetColor (InstanceIndex, Crow.Configuration.Get<Color> ("WhiteColor").ToVector4());
+				Mesh.SetAmbient (InstanceIndex, new Vector4 (0.4f, 0.4f, 0.4f, 1.0f));
+				Mesh.SetSpecular (InstanceIndex, new Vector4 (0.9f, 0.9f, 0.9f, 128/255f));
 				ZAngle = 0f;
 			} else {
 				Mesh.SetColor (InstanceIndex, Crow.Configuration.Get<Color> ("BlackColor").ToVector4());
+				Mesh.SetAmbient (InstanceIndex, new Vector4 (0.1f, 0.1f, 0.1f, 1.0f));
+				Mesh.SetSpecular (InstanceIndex, new Vector4 (0.8f, 0.8f, 0.8f, 16f/255f));
 				ZAngle = MathHelper.Pi;
 			}			
 		}

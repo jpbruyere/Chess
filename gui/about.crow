@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0"?>
-<Window Font="droid bold, 12" Title="About" Height="Fit" Width="50%">
+<Window Font="droid bold, 12" Caption="About" Height="Fit" Width="50%">
 	<VerticalStack Fit="true" Margin="20" Spacing="10">
 		<Label Font="droid bold, 16" Text="{Name}"/>
 		<Label Font="droid, 14" Text="Version: 0.1"/>

@@ -41,7 +41,7 @@ VSInMenu {
 	CornerRadius = 10;
 }
 LabInMenu {
-	Margin = 5;
+	Margin = 1;
 	Font = droid, 10;
 	Background = DimGray;
 	Foreground = Ivory;
@@ -49,12 +49,13 @@ LabInMenu {
 ColorSelector {
 	Template=#Chess.gui.ColorSelector.crow;
 	Margin=1;
-	Background = vgradient|0:DimGray|1:Black;
-	Font=droid bold, 10;
+	Background = vgradient|0:DimGray|1:Onyx;
+	Font=droid 10;
 	MouseEnter={Background=vgradient|0:Gray|1:Onyx;};
 	MouseLeave={Background=vgradient|0:DimGray|1:Black};
 	Width=90%;
 	Height=Fit;
+	Popped={colPick.DataSource=this};
 }
 BigCheckBox {
 	Template=#Chess.gui.tmpCheckBox.crow;

@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="UTF-8" ?>
-<Window Font="droid bold, 40" Height="50%" Width="50%" Title="New Game"
+<Window Font="droid bold, 40" Height="50%" Width="50%" Caption="New Game"
 	Template="#Chess.gui.tmpWindow.crow">
 	<Container>
 		<VerticalStack Margin="30" Spacing="5">

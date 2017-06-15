@@ -41,7 +41,10 @@ namespace Chess
 			out vec3 n;
 			out vec3 vLight;
 			out vec3 vEye;
-			out vec4 diffuse;
+			flat out vec4 diffuse;
+			flat out vec4 ambient;
+			flat out vec4 specular;
+			flat out float shininess;
 
 			subroutine void vertexTech_t ();
 			subroutine uniform vertexTech_t vertexTech;
@@ -53,6 +56,9 @@ namespace Chess
 				texCoord = in_tex;
 
 				diffuse = in_color;
+				ambient = in_amb;
+				specular = vec4(in_spec.rgb,1.0);
+				shininess = in_spec.a * 255.0;
 
 				n = vec3(Normal * in_model * vec4(in_normal, 0));
 
@@ -93,13 +99,14 @@ namespace Chess
 			in vec3 vLight;
 			in vec3 vEye;
 			in vec3 n;
-			in vec4 diffuse;
+			flat in vec4 diffuse;
+			flat in vec4 ambient;
+			flat in vec4 specular;
+			flat in float shininess;
 						
 			out vec4 out_frag_color;
 
-			uniform vec3 ambient = vec3(0.1, 0.1, 0.1);
-			uniform vec3 specular = vec3(0.8,0.8,0.8);			
-			uniform float shininess =16.0;
+			//uniform float shininess =16.0;
 			uniform float screenGamma = 1.0;
 
 			subroutine vec4 computeColor_t ();
@@ -114,7 +121,7 @@ namespace Chess
 					discard;
 				vec3 N = normalize(n);
 				float nl = dot(N,vLight);
-				diffTex.rgb = ambient.rgb + diffTex.rgb * clamp(nl, 0.0, 1.0);
+				diffTex.rgb = diffTex.rgb * clamp(nl, 0.0, 1.0) + ambient.rgb;
 				if (nl > 0.0) {
 					//blinn phong
 					vec3 halfDir = normalize(vLight - vEye);
@@ -122,7 +129,7 @@ namespace Chess
 					//phong
 					//vec3 r = reflect (vLight, N);
 					//vec3 Ispec = specular * clamp(dot(-vEye, r), 0.0, 1.0);
-					diffTex.rgb += specular.rgb * pow(specAngle, shininess);
+					diffTex.rgb = specular.rgb * pow(specAngle, shininess) + diffTex.rgb;
 				}
 
 				return vec4(pow(diffTex.rgb, vec3(1.0/screenGamma)), diffTex.a);
@@ -148,6 +155,8 @@ namespace Chess
 			GL.BindAttribLocation(pgmId, 2, "in_normal");
 			GL.BindAttribLocation(pgmId, VertexArrayObject.instanceBufferIndex, "in_model");
 			GL.BindAttribLocation(pgmId, VertexArrayObject.instanceBufferIndex+4, "in_color");
+			GL.BindAttribLocation(pgmId, VertexArrayObject.instanceBufferIndex+5, "in_amb");
+			GL.BindAttribLocation(pgmId, VertexArrayObject.instanceBufferIndex+6, "in_spec");
 		}
 		int bi1;
 		int simpleColorFunc, blinnPhongFunc, texturedFunc,

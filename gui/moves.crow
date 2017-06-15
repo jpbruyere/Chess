@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0"?>
-<Window Font="droid bold, 8" Title="Moves" Width="50" Height="50%"
+<Window Font="droid bold, 8" Caption="Moves" Width="50" Height="50%"
 	Template="#Chess.gui.tmpWindow.crow"
 	HorizontalAlignment="Left" Top="100" Left="10">
 	<Scroller Margin="5" VerticalScrolling="true" Scrolled="../movesWidget.onScroll">

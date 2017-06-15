@@ -51,6 +51,14 @@ namespace Chess
 			Instances.InstancedDatas[index].color = color;
 			SyncVBO = true;
 		}
+		public void SetAmbient (int index, Vector4 color){
+			Instances.InstancedDatas[index].ambient = color;
+			SyncVBO = true;
+		}
+		public void SetSpecular (int index, Vector4 color){
+			Instances.InstancedDatas[index].specular = color;
+			SyncVBO = true;
+		}
 		public void Set (int index, Matrix4 modelMat, Vector4 color){
 			Instances.InstancedDatas[index].modelMats = modelMat;
 			Instances.InstancedDatas[index].color = color;
@@ -88,6 +96,7 @@ namespace Chess
 			SyncVBO = false;
 		}
 	}
+
 	class MainWin : CrowWindow
 	{
 		[StructLayout(LayoutKind.Sequential)]
@@ -135,8 +144,8 @@ namespace Chess
 		//public Vector4 vLight = Vector4.Normalize(new Vector4 (0.1f, 0.1f, -0.8f, 0f));
 		Vector4 arrowColor = new Vector4 (0.2f, 1.0f, 0.2f, 0.5f);
 
-		Vector4 validPosColor = new Vector4 (0.0f, 0.5f, 0.7f, 0.5f);
-		Vector4 activeColor = new Vector4 (0.2f, 0.2f, 1.0f, 0.5f);
+		Vector4 validPosColor = new Vector4 (0.5f, 0.5f, 0.9f, 0.7f);
+		Vector4 activeColor = new Vector4 (0.0f, 0.9f, 0.9f, 0.5f);
 		Vector4 kingCheckedColor = new Vector4 (1.0f, 0.1f, 0.1f, 0.8f);
 
 //		uniform vec3 diffuse = vec3(1.0, 1.0, 1.0);
@@ -309,6 +318,7 @@ namespace Chess
 		public static InstancedChessModel vaoiKing;
 		public static InstancedChessModel vaoiQuad;//full screen quad in mainVAO to prevent unbind
 													//while drawing reflexion
+		static ShadedTexture effect1;
 
 		public bool Reflexion {
 			get { return Crow.Configuration.Get<bool> ("Reflexion"); }
@@ -341,6 +351,8 @@ namespace Chess
 			GL.Enable (EnableCap.PrimitiveRestart);
 			GL.Enable (EnableCap.Blend);
 			GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+
+			effect1 = new ShadedTexture (null, "#Chess.Datas.colorCircle.frag", 64, 64);
 
 			piecesShader = new Mat4InstancedShader();
 			piecesShader.Enable ();
@@ -517,15 +529,22 @@ namespace Chess
 			Tetra.Texture.DefaultWrapMode = TextureWrapMode.Repeat;
 
 			boardPlateVAOItem.Diffuse = Tetra.Texture.Load (@"Datas/board3.dds");
-			boardPlateVAOItem.Set (Matrix4.Identity, new Vector4(0.7f,0.7f,0.7f,1.0f));
+			boardPlateVAOItem.Set (Matrix4.Identity, new Vector4(0.9f,0.9f,0.9f,1.0f));
+			boardPlateVAOItem.SetAmbient (0, new Vector4 (0.1f, 0.1f, 0.1f, 1.0f));
+			boardPlateVAOItem.SetSpecular (0, new Vector4 (0.8f, 0.8f, 0.8f, 9f/255f));
+
 
 			boardVAOItem.Diffuse = Tetra.Texture.Load (@"Datas/marble1.dds");
 			boardVAOItem.Set (Matrix4.CreateTranslation (4f, 4f, -0.15f), new Vector4(0.4f,0.4f,0.42f,1.0f));
+			boardVAOItem.SetAmbient (0, new Vector4 (0.1f, 0.1f, 0.1f, 1.0f));
+			boardVAOItem.SetSpecular (0, new Vector4 (0.9f, 0.9f, 0.9f, 7f/255f));
 
 			Tetra.Texture.DefaultWrapMode = TextureWrapMode.ClampToEdge;
 
-			cellVAOItem.Diffuse = Tetra.Texture.Load (@"Datas/marble.dds");
-			cellVAOItem.Set (Matrix4.CreateTranslation (new Vector3 (4.5f, 4.5f, 0f)), new Vector4 (0.3f, 1.0f, 0.3f, 0.5f));
+			cellVAOItem.Diffuse = effect1.OutputTex;//Tetra.Texture.Load (@"Datas/marble.dds");
+			cellVAOItem.Set (Matrix4.CreateTranslation (new Vector3 (4.5f, 4.5f, 0f)), new Vector4 (0.0f, 1.0f, 0.0f, 0.8f));
+			cellVAOItem.SetAmbient (0, new Vector4 (0.1f, 0.1f, 0.1f, 1.0f));
+			cellVAOItem.SetSpecular (0, new Vector4 (0.8f, 0.8f, 0.8f, 0.9f));
 
 
 			Tetra.Texture.GenerateMipMaps = true;
@@ -759,6 +778,23 @@ namespace Chess
 		const string UI_Load = "#Chess.gui.loadDialog.crow";
 		const string UI_Promote = "#Chess.gui.promote.crow";
 
+		public ColorPicker sharedColorPicker;
+
+		public Command CMDNew, CMDOpen, CMDSave, CMDQuit,
+					CMDViewMiniBoard, CMDViewMoveLog, CMDViewStockfishLogs, CMDViewGPerfs, CMDViewOptions, CMDViewAbout;
+
+		void initCommands(){
+			CMDNew = new Command(new Action(() => loadWindow (UI_NewGame))) { Caption = "New Game", Icon = new SvgPicture("#Crow.Icons.exit-symbol.svg")};
+			CMDOpen = new Command(new Action(() => loadWindow (UI_Load))) { Caption = "Open...", Icon = new SvgPicture("#Crow.Icons.exit-symbol.svg")};
+			CMDSave = new Command(new Action(() => loadWindow (UI_Save))) { Caption = "Save...", Icon = new SvgPicture("#Crow.Icons.exit-symbol.svg")};
+			CMDQuit = new Command(new Action(() => Quit (null, null))) { Caption = "Quit", Icon = new SvgPicture("#Crow.Icons.exit-symbol.svg")};
+			CMDViewOptions = new Command(new Action(() => loadWindow(UI_Options))) { Caption = "Options", Icon = new SvgPicture("#Crow.Icons.exit-symbol.svg")};
+			CMDViewGPerfs = new Command(new Action(() => loadWindow(UI_Fps))) { Caption = "Graphic Perfs", Icon = new SvgPicture("#Crow.Icons.exit-symbol.svg")};
+			CMDViewMiniBoard = new Command(new Action(() => loadWindow(UI_Board))) { Caption = "Mini Board", Icon = new SvgPicture("#Crow.Icons.exit-symbol.svg")};
+			CMDViewMoveLog = new Command(new Action(() => loadWindow(UI_Moves))) { Caption = "Moves log", Icon = new SvgPicture("#Crow.Icons.exit-symbol.svg")};
+			CMDViewStockfishLogs = new Command(new Action(() => loadWindow(UI_Log))) { Caption = "Stockfish log", Icon = new SvgPicture("#Crow.Icons.exit-symbol.svg")};
+			CMDViewAbout = new Command(new Action(() => loadWindow(UI_About))) { Caption = "About", Icon = new SvgPicture("#Crow.Icons.exit-symbol.svg")};
+		}
 		volatile int progressValue=0;
 		volatile int progressMax=200;
 		public int ProgressValue{
@@ -813,6 +849,8 @@ namespace Chess
 		}
 
 		void initInterface(){
+			initCommands ();
+
 			MouseMove += Mouse_Move;
 			MouseButtonDown += Mouse_ButtonDown;
 			MouseWheelChanged += Mouse_WheelChanged;
@@ -821,6 +859,22 @@ namespace Chess
 			loadWindow (UI_Menu);
 
 			closeWindow (UI_Splash);
+
+				
+			lock (ifaceControl[0].CrowInterface.UpdateMutex) {
+				Instantiator scp = Instantiator.CreateFromImlFragment (@"
+<ColorPicker Name='colPick' Fit='true' SelectedColor='{²Foreground}'/>
+				");
+				sharedColorPicker = scp.CreateInstance (this.ifaceControl [0].CrowInterface) as ColorPicker;
+				//sharedColorPicker.DataSource = this;
+			}
+//			lock (ifaceControl[0].CrowInterface.UpdateMutex) {
+//				sharedColorPicker = new ColorPicker ();
+//				sharedColorPicker.Initialize ();
+//				sharedColorPicker.Width = Measure.Fit;
+//				sharedColorPicker.Height = Measure.Fit;
+//			}
+
 		}
 
 		#region LOGS
@@ -862,11 +916,8 @@ namespace Chess
 			closeWindow (UI_Save);
 		}
 
-		void onLoadClick (object sender, MouseButtonEventArgs e){
-			loadWindow (UI_Load);
-		}
 		void onSelectedFileChanged(object sender, SelectionChangeEventArgs e){
-			FileName = e.NewValue.ToString ();
+			FileName = e.NewValue?.ToString ();
 		}
 		void onDeleteFileClick (object sender, MouseButtonEventArgs e){
 			File.Delete (FileName);
@@ -908,7 +959,7 @@ namespace Chess
 		}
 
 		void onViewOptionsClick (object sender, MouseButtonEventArgs e){
-			loadWindow(UI_Options);
+			
 		}
 		void onViewFpsClick (object sender, MouseButtonEventArgs e){
 			loadWindow(UI_Fps);
@@ -1844,6 +1895,8 @@ namespace Chess
 		protected override void OnResize (EventArgs e)
 		{
 			base.OnResize (e);
+			Crow.Configuration.Set ("WinWidth", this.ClientRectangle.Width);
+			Crow.Configuration.Set ("WinHeight", this.ClientRectangle.Height);
 			UpdateViewMatrix();
 			if (Reflexion)
 				initReflexionFbo ();
@@ -1852,9 +1905,17 @@ namespace Chess
 		void addCellLight(Vector4 cellColor, Point pos){
 			cellVAOItem.AddInstance (Matrix4.CreateTranslation (0.5f + (float)pos.X, 0.5f + (float)pos.Y, 0), cellColor);
 		}
+
+		int frame;
+		float time;
 		protected override void OnUpdateFrame (FrameEventArgs e)
 		{
 			base.OnUpdateFrame (e);
+
+			unchecked{
+				time += (float)e.Time;
+				frame++;
+			}
 
 			if (shaderMatsAreDirty)
 				updateShadersMatrices ();
@@ -1905,7 +1966,7 @@ namespace Chess
 			#region cell lighting
 			cellVAOItem.SetModelMat (0, Matrix4.CreateTranslation(0.5f + (float)selection.X, 0.5f + (float)selection.Y, 0));
 			if (ValidPositionsForActivePce != null){
-				for (int i = 1; i < cellVAOItem.Datas.Length; i++)
+				for (int i = 1; i < cellVAOItem.Datas.Length; i++)//TODO:simpler clear data
 					cellVAOItem.RemoveInstance (i);
 				foreach (Point vm in ValidPositionsForActivePce)
 					addCellLight (validPosColor, vm);
@@ -1928,6 +1989,9 @@ namespace Chess
 			}
 			if (Reflexion)
 				updateReflexionFbo ();
+
+
+			effect1.Update (time);
 		}
 //		protected override void OnClosing (System.ComponentModel.CancelEventArgs e)
 //		{
@@ -1975,6 +2039,8 @@ namespace Chess
 		#region Mouse
 		void Mouse_ButtonDown (object sender, OpenTK.Input.MouseButtonEventArgs e)
 		{
+			if (e.Mouse.MiddleButton == OpenTK.Input.ButtonState.Pressed)
+				Debug.WriteLine ("middle");
 			if (e.Mouse.LeftButton != OpenTK.Input.ButtonState.Pressed)
 				return;
 
@@ -2067,7 +2133,7 @@ namespace Chess
 
 		#region CTOR and Main
 		public MainWin ()
-			: base(700, 600, "Chess", 32, 24, 1, Crow.Configuration.Get<int> ("Samples"))
+			: base(Crow.Configuration.Get<int> ("WinWidth"), Crow.Configuration.Get<int> ("WinHeight"), "Chess", 32, 24, 1, Crow.Configuration.Get<int> ("Samples"))
 		{}
 
 		[STAThread]

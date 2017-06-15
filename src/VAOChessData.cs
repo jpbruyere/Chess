@@ -24,15 +24,19 @@ using OpenTK;
 
 namespace Chess
 {
-	[StructLayout(LayoutKind.Sequential)]
+	[StructLayout(LayoutKind.Sequential,Pack=16)]
 	public struct VAOChessData
 	{
 		public Matrix4 modelMats;
 		public Vector4 color;
+		public Vector4 ambient;
+		public Vector4 specular;
 
 		public VAOChessData(Matrix4 _model, Vector4 _color){
 			modelMats = _model;
 			color = _color;
+			ambient = new Vector4 (0.1f, 0.1f, 0.1f, 1.0f);
+			specular = new Vector4 (0.9f, 0.9f, 0.9f, 0.2f);
 		}
 	}
 }
