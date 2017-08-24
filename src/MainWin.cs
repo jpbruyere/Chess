@@ -440,7 +440,7 @@ namespace Chess
 
 		void loadMeshes()
 		{
-			string meshesPath = @"Datas/simple/";
+			string meshesPath = @"Datas/classic/";
 			string meshesExt = ".bin";
 
 			CurrentState = GameState.MeshesLoading;
@@ -519,7 +519,7 @@ namespace Chess
 			CurrentState = GameState.VAOInit;
 		}
 		void createMainVAO(){
-			string texturesPath = @"Datas/simple/";
+			string texturesPath = @"Datas/classic/";
 			string texturesExt = ".dds";
 
 			mainVAO = new InstancedVAO<MeshData, VAOChessData> (meshes);

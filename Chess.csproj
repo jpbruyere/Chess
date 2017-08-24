@@ -67,13 +67,9 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Xml" />
-    <Reference Include="gdk-sharp">
-      <Package>gtk-sharp-2.0</Package>
-    </Reference>
     <Reference Include="OpenTK">
       <HintPath>packages\OpenTK.2.0.0\lib\net20\OpenTK.dll</HintPath>
     </Reference>
-    <Reference Include="Mono.Cairo" />
   </ItemGroup>
   <ItemGroup>
     <None Include="OpenTK.dll.config" />
