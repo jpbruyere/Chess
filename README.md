@@ -15,7 +15,7 @@ xbuild  /p:Configuration=Release Chess.sln        # Compile
 ```
 The resulting executable will be in **build/Release**.
 
-###Screen shots :
+### Screen shots :
 <table width="100%">
   <tr>
     <td width="30%" align="center"><img src="/screenshot.png?raw=true" alt="chess" width="90%"/></td>
