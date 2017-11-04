@@ -5,6 +5,7 @@
 			<HorizontalStack Margin="5" Height="Fit" Width="Stretched">
 				<Label Foreground="White" Text="Stockfish Path :" Width="Fit"/>
 				<TextBox Margin="5" Text="{²StockfishPath}" Width="Stretched"/>
+				<Image Width="30" Height="20" Path="#Crow.Images.Icons.IconAlerte.svg" Visible="{StockfishNotFound}"/>
 			</HorizontalStack>
 			<GroupBox Caption="Game" Height="Fit">
 				<VerticalStack>
@@ -20,10 +21,12 @@
 				<VerticalStack>
 					<HorizontalStack>
 						<VerticalStack Width="50%">
-							<Popper Style="ColorSelector" Caption="Color for Whites" Foreground="{²WhiteColor}"
-								Content="{sharedColorPicker}" />
-							<Popper Style="ColorSelector" Caption="Color for Blacks" Foreground="{²BlackColor}"
-								Content="{sharedColorPicker}" />							
+							<Popper Style="ColorSelector" Caption="Color for Whites" Foreground="{WhiteColor}">
+								<ColorPicker Fit="true" SelectedRawColor="{²WhiteColor}"/>
+							</Popper>
+							<Popper Style="ColorSelector" Caption="Color for Blacks" Foreground="{BlackColor}">
+								<ColorPicker Fit="true" SelectedRawColor="{²BlackColor}"/>
+							</Popper>
 						</VerticalStack>
 						<VerticalStack Width="50%">
 							<Popper Style="ColorSelector" Caption="Main Color" Foreground="{MainColor}">

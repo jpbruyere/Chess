@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="UTF-8" ?>
 <Window Font="droid bold, 10" Template="#Chess.gui.tmpWindow.crow"
 		Caption="Stockfish Logs"
-		VerticalAlignment="Top"  Width="90%" Height="15%">
+		VerticalAlignment="Bottom"  Width="90%" Height="15%">
 		<TextScrollerWidget Focusable="true" Lines="{LogBuffer}" Margin="5"/>
 </Window>

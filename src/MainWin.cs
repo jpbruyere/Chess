@@ -40,63 +40,6 @@ namespace Chess
 	public enum ChessColor { White, Black };
 	public enum PieceType { Pawn, Rook, Knight, Bishop, King, Queen };
 
-	public class InstancedChessModel : InstancedModel<VAOChessData> {
-		public InstancedChessModel(MeshPointer pointer) : base(pointer) {}
-
-		public void SetModelMat (int index, Matrix4 modelMat){
-			Instances.InstancedDatas[index].modelMats = modelMat;
-			SyncVBO = true;
-		}
-		public void SetColor (int index, Vector4 color){
-			Instances.InstancedDatas[index].color = color;
-			SyncVBO = true;
-		}
-		public void SetAmbient (int index, Vector4 color){
-			Instances.InstancedDatas[index].ambient = color;
-			SyncVBO = true;
-		}
-		public void SetSpecular (int index, Vector4 color){
-			Instances.InstancedDatas[index].specular = color;
-			SyncVBO = true;
-		}
-		public void Set (int index, Matrix4 modelMat, Vector4 color){
-			Instances.InstancedDatas[index].modelMats = modelMat;
-			Instances.InstancedDatas[index].color = color;
-			SyncVBO = true;
-		}
-		public void Set (Matrix4 modelMat, Vector4 color){
-			if (Instances == null)
-				Instances = new InstancesVBO<VAOChessData> (new VAOChessData[1]);
-			Instances.InstancedDatas[0].modelMats = modelMat;
-			Instances.InstancedDatas[0].color = color;
-			SyncVBO = true;
-		}
-		public int AddInstance (){
-			if (Instances == null)
-				Instances = new InstancesVBO<VAOChessData> (new VAOChessData[1]);
-			int idx = Instances.AddInstance ();
-			SyncVBO = true;
-			return idx;
-		}
-		public void AddInstance (Matrix4 modelMat, Vector4 color){
-			if (Instances == null)
-				Instances = new InstancesVBO<VAOChessData> (new VAOChessData[1]);
-			Instances.AddInstance (new VAOChessData (modelMat, color));
-			SyncVBO = true;
-		}
-		public void RemoveInstance (int index){
-			Instances.RemoveInstance (index);
-			SyncVBO = true;
-		}
-
-		public void UpdateBuffer(){
-			if (!SyncVBO)
-				return;
-			Instances.UpdateVBO();
-			SyncVBO = false;
-		}
-	}
-
 	class MainWin : CrowWindow
 	{
 		[StructLayout(LayoutKind.Sequential)]
@@ -793,7 +736,7 @@ namespace Chess
 			CMDViewMiniBoard = new Command(new Action(() => loadWindow(UI_Board))) { Caption = "Mini Board", Icon = new SvgPicture("#Crow.Icons.exit-symbol.svg")};
 			CMDViewMoveLog = new Command(new Action(() => loadWindow(UI_Moves))) { Caption = "Moves log", Icon = new SvgPicture("#Crow.Icons.exit-symbol.svg")};
 			CMDViewStockfishLogs = new Command(new Action(() => loadWindow(UI_Log))) { Caption = "Stockfish log", Icon = new SvgPicture("#Crow.Icons.exit-symbol.svg")};
-			CMDViewAbout = new Command(new Action(() => loadWindow(UI_About))) { Caption = "About", Icon = new SvgPicture("#Crow.Icons.exit-symbol.svg")};
+			CMDViewAbout = new Command(new Action(() => showAboutDialog())) { Caption = "About", Icon = new SvgPicture("#Crow.Icons.exit-symbol.svg")};
 		}
 		volatile int progressValue=0;
 		volatile int progressMax=200;
@@ -957,25 +900,6 @@ namespace Chess
 		void onLoadCancel (object sender, MouseButtonEventArgs e){
 			closeWindow (UI_Load);
 		}
-
-		void onViewOptionsClick (object sender, MouseButtonEventArgs e){
-			
-		}
-		void onViewFpsClick (object sender, MouseButtonEventArgs e){
-			loadWindow(UI_Fps);
-		}
-		void onViewBoardClick (object sender, MouseButtonEventArgs e){
-			loadWindow(UI_Board);
-		}
-		void onViewMovesClick (object sender, MouseButtonEventArgs e){
-			loadWindow(UI_Moves);
-		}
-		void onViewLogsClick (object sender, MouseButtonEventArgs e){
-			loadWindow(UI_Log);
-		}
-		void onQuitClick (object sender, MouseButtonEventArgs e){
-			this.Exit();
-		}
 		void onHintClick (object sender, MouseButtonEventArgs e){
 			if (CurrentPlayer.Type == PlayerType.Human)
 				sendToStockfish("go");
@@ -1031,7 +955,7 @@ namespace Chess
 		void deletePromoteDialog(){
 			closeWindow (UI_Promote);
 		}
-		void onViewAbout(object sender, EventArgs e){
+		void showAboutDialog(){
 			loadWindow (UI_About);
 			AssemblyName infos = System.Reflection.Assembly.GetEntryAssembly ().GetName();
 			NotifyValueChanged ("Name",  infos.Name);
@@ -1047,9 +971,9 @@ namespace Chess
 		Queue<string> stockfishCmdQueue = new Queue<string>();
 		List<String> stockfishMoves = new List<string> ();
 
-//		public bool StockfishRunning {
-//			get { return stockfish != null; }
-//		}
+		public bool StockfishNotFound {
+			get { return stockfish == null; }
+		}
 		public string StockfishPath{
 			get { return Crow.Configuration.Get<string> ("StockfishPath"); }
 			set {
@@ -1097,9 +1021,6 @@ namespace Chess
 
 		void initStockfish()
 		{
-			if (!File.Exists (StockfishPath))
-				return;
-
 			if (stockfish != null) {
 				resetBoard (false);
 
@@ -1108,6 +1029,13 @@ namespace Chess
 				stockfish.Exited -= P_Exited;
 
 				stockfish.Kill ();
+				stockfish = null;
+			}
+
+			if (!File.Exists (StockfishPath)) {
+				loadWindow (UI_Options);
+				NotifyValueChanged ("StockfishNotFound", true);
+				return;
 			}
 
 			stockfish = new Process ();
@@ -1122,7 +1050,6 @@ namespace Chess
 			stockfish.Exited += P_Exited;
 			stockfish.Start();
 
-			//NotifyValueChanged ("StockfishRunning", true);
 			//CrowInterface.FindByName ("SFStatus").Background = Color.Mantis;
 
 			stockfish.BeginOutputReadLine ();
@@ -1170,6 +1097,7 @@ namespace Chess
 				waitStockfishIsReady = false;
 				return;
 			case "uciok":
+				NotifyValueChanged ("StockfishNotFound", false);
 				sendToStockfish ("setoption name Skill Level value " + StockfishLevel.ToString());
 				break;
 			case "bestmove":

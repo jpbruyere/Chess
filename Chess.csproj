@@ -60,6 +60,7 @@
       <Link>src\Extensions.cs</Link>
     </Compile>
     <Compile Include="src\TextScrollerWidget.cs" />
+    <Compile Include="src\InstancedChessModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />

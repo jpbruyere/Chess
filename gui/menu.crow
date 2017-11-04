@@ -20,10 +20,12 @@
 	<MenuItem Caption="Hint" MouseClick="onHintClick" Fit="true"/>
 	<MenuItem Caption="Undo" MouseClick="onUndoClick" Fit="true"/>
 	<GraphicObject Width="50"/>
-	<VerticalStack Margin="3" Fit="true" CornerRadius="3" Background="Onyx">
-		<Label Font="droid, 12" Text="Current Player:"/>
-		<Label Font="droid bold, 12" Text="{CurrentPlayer}"/>
+	<VerticalStack Margin="1" Fit="true" CornerRadius="3" Background="Onyx">
+		<Label Font="droid, 10" Text="Current Player:"/>
+		<Label Font="droid bold, 10" Text="{CurrentPlayer}"/>
 	</VerticalStack>
+	<Image Width="30" Height="20" Path="#Crow.Images.Icons.IconAlerte.svg" Visible="{StockfishNotFound}"/>
+	<Label Text="Stockfish not found" Font="droid bold, 10" Visible="{StockfishNotFound}"/>
 </Menu>
 <!--<Border Height="10%"  VerticalAlignment="Bottom"
 		BorderWidth="1" CornerRadius="5" Background="0.4,0.4,0.4,0.8">
