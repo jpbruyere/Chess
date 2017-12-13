@@ -905,7 +905,7 @@ namespace Chess
 				sendToStockfish("go");
 		}
 		void onUndoClick (object sender, MouseButtonEventArgs e){
-			if (currentState != GameState.Checkmate && currentState != GameState.Pad)//undo ai move
+			if ((currentState != GameState.Pad && currentState != GameState.Checkmate)||CurrentPlayer.Type == PlayerType.Human)//undo ai move
 				undoLastMove ();
 			undoLastMove ();
 		}
