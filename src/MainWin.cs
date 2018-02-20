@@ -100,48 +100,48 @@ namespace Chess
 		#region Options
 		public int ReflexionIntensity {
 			get {
-				return Crow.Configuration.Get<int> ("ReflexionIntensity");
+				return Crow.Configuration.Global.Get<int> ("ReflexionIntensity");
 			}
 			set {
 				if (LightX == value)
 					return;
-				Crow.Configuration.Set ("ReflexionIntensity", value);
+				Crow.Configuration.Global.Set ("ReflexionIntensity", value);
 				NotifyValueChanged ("ReflexionIntensity", value);
 				vaoiQuad.SetColor (0, new Vector4 (1.0f, 1.0f, 1.0f, (float)ReflexionIntensity / 100f));
 			}
 		}
 		public int LightX {
 			get {
-				return Crow.Configuration.Get<int> ("LightX");
+				return Crow.Configuration.Global.Get<int> ("LightX");
 			}
 			set {
 				if (LightX == value)
 					return;
-				Crow.Configuration.Set ("LightX", value);
+				Crow.Configuration.Global.Set ("LightX", value);
 				NotifyValueChanged ("LightX", value);
 				shaderMatsAreDirty = true;
 			}
 		}
 		public int LightY {
 			get {
-				return Crow.Configuration.Get<int> ("LightY");
+				return Crow.Configuration.Global.Get<int> ("LightY");
 			}
 			set {
 				if (LightY == value)
 					return;
-				Crow.Configuration.Set ("LightY", value);
+				Crow.Configuration.Global.Set ("LightY", value);
 				NotifyValueChanged ("LightY", value);
 				shaderMatsAreDirty = true;
 			}
 		}
 		public int LightZ {
 			get {
-				return Crow.Configuration.Get<int> ("LightZ");
+				return Crow.Configuration.Global.Get<int> ("LightZ");
 			}
 			set {
 				if (LightZ == value)
 					return;
-				Crow.Configuration.Set ("LightZ", value);
+				Crow.Configuration.Global.Set ("LightZ", value);
 				NotifyValueChanged ("LightZ", value);
 				shaderMatsAreDirty = true;
 			}
@@ -150,36 +150,36 @@ namespace Chess
 		float[] clearColor;
 		public Color BackgroundColor {
 			get {
-				return Crow.Configuration.Get<Color> ("BackgroundColor");
+				return Crow.Configuration.Global.Get<Color> ("BackgroundColor");
 			}
 			set {
 				if (BackgroundColor == value)
 					return;
-				Crow.Configuration.Set ("BackgroundColor", value);
+				Crow.Configuration.Global.Set ("BackgroundColor", value);
 				clearColor = value.floatArray;
 				NotifyValueChanged ("BackgroundColor", value);
 			}
 		}
 		public Color MainColor {
 			get {
-				return Crow.Configuration.Get<Color> ("MainColor");
+				return Crow.Configuration.Global.Get<Color> ("MainColor");
 			}
 			set {
 				if (MainColor == value)
 					return;
-				Crow.Configuration.Set ("MainColor", value);
+				Crow.Configuration.Global.Set ("MainColor", value);
 				mainColor = value.floatArray;
 				NotifyValueChanged ("MainColor", value);
 			}
 		}
 		public Color WhiteColor {
 			get {
-				return Crow.Configuration.Get<Color> ("WhiteColor");
+				return Crow.Configuration.Global.Get<Color> ("WhiteColor");
 			}
 			set {
 				if (WhiteColor == value)
 					return;
-				Crow.Configuration.Set ("WhiteColor", value);
+				Crow.Configuration.Global.Set ("WhiteColor", value);
 				NotifyValueChanged ("WhiteColor", value);
 				foreach (ChessPiece pce in Players[0].Pieces)
 					pce.UpdateColor ();
@@ -187,54 +187,54 @@ namespace Chess
 		}
 		public Color BlackColor {
 			get {
-				return Crow.Configuration.Get<Color> ("BlackColor");
+				return Crow.Configuration.Global.Get<Color> ("BlackColor");
 			}
 			set {
 				if (BlackColor == value)
 					return;
-				Crow.Configuration.Set ("BlackColor", value);
+				Crow.Configuration.Global.Set ("BlackColor", value);
 				NotifyValueChanged ("BlackColor", value);
 				foreach (ChessPiece pce in Players[1].Pieces)
 					pce.UpdateColor ();
 			}
 		}
 		public float Shininess {
-			get { return Crow.Configuration.Get<float> ("Shininess"); }
+			get { return Crow.Configuration.Global.Get<float> ("Shininess"); }
 			set {
 				if (Shininess == value)
 					return;
-				Crow.Configuration.Set ("Shininess", value);
+				Crow.Configuration.Global.Set ("Shininess", value);
 				shaderUniformsAreDirty = true;
 				NotifyValueChanged ("Shininess", value);
 			}
 		}
 		public int Samples {
-			get { return Crow.Configuration.Get<int> ("Samples"); }
+			get { return Crow.Configuration.Global.Get<int> ("Samples"); }
 			set {
 				if (Samples == value)
 					return;
-				Crow.Configuration.Set ("Samples", value);
+				Crow.Configuration.Global.Set ("Samples", value);
 				NotifyValueChanged ("Samples", value);
 			}
 		}
 		public float ScreenGamma {
-			get { return Crow.Configuration.Get<float> ("ScreenGamma"); }
+			get { return Crow.Configuration.Global.Get<float> ("ScreenGamma"); }
 			set {
 				if (ScreenGamma == value)
 					return;
-				Crow.Configuration.Set ("ScreenGamma", value);
+				Crow.Configuration.Global.Set ("ScreenGamma", value);
 				shaderUniformsAreDirty = true;
 				NotifyValueChanged ("ScreenGamma", value);
 			}
 		}
 		//		public Vector3 Diffuse {
-		//			get { return Crow.Configuration.Get<Vector3> ("Diffuse"); }
+		//			get { return Crow.Configuration.Global.Get<Vector3> ("Diffuse"); }
 		//			set {
 		//				if (Diffuse == value)
 		//					return;
 		//				piecesShader.Enable ();
 		//				GL.Uniform3(GL.GetUniformLocation(piecesShader.pgmId, "diffuse"), value);
-		//				Crow.Configuration.Set ("Diffuse", value);
+		//				Crow.Configuration.Global.Set ("Diffuse", value);
 		//				NotifyValueChanged ("Diffuse", value);
 		//			}
 		//		}
@@ -264,7 +264,7 @@ namespace Chess
 		static ShadedTexture effect1;
 
 		public bool Reflexion {
-			get { return Crow.Configuration.Get<bool> ("Reflexion"); }
+			get { return Crow.Configuration.Global.Get<bool> ("Reflexion"); }
 			set {
 				if (Reflexion == value)
 					return;
@@ -273,7 +273,7 @@ namespace Chess
 				else
 					disableReflexionFbo ();
 
-				Crow.Configuration.Set ("Reflexion", value);
+				Crow.Configuration.Global.Set ("Reflexion", value);
 				NotifyValueChanged ("Reflexion", value);
 			}
 		}
@@ -282,8 +282,8 @@ namespace Chess
 		void initOpenGL()
 		{
 			Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
-			mainColor = Crow.Configuration.Get<Color> ("MainColor").floatArray;
-			clearColor = Crow.Configuration.Get<Color> ("BackgroundColor").floatArray;
+			mainColor = Crow.Configuration.Global.Get<Color> ("MainColor").floatArray;
+			clearColor = Crow.Configuration.Global.Get<Color> ("BackgroundColor").floatArray;
 
 			Debug.WriteLine("MaxVertexAttribs: " + GL.GetInteger(GetPName.MaxVertexAttribs));
 			GL.Enable (EnableCap.CullFace);
@@ -795,9 +795,9 @@ namespace Chess
 			initCommands ();
 
 			MouseMove += Mouse_Move;
-			MouseButtonDown += Mouse_ButtonDown;
-			MouseWheelChanged += Mouse_WheelChanged;
-			KeyboardKeyDown += MainWin_KeyboardKeyDown;
+			MouseDown += Mouse_ButtonDown;
+			MouseWheel += Mouse_WheelChanged;
+			Keyboard.KeyDown += MainWin_KeyboardKeyDown;
 
 			loadWindow (UI_Menu);
 
@@ -805,7 +805,7 @@ namespace Chess
 
 				
 			lock (ifaceControl[0].CrowInterface.UpdateMutex) {
-				Instantiator scp = Instantiator.CreateFromImlFragment (@"
+				Crow.IML.Instantiator scp = Crow.IML.Instantiator.CreateFromImlFragment (@"
 <ColorPicker Name='colPick' Fit='true' SelectedColor='{²Foreground}'/>
 				");
 				sharedColorPicker = scp.CreateInstance (this.ifaceControl [0].CrowInterface) as ColorPicker;
@@ -975,24 +975,24 @@ namespace Chess
 			get { return stockfish == null; }
 		}
 		public string StockfishPath{
-			get { return Crow.Configuration.Get<string> ("StockfishPath"); }
+			get { return Crow.Configuration.Global.Get<string> ("StockfishPath"); }
 			set {
 				if (value == StockfishPath)
 					return;
-				Crow.Configuration.Set ("StockfishPath", value);
+				Crow.Configuration.Global.Set ("StockfishPath", value);
 				NotifyValueChanged ("StockfishPath", value);
 
 				initStockfish ();
 			}
 		}
 		public int StockfishLevel{
-			get { return Crow.Configuration.Get<int> ("Level"); }
+			get { return Crow.Configuration.Global.Get<int> ("Level"); }
 			set
 			{
 				if (value == StockfishLevel)
 					return;
 
-				Crow.Configuration.Set ("Level", value);
+				Crow.Configuration.Global.Set ("Level", value);
 				sendToStockfish ("setoption name Skill Level value " + value.ToString());
 				NotifyValueChanged ("StockfishLevel", value);
 			}
@@ -1005,11 +1005,11 @@ namespace Chess
 		}
 
 		public bool AutoPlayHint {
-			get { return Crow.Configuration.Get<bool> ("AutoPlayHint"); }
+			get { return Crow.Configuration.Global.Get<bool> ("AutoPlayHint"); }
 			set {
 				if (value == AutoPlayHint)
 					return;
-				Crow.Configuration.Set ("AutoPlayHint", value);
+				Crow.Configuration.Global.Set ("AutoPlayHint", value);
 				NotifyValueChanged ("AutoPlayHint", value);
 			}
 		}
@@ -1823,8 +1823,8 @@ namespace Chess
 		protected override void OnResize (EventArgs e)
 		{
 			base.OnResize (e);
-			Crow.Configuration.Set ("WinWidth", this.ClientRectangle.Width);
-			Crow.Configuration.Set ("WinHeight", this.ClientRectangle.Height);
+			Crow.Configuration.Global.Set ("WinWidth", this.ClientRectangle.Width);
+			Crow.Configuration.Global.Set ("WinHeight", this.ClientRectangle.Height);
 			UpdateViewMatrix();
 			if (Reflexion)
 				initReflexionFbo ();
@@ -2061,7 +2061,7 @@ namespace Chess
 
 		#region CTOR and Main
 		public MainWin ()
-			: base(Crow.Configuration.Get<int> ("WinWidth"), Crow.Configuration.Get<int> ("WinHeight"), "Chess", 32, 24, 1, Crow.Configuration.Get<int> ("Samples"))
+			: base(Crow.Configuration.Global.Get<int> ("WinWidth"), Crow.Configuration.Global.Get<int> ("WinHeight"), "Chess", 32, 24, 1, Crow.Configuration.Global.Get<int> ("Samples"))
 		{}
 
 		[STAThread]

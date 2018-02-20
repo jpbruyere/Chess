@@ -1,7 +1,11 @@
 ﻿<?xml version="1.0"?>
-<Border CornerRadius="3" Background="{./Background}" BorderWidth="1" Foreground="Gray" Height="Fit">
-	<HorizontalStack Margin="5" Spacing="3" Height="Fit">
-		<GraphicObject CornerRadius="4" Width="20" Height="16" Background="{./Foreground}"/>				
-		<Label Margin="1" Text="{./Caption}" Font="{./Font}"/>
-	</HorizontalStack>
-</Border>
+<CheckBox Caption="{./Caption}" IsChecked="{²./IsPopped}" Foreground="{./Foreground}" Background="{./Background}">
+	<Template>
+		<Border CornerRadius="3" Background="{./Background}" BorderWidth="1" Foreground="Gray" Height="Fit">
+			<HorizontalStack Margin="5" Spacing="3" Height="Fit">
+				<GraphicObject CornerRadius="4" Width="20" Height="16" Background="{./Foreground}"/>				
+				<Label Margin="1" Text="{./Caption}" Font="{./Font}"/>
+			</HorizontalStack>
+		</Border>
+	</Template>
+</CheckBox>

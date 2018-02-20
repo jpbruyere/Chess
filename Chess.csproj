@@ -25,11 +25,15 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
+    <IntermediateOutputPath>$(SolutionDir)build\obj\$(Configuration)</IntermediateOutputPath>
+    <OutputPath>$(SolutionDir)build\$(Configuration)</OutputPath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>none</DebugType>
     <Optimize>true</Optimize>
     <WarningLevel>0</WarningLevel>
+    <IntermediateOutputPath>$(SolutionDir)build\obj\$(Configuration)</IntermediateOutputPath>
+    <OutputPath>$(SolutionDir)build\$(Configuration)</OutputPath>
   </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -160,6 +164,9 @@
     <None Include="Datas\board3.dds">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="gui\MenuItem.template">
+      <LogicalName>Crow.MenuItem.template</LogicalName>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="gui\" />
@@ -193,9 +200,6 @@
     <EmbeddedResource Include="gui\tmpSpinner.crow" />
     <EmbeddedResource Include="default.config" />
     <EmbeddedResource Include="gui\about.crow" />
-    <EmbeddedResource Include="gui\MenuItem.template">
-      <LogicalName>Crow.MenuItem.template</LogicalName>
-    </EmbeddedResource>
     <EmbeddedResource Include="Datas\effect1.frag">
       <LogicalName>Chess.Datas.colorCircle.frag</LogicalName>
     </EmbeddedResource>
